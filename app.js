@@ -127,6 +127,8 @@ let albumSweepIntensity = 0;
 let photoSpotlightIndex = -1;
 let photoSpotlightStrength = 0;
 let photoSpotlightPhase = 0;
+let manualSpotlightIndex = -1;
+let manualSpotlightStartedAt = 0;
 let isUnlocked = false;
 
 const layouts = [
@@ -269,6 +271,15 @@ function setupActions() {
     event.stopPropagation();
     showFullPhoto();
   });
+  $("#focusPhotoStage").addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+  $("#focusPhotoStage").addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    focusCurrentPhotoOnStage();
+  });
   $(".lightbox-image-wrap").setAttribute("tabindex", "0");
   $(".lightbox-image-wrap").setAttribute("role", "button");
   $(".lightbox-image-wrap").setAttribute("aria-label", "打开完整照片");
@@ -360,6 +371,7 @@ function showView(viewId, options = {}) {
   if (options.updateHash !== false && window.location.hash !== `#${viewId}`) {
     history.replaceState(null, "", `#${viewId}`);
   }
+  if (viewId !== "photoWall") clearPhotoSpotlight();
 
   if (viewId === "letter" && options.resetLetter) {
     resetLetterView();
@@ -380,9 +392,7 @@ function startAlbumIntro(force = false) {
   albumIntroStart = performance.now();
   albumSceneBlend = 0;
   albumSceneMode = 0;
-  photoSpotlightIndex = -1;
-  photoSpotlightStrength = 0;
-  photoSpotlightPhase = 0;
+  clearPhotoSpotlight();
   stageMotion = Math.max(stageMotion, 0.86);
   queueVelocity = queueVelocity >= 0 ? 0.022 : -0.022;
   wall.classList.add("is-intro");
@@ -406,6 +416,12 @@ function markInteraction() {
 function openPhotoFromTile(index, tile) {
   if (!isUnlocked) {
     lockMainContent();
+    return;
+  }
+  if (manualSpotlightIndex === index && $("#photoLightbox").hidden) {
+    clearPhotoSpotlight();
+    applyLayout(false);
+    markInteraction();
     return;
   }
   markInteraction();
@@ -583,10 +599,9 @@ function startFreePhotoDrag(press) {
   hoveredPhotoTile = null;
   press.tile.classList.remove("is-hovered");
   const wall = $("#photoGrid");
-  wall.classList.remove("is-hover-flow", "is-spotlight");
+  wall.classList.remove("is-hover-flow");
   wall.classList.add("is-free-dragging");
-  photoSpotlightStrength = 0;
-  photoSpotlightIndex = -1;
+  clearPhotoSpotlight();
   queueVelocity = 0;
   orbitVelocity = 0;
   stageMotion = Math.max(stageMotion, 0.42);
@@ -771,6 +786,37 @@ function showFullPhoto() {
   burst(12);
 }
 
+function focusCurrentPhotoOnStage() {
+  if ($("#photoLightbox").hidden) return;
+  const focusIndex = currentPhoto;
+  closePhoto();
+  showView("photoWall", { updateHash: true });
+
+  manualSpotlightIndex = focusIndex;
+  manualSpotlightStartedAt = performance.now();
+  photoSpotlightIndex = focusIndex;
+  photoSpotlightStrength = Math.max(photoSpotlightStrength, 0.18);
+  photoSpotlightPhase = 0.16;
+  freePhotoOffsets.clear();
+  photoFreeDragging = false;
+  activeFreePhoto = null;
+  hoverFlowActive = false;
+  hoveredPhotoTile = null;
+  queueVelocity = queueVelocity >= 0 ? 0.0035 : -0.0035;
+  orbitVelocity = orbitVelocity >= 0 ? 0.001 : -0.001;
+  stageMotion = Math.max(stageMotion, 0.34);
+
+  const wall = $("#photoGrid");
+  wall.classList.remove("is-free-dragging", "is-hover-flow");
+  wall.classList.add("is-spotlight", "is-manual-spotlight");
+  wall.style.setProperty("--spotlight-index", String(photoSpotlightIndex));
+  wall.style.setProperty("--spotlight-strength", photoSpotlightStrength.toFixed(3));
+  cachedPhotoTiles.forEach((tile) => tile.classList.remove("is-hovered"));
+  markInteraction();
+  applyLayout(false);
+  burst(20);
+}
+
 function isOutsideRenderedImage(event) {
   const image = $("#lightboxImage");
   const rect = image.getBoundingClientRect();
@@ -907,9 +953,7 @@ function setupPhotoStageInteraction() {
     hoverFlowActive = false;
     hoveredPhotoTile = null;
     hoverMotionUntil = 0;
-    photoSpotlightStrength = 0;
-    photoSpotlightIndex = -1;
-    wall.classList.remove("is-spotlight");
+    clearPhotoSpotlight();
     dragDistance = 0;
     orbitVelocity = 0;
     queueVelocity = 0;
@@ -1039,6 +1083,13 @@ function setupPhotoStageInteraction() {
     dragLastX = event.clientX;
     dragLastAt = performance.now();
     dragDistance = 0;
+  });
+
+  wall.addEventListener("click", (event) => {
+    if (manualSpotlightIndex < 0) return;
+    if (event.target.closest(".photo-tile")) return;
+    clearPhotoSpotlight();
+    applyLayout(false);
   });
 
   const finishDrag = (event) => {
@@ -1222,6 +1273,11 @@ function getAutoSceneMode(time) {
 }
 
 function updateAlbumSpotlight(wall, now, frameScale, hoverVisualActive) {
+  const manualActive = manualSpotlightIndex >= 0
+    && albumIntroProgress >= 1
+    && !albumDragging
+    && !photoFreeDragging
+    && $("#photoLightbox").hidden;
   const idle = albumIntroProgress >= 1
     && now - lastInteractionAt > 2600
     && !albumDragging
@@ -1232,17 +1288,23 @@ function updateAlbumSpotlight(wall, now, frameScale, hoverVisualActive) {
   const cycle = ((cinematicTime - 8.4) % cycleLength + cycleLength) % cycleLength;
   const pull = smoothstep(0.8, 2.1, cycle);
   const hold = 1 - smoothstep(7.0, 9.0, cycle);
-  const targetStrength = AUTO_SPOTLIGHT_ENABLED && idle ? Math.min(pull, hold) : 0;
+  const targetStrength = manualActive ? 1 : AUTO_SPOTLIGHT_ENABLED && idle ? Math.min(pull, hold) : 0;
 
   photoSpotlightStrength += (targetStrength - photoSpotlightStrength) * Math.min(1, (targetStrength > photoSpotlightStrength ? 0.065 : 0.075) * frameScale);
-  if (targetStrength > 0.04 || photoSpotlightStrength > 0.04) {
+  if (manualActive) {
+    const elapsed = Math.max(0, (now - manualSpotlightStartedAt) / 1000);
+    photoSpotlightIndex = ((manualSpotlightIndex % total) + total) % total;
+    photoSpotlightPhase = (0.16 + elapsed * 0.028) % 1;
+  } else if (targetStrength > 0.04 || photoSpotlightStrength > 0.04) {
     const cycleNumber = Math.floor((cinematicTime - 8.4) / cycleLength);
     photoSpotlightIndex = ((cycleNumber * 5 + 3) % total + total) % total;
+    photoSpotlightPhase = cycle / cycleLength;
   } else {
     photoSpotlightIndex = -1;
+    photoSpotlightPhase = 0;
   }
-  photoSpotlightPhase = cycle / cycleLength;
   wall.classList.toggle("is-spotlight", photoSpotlightStrength > 0.06);
+  wall.classList.toggle("is-manual-spotlight", manualActive && photoSpotlightStrength > 0.06);
   wall.style.setProperty("--spotlight-strength", photoSpotlightStrength.toFixed(3));
   wall.style.setProperty("--spotlight-phase", photoSpotlightPhase.toFixed(3));
   wall.style.setProperty("--spotlight-index", String(photoSpotlightIndex));
@@ -1276,16 +1338,12 @@ function triggerLayoutMorph(manual = false) {
   freePhotoOffsets.clear();
   photoFreeDragging = false;
   activeFreePhoto = null;
-  photoSpotlightStrength = 0;
-  photoSpotlightIndex = -1;
-  photoSpotlightPhase = 0;
+  clearPhotoSpotlight();
   queueVelocity = queueVelocity >= 0 ? (manual ? 0.01 : 0.006) : (manual ? -0.01 : -0.006);
   orbitVelocity = orbitVelocity >= 0 ? (manual ? 0.0025 : 0.0016) : (manual ? -0.0025 : -0.0016);
   stageMotion = 0.58;
   const wall = $("#photoGrid");
-  wall.classList.remove("is-spotlight", "is-free-dragging");
-  wall.style.setProperty("--spotlight-strength", "0");
-  wall.style.setProperty("--spotlight-index", "-1");
+  wall.classList.remove("is-free-dragging");
   wall.style.setProperty("--drag-motion", "1");
   wall.style.setProperty("--flow-direction", String(Math.sign(queueVelocity || 1)));
   wall.classList.add("is-morphing");
@@ -1293,6 +1351,28 @@ function triggerLayoutMorph(manual = false) {
   morphTimer = window.setTimeout(() => wall.classList.remove("is-morphing"), manual ? 980 : 1280);
   applyLayout();
   burst(manual ? 24 : 18);
+}
+
+function clearPhotoSpotlight() {
+  manualSpotlightIndex = -1;
+  manualSpotlightStartedAt = 0;
+  photoSpotlightStrength = 0;
+  photoSpotlightIndex = -1;
+  photoSpotlightPhase = 0;
+  const wall = $("#photoGrid");
+  if (!wall) return;
+  wall.classList.remove("is-spotlight", "is-manual-spotlight");
+  wall.style.setProperty("--spotlight-strength", "0");
+  wall.style.setProperty("--spotlight-phase", "0");
+  wall.style.setProperty("--spotlight-index", "-1");
+  const tiles = new Set([
+    ...cachedPhotoTiles,
+    ...document.querySelectorAll(".photo-tile")
+  ]);
+  tiles.forEach((tile) => {
+    tile.classList.remove("is-spotlight-card");
+    tile.style.setProperty("--spotlight", "0");
+  });
 }
 
 function revealStagePoem() {

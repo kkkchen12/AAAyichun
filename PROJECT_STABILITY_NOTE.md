@@ -192,3 +192,11 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - Photo cards use a more solid premium material treatment: stronger border, shadow, edge light, inner media glow, and a restrained image sweep. This should improve texture without returning to transparent glass cards.
 - Do not use this pass as permission to restore unstable effects. Keep `.photo-cards` global filter/drop-shadow disabled, keep per-card `cardFloat`/filter animation disabled, and keep automatic spotlight disabled by default.
 - Regression coverage now also guards the stage lightfield visibility in the main album test by checking `.stage-flow` and `.photo-cards::after`, while the existing interaction tests continue to guard the full-image button and single-photo drag range.
+
+## Manual Spotlight Focus - 2026-06-30
+
+- Added a user-controlled `在相册中聚焦` action in the photo detail panel. It closes the detail panel, returns to the album, and uses the existing spotlight layout to pull the current photo into the foreground.
+- This is the stable version of the reference-video "single photo extracted from the album" idea. Automatic spotlight remains disabled by default; no idle timer is allowed to pull photos out unexpectedly.
+- Manual spotlight state is tracked with `manualSpotlightIndex` and cleared through `clearPhotoSpotlight()`. Dragging a single photo, dragging the whole album, leaving the album page, starting the album intro, or switching layout clears it.
+- Clicking the foreground spotlight photo again cancels manual spotlight without opening the detail panel; clicking dark blank stage space also cancels when the hit target is clear. Double-clicking blank space still changes layout and resets the spotlight photo back into the queue.
+- Regression coverage now verifies the detail-panel button, spotlight foreground class/layer/caption, foreground-click cancel, and double-click layout reset. The screenshot is `output/playwright/verified-manual-spotlight.png`.

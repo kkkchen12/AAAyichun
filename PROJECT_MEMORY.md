@@ -133,6 +133,9 @@
 - 2026-06-30 CSS 光场和照片材质继续加强：相册背景增加深酒红/暗金/少量紫色层次，`.photo-cards::before/::after`、`.stage-flow`、`.stage-trail` 和 `.stage-veil` 的低频光带更明显；照片边框、阴影、内侧高光和真实图片掠光更扎实，避免回到透明玻璃片感觉。
 - 2026-06-30 这轮视觉加强没有恢复会导致闪烁的高成本路径：仍然不恢复 `.photo-cards` 全局 filter/drop-shadow，不恢复每张照片独立 `cardFloat` 动画，不开启默认自动 spotlight，不改变 `查看完整照片`、纯照片外侧关闭、单张照片拖动和队形切换复位链路。
 - 2026-06-30 主相册 Playwright 用例新增 stage 光场回归断言，要求 `.stage-flow` 和 `.photo-cards::after` 的可见度保持在当前电影感区间；重点截图继续看 `output/playwright/verified-album-desktop.png`、`verified-album-drag-motion.png`、`verified-single-photo-drag.png` 和 `verified-photo-full.png`。
+- 2026-06-30 将“单张照片拿出来再复位”的创意从自动 spotlight 改成手动可控：照片介绍页新增 `在相册中聚焦` 按钮，点击后关闭介绍层并回到相册，把当前照片抽到前景，背景照片退成有景深的队列；再次点击前景照片或点击暗场空白会取消聚焦，双击空白切换队形也会复位。
+- 2026-06-30 手动聚焦仍使用 `applySpotlightPoint()` 的稳定布局算法，但由 `manualSpotlightIndex` 控制；默认自动 spotlight 继续保持关闭，拖动单张照片、整面相册拖动、离开相册页面和切换队形都会调用 `clearPhotoSpotlight()`，避免旧状态残留或重新闪烁。
+- 2026-06-30 Playwright 新增 `manually spotlights a photo on the album stage and resets on layout switch`，验证介绍页按钮、前景 spotlight class/层级/caption、再次点击前景照片复位、再次手动聚焦后双击空白切换队形复位；新增重点截图为 `output/playwright/verified-manual-spotlight.png`。
 
 ## Next Session TODO
 
@@ -142,6 +145,7 @@
 4. 不要破坏已稳定的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不长时间暂停、不闪烁；返回封面可用。
 4.1 不要破坏本轮单张照片交互：介绍页 `查看完整照片` 按钮必须可用，纯照片模式点击图片外黑色区域必须能关闭，照片底部文字区/边缘也应能拖出单张照片，切换队形时拖出的照片必须回到队列。
 4.2 后续视觉增强可以继续提高光场、照片材质和铺屏层次，但必须先保留现有低成本路径：不要恢复全局 filter/drop-shadow、独立照片浮动动画或默认自动 spotlight。
+4.3 新增的 `在相册中聚焦` 是手动 spotlight 入口，不要改回空闲自动强抽出；聚焦后再次点击前景照片或点击暗场应取消，双击暗场应切换队形并复位。
 5. 不要回退已修好的技术路径：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不推动真实队列；不要用全局强残影覆盖全部照片。
 6. 不要回退本轮稳定性修正：不要恢复 `.photo-cards` 常驻 `drop-shadow`，不要恢复照片独立 `cardFloat`/filter 动画，hover 不要固定跳到高 z-index；残影只能克制地服务拖拽、入场、变阵和当前 hover 卡片。
 6.1 不要回退本轮动画回收：不要把自动 scene blend 再拉回 0.9 左右，不要默认开启自动 spotlight，不要让扫光/ghost/camera 同时大幅叠加，否则会重新出现整体照片闪烁和动画失控。

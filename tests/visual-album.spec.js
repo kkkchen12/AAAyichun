@@ -142,6 +142,75 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   await expect(page.locator("#photoLightbox")).toBeHidden();
 });
 
+test("manually spotlights a photo on the album stage and resets on layout switch", async ({ page }) => {
+  await unlock(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/#photoWall");
+  await page.waitForTimeout(3600);
+
+  const hero = page.locator(".photo-tile.is-hero-card").first();
+  await expect(hero).toBeVisible();
+  const targetNumber = await hero.getAttribute("data-number");
+  expect(targetNumber).toBeTruthy();
+  await hero.evaluate((tile) => tile.click());
+  await expect(page.locator("#photoLightbox")).toBeVisible();
+  await page.waitForTimeout(760);
+  await page.locator("#focusPhotoStage").click();
+
+  await expect(page.locator("#photoLightbox")).toBeHidden();
+  await expect(page.locator("body")).toHaveAttribute("data-view", "photoWall");
+  await expect(page.locator(".photo-wall")).toHaveClass(/is-manual-spotlight/);
+  const focused = page.locator(`.photo-tile[data-number="${targetNumber}"]`);
+  await expect(focused).toHaveClass(/is-spotlight-card/);
+  const focusState = await focused.evaluate((tile) => ({
+    spotlight: Number.parseFloat(tile.style.getPropertyValue("--spotlight")),
+    zIndex: Number.parseInt(getComputedStyle(tile).zIndex, 10),
+    captionVisible: getComputedStyle(tile.querySelector(".tile-caption span")).display !== "none"
+  }));
+  expect(focusState.spotlight).toBeGreaterThan(0.5);
+  expect(focusState.zIndex).toBeGreaterThan(150);
+  expect(focusState.captionVisible).toBe(true);
+  await page.screenshot({ path: "output/playwright/verified-manual-spotlight.png" });
+
+  const blankPoint = await page.evaluate(() => {
+    const wall = document.querySelector(".photo-wall").getBoundingClientRect();
+    const candidates = [
+      [0.12, 0.82],
+      [0.88, 0.82],
+      [0.12, 0.22],
+      [0.88, 0.22],
+      [0.5, 0.88]
+    ];
+    for (const [xRatio, yRatio] of candidates) {
+      const x = wall.left + wall.width * xRatio;
+      const y = wall.top + wall.height * yRatio;
+      if (!document.elementFromPoint(x, y)?.closest(".photo-tile")) return { x, y };
+    }
+    return { x: wall.left + 42, y: wall.bottom - 42 };
+  });
+  await focused.evaluate((tile) => tile.click());
+  await expect(page.locator(".photo-wall")).not.toHaveClass(/is-manual-spotlight/);
+  await expect.poll(async () => (
+    await focused.evaluate((tile) => ({
+      className: tile.className,
+      spotlight: Number.parseFloat(tile.style.getPropertyValue("--spotlight")) || 0
+    }))
+  )).toEqual(expect.objectContaining({
+    spotlight: 0
+  }));
+
+  await hero.evaluate((tile) => tile.click());
+  await expect(page.locator("#photoLightbox")).toBeVisible();
+  await page.waitForTimeout(760);
+  await page.locator("#focusPhotoStage").click();
+  await expect(page.locator(".photo-wall")).toHaveClass(/is-manual-spotlight/);
+
+  await page.mouse.dblclick(blankPoint.x, blankPoint.y);
+  await expect(page.locator(".photo-wall")).not.toHaveClass(/is-manual-spotlight/);
+  await expect(focused).not.toHaveClass(/is-spotlight-card/);
+  await expect(page.locator(".photo-wall")).toHaveClass(/layout-1/);
+});
+
 test("opens photo detail reliably after hovering over a moving tile", async ({ page }) => {
   await unlock(page);
   await page.setViewportSize({ width: 1440, height: 900 });
