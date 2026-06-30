@@ -116,6 +116,8 @@
 - 2026-06-30 spotlight 视觉已做成实体高级照片材质：前景卡片使用更强边缘光、暗金 halo、清晰图片滤镜和 caption，背景照片降低 opacity/blur 形成景深；重点截图为 `output/playwright/verified-album-spotlight-extract.png`。
 - 2026-06-30 低高度横屏进一步处理标题叠压：`.stage-poem` 在横屏低高度下更靠上、更小、更淡，并在 `captures phone landscape album` 用例中断言 opacity、bottom 和字体大小，防止以后又盖住照片主体。重点截图为 `output/playwright/verified-album-iphone-landscape.png`。
 - 2026-06-30 Playwright 新增 `extracts a single photo during automatic scene evolution and then resets`，验证 spotlight 强度、前景照片尺寸、opacity、z-index、caption 显示和自动复位；本轮最终验证：`npm run check` 通过，`npm test` 11/11 通过。
+- 2026-06-30 开始建立 Git/GitHub 部署路线：原 `.git` 是空目录导致 `git status` 识别失败，已重新初始化本地 Git 仓库，分支为 `main`，初始提交为 `a73b01d chore: initialize birthday album project`；`.gitignore` 已排除 `node_modules/`、测试输出、Codex 临时目录、`.env*` 和普通截图输出，但保留 `output/reference/**` 作为参考视频对照资料。
+- 2026-06-30 当前 `gh` 已登录 `kkkchen12`，但创建远程仓库时被 token 权限挡住：`Resource not accessible by personal access token (createRepository)`。已新增 `GITHUB_SETUP.md`，后续需要用户运行 `gh auth refresh -h github.com -s repo` 或在 GitHub 网页手动创建 private repo `AAAyichun` 后再 push。
 
 ## Next Session TODO
 
@@ -131,5 +133,5 @@
 10. 添加一个简单私密入口，例如输入她的昵称、生日或纪念日才能进入。
 11. 每次视觉调整后运行 `npm run check` 和 `npm test`，查看 `output/playwright/verified-*.png`，特别是 `verified-album-desktop.png`、`verified-album-auto-scene.png`、`verified-album-spotlight-extract.png`、`verified-hover-stability.png`、`verified-album-drag-motion.png`、`verified-album-iphone-landscape.png`。
 12. 做最终浏览器检查：电脑横屏、iPhone 横屏、iPhone 竖屏。
-13. 初始化 Git 仓库，创建私有 GitHub 仓库，推送代码。
-14. 用 Vercel 从私有 GitHub 仓库部署，拿到 HTTPS 链接。
+13. Git 本地仓库已初始化；下一步按 `GITHUB_SETUP.md` 刷新 `gh` 权限或在网页创建 private repo `AAAyichun`，然后 push `main`。
+14. 用 Vercel 从私有 GitHub 仓库部署，拿到 HTTPS 链接；正式发送前先加私密入口。

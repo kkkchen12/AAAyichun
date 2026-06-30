@@ -262,6 +262,8 @@ npm test
 - 手机低高度横屏再次修正：上方诗句更小、更淡、更靠上，避免覆盖主照片；`captures phone landscape album` 现在会断言诗句透明度、底部位置和标题字号。
 - Playwright 新增 `extracts a single photo during automatic scene evolution and then resets`，验证前景照片尺寸、清晰度、层级、标题显示和自动复位。
 - 最新验证：`npm run check` 通过，`npm test` 11/11 通过。
+- 已开始建立 GitHub/Vercel 路线：本地 Git 仓库已重新初始化到 `main`，初始提交为 `a73b01d chore: initialize birthday album project`。`.gitignore` 已避免提交 `node_modules/`、测试截图、Codex 临时目录和 `.env*`。
+- 远程 private repo 还未创建成功，原因是当前 `gh` token 没有 `createRepository` 权限。下一步按 `GITHUB_SETUP.md` 刷新权限，或手动创建 `kkkchen12/AAAyichun` 私有空仓库后执行 `git push -u origin main`。
 
 ## 明天重开对话快速接续
 
@@ -272,4 +274,5 @@ npm test
 3. 当前最需要继续优化的是相册视觉，而不是先部署：照片还可以继续变得更满、更像一整团动态相册集；UI 继续沿用深酒红、暗金、玻璃、细光尘的方向，并保留 spotlight 单张抽出的高级展示。
 4. 不能破坏的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不应该让相册卡住或闪烁；左上角返回封面必须可用。
 5. 不能回退的技术约束：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不要推动真实队列；不要用全局强残影覆盖 24 张照片。
-6. 继续改完后运行 `npm run check` 和 `npm test`。重点查看 `output/playwright/verified-album-spotlight-extract.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png` 和 `verified-album-iphone-landscape.png`。
+6. GitHub 推送路线见 `GITHUB_SETUP.md`；远程仓库建议 private repo `AAAyichun`，后续用 Vercel 从该仓库导入部署。
+7. 继续改完后运行 `npm run check` 和 `npm test`。重点查看 `output/playwright/verified-album-spotlight-extract.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png` 和 `verified-album-iphone-landscape.png`。

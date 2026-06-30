@@ -22,6 +22,8 @@
 
 更多当前决策和明天 TODO 见 `PROJECT_MEMORY.md` 和 `PROJECT_DOC.md`。
 
+GitHub 私有仓库和 Vercel 部署准备见 `GITHUB_SETUP.md`。
+
 ## 本地预览
 
 建议使用本地服务预览：
