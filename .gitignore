@@ -1,0 +1,14 @@
+node_modules/
+test-results/
+playwright-report/
+.playwright-cli/
+output/*
+!output/reference/
+!output/reference/**
+.agents/
+.codex/
+.env
+.env.*
+*.log
+Thumbs.db
+.DS_Store

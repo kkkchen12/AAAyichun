@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#111729" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="生日信" />
+    <title>只给你看的生日信</title>
+    <link rel="preload" as="image" href="assets/hero-letter.png" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <canvas id="effectCanvas" aria-hidden="true"></canvas>
+    <a class="home-return" href="#home" data-view="home" aria-label="返回封面">返回封面</a>
+
+    <main>
+      <section class="hero is-active" id="home">
+        <img class="hero-image" src="assets/hero-letter.png" alt="" />
+        <div class="hero-shade"></div>
+        <nav class="top-nav" aria-label="页面导航">
+          <a href="#photoWall" data-view="photoWall">相册</a>
+          <a href="#letter" data-view="letter">信</a>
+          <button class="music-button" id="musicToggle" type="button" aria-label="播放音乐">
+            <span id="musicIcon">♪</span>
+          </button>
+        </nav>
+        <div class="hero-copy">
+          <p class="eyebrow" id="heroKicker"></p>
+          <h1 id="heroTitle"></h1>
+          <p id="heroText"></p>
+          <div class="hero-actions">
+            <a class="primary-action" href="#photoWall" data-view="photoWall">回忆</a>
+            <button class="secondary-action" id="jumpLetter" type="button">祝福</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="photo-section" id="photoWall">
+        <div class="section-shell">
+          <header class="section-head">
+            <p class="eyebrow">Interactive Album</p>
+            <h2>把我们放进同一片星河里</h2>
+            <p>移动鼠标或手指时，照片会跟着轻轻偏移；点开任意一张，就能单独放大看照片和对应介绍。</p>
+          </header>
+          <div class="wall-toolbar" aria-label="相册操作">
+            <button id="cycleLayout" type="button">切换队形</button>
+            <button id="openFirstPhoto" type="button">从第一张开始看</button>
+          </div>
+          <div class="wall-status" id="wallStatus" aria-live="polite"></div>
+          <div class="photo-wall" id="photoGrid" aria-live="polite">
+            <div class="stage-lightfields" aria-hidden="true">
+              <span class="stage-orbit orbit-a"></span>
+              <span class="stage-orbit orbit-b"></span>
+              <span class="stage-beam beam-a"></span>
+              <span class="stage-beam beam-b"></span>
+              <span class="stage-trail trail-a"></span>
+              <span class="stage-trail trail-b"></span>
+              <span class="stage-flow flow-a"></span>
+              <span class="stage-flow flow-b"></span>
+              <span class="stage-veil veil-a"></span>
+              <span class="stage-veil veil-b"></span>
+              <span class="stage-aperture"></span>
+            </div>
+            <div class="stage-brand">
+              <strong id="stageInitials"></strong>
+              <span>Eternal Blossoms</span>
+            </div>
+            <div class="stage-mode" id="stageMode"></div>
+            <div class="stage-poem">
+              <span id="stagePoemLine1"></span>
+              <strong id="stagePoemLine2"></strong>
+            </div>
+            <div class="photo-cards" id="photoCards"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="letter-section" id="letter">
+        <div class="letter-stage">
+          <div class="envelope-wrap" id="envelopeWrap">
+            <button class="envelope" id="openLetter" type="button" aria-label="拆开这封信">
+              <span class="envelope-flap"></span>
+              <span class="envelope-paper">
+                <span id="envelopeText"></span>
+              </span>
+              <span class="envelope-front"></span>
+              <span class="seal">♡</span>
+            </button>
+          </div>
+
+          <article class="letter-paper">
+            <p class="eyebrow">Letter</p>
+            <h2 id="letterTitle"></h2>
+            <div class="letter-body" id="letterBody"></div>
+            <div class="letter-actions">
+              <button class="primary-action" id="replayLetter" type="button">重新读一遍</button>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <div class="lightbox" id="photoLightbox" hidden>
+      <button class="lightbox-close" id="closeLightbox" type="button" aria-label="关闭照片">×</button>
+      <button class="lightbox-nav prev" id="prevPhoto" type="button" aria-label="上一张">‹</button>
+      <figure class="lightbox-card">
+        <div class="lightbox-image-wrap">
+          <img id="lightboxImage" alt="" />
+        </div>
+        <figcaption>
+          <span id="photoCounter"></span>
+          <h3 id="lightboxTitle"></h3>
+          <p id="lightboxCaption"></p>
+          <button class="lightbox-full" id="viewFullPhoto" type="button">打开完整照片</button>
+        </figcaption>
+      </figure>
+      <button class="lightbox-nav next" id="nextPhoto" type="button" aria-label="下一张">›</button>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

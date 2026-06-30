@@ -1,0 +1,19 @@
+{
+  "name": "aaayichun",
+  "version": "1.0.0",
+  "description": "Private romantic birthday album and letter site.",
+  "private": true,
+  "main": "app.js",
+  "scripts": {
+    "dev": "node tools/static-server.cjs --port 5173",
+    "check": "node --check app.js",
+    "test": "playwright test"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.61.1"
+  }
+}
