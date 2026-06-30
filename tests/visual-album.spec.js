@@ -48,7 +48,8 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   expect(motionState.xPx).toContain("px");
   expect(motionState.sweepX).toBeGreaterThanOrEqual(-20);
   expect(motionState.sweepX).toBeLessThanOrEqual(120);
-  expect(motionState.sweepIntensity).toBeGreaterThan(0.25);
+  expect(motionState.sweepIntensity).toBeGreaterThan(0.16);
+  expect(motionState.sweepIntensity).toBeLessThan(0.62);
   expect(motionState.cameraX).toContain("px");
   expect(motionState.cameraZ).toBeGreaterThan(-90);
   expect(motionState.cameraZ).toBeLessThan(90);
@@ -208,61 +209,70 @@ test("captures cinematic album intro gather", async ({ page }) => {
   await page.screenshot({ path: "output/playwright/verified-album-intro-gather.png" });
 });
 
-test("captures idle cinematic scene evolution", async ({ page }) => {
+test("captures restrained idle cinematic motion", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
-  await page.waitForFunction(() => {
-    const wall = document.querySelector(".photo-wall");
-    if (!wall) return false;
-    const blend = Number.parseFloat(getComputedStyle(wall).getPropertyValue("--scene-blend"));
-    return wall.dataset.scene !== "0" && blend > 0.55;
-  }, null, { timeout: 22000 });
+  await page.waitForTimeout(9600);
 
-  const sceneState = await page.locator(".photo-wall").evaluate((wall) => ({
-    scene: wall.dataset.scene,
-    blend: Number.parseFloat(getComputedStyle(wall).getPropertyValue("--scene-blend"))
+  const before = await page.locator(".photo-tile.is-hero-card").first().evaluate((tile) => ({
+    x: Number.parseFloat(tile.style.getPropertyValue("--x")),
+    y: Number.parseFloat(tile.style.getPropertyValue("--y"))
   }));
-  expect(sceneState.scene).not.toBe("0");
-  expect(sceneState.blend).toBeGreaterThan(0.55);
+  await page.waitForTimeout(900);
+  const idleState = await page.locator(".photo-wall").evaluate((wall) => {
+    const style = getComputedStyle(wall);
+    const hero = document.querySelector(".photo-tile.is-hero-card") || document.querySelector(".photo-tile");
+    const heroPoint = hero ? {
+      x: Number.parseFloat(hero.style.getPropertyValue("--x")),
+      y: Number.parseFloat(hero.style.getPropertyValue("--y"))
+    } : { x: 0, y: 0 };
+    return {
+      scene: wall.dataset.scene,
+      blend: Number.parseFloat(style.getPropertyValue("--scene-blend")),
+      spotlightStrength: Number.parseFloat(style.getPropertyValue("--spotlight-strength")),
+      sweepIntensity: Number.parseFloat(style.getPropertyValue("--sweep-intensity")),
+      spotlightCards: document.querySelectorAll(".photo-tile.is-spotlight-card").length,
+      heroPoint
+    };
+  });
+  const idleDrift = Math.hypot(idleState.heroPoint.x - before.x, idleState.heroPoint.y - before.y);
+  expect(idleDrift).toBeGreaterThan(0.02);
+  expect(idleState.blend).toBeLessThan(0.44);
+  expect(idleState.spotlightStrength).toBeLessThan(0.04);
+  expect(idleState.sweepIntensity).toBeLessThan(0.62);
+  expect(idleState.spotlightCards).toBe(0);
   await page.screenshot({ path: "output/playwright/verified-album-auto-scene.png" });
 });
 
-test("extracts a single photo during automatic scene evolution and then resets", async ({ page }) => {
+test("keeps automatic album motion restrained without spotlight flicker", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
-  await page.waitForFunction(() => {
-    const wall = document.querySelector(".photo-wall");
-    const spotlightCard = document.querySelector(".photo-tile.is-spotlight-card");
-    if (!wall || !spotlightCard) return false;
-    const strength = Number.parseFloat(getComputedStyle(wall).getPropertyValue("--spotlight-strength"));
-    return wall.classList.contains("is-spotlight") && strength > 0.68;
-  }, null, { timeout: 22000 });
+  await page.waitForTimeout(11600);
 
-  const spotlightState = await page.locator(".photo-tile.is-spotlight-card").first().evaluate((tile) => {
-    const rect = tile.getBoundingClientRect();
-    const style = getComputedStyle(tile);
-    const caption = tile.querySelector(".tile-caption span");
+  await page.waitForTimeout(1800);
+  const stableMotionState = await page.locator(".photo-wall").evaluate((wall) => {
+    const style = getComputedStyle(wall);
+    const strongestGhost = Array.from(document.querySelectorAll(".photo-tile:not(.is-hovered) .tile-ghost"))
+      .reduce((max, ghost) => Math.max(max, Number.parseFloat(getComputedStyle(ghost).opacity) || 0), 0);
+    const strongestSpotlight = Array.from(document.querySelectorAll(".photo-tile"))
+      .reduce((max, tile) => Math.max(max, Number.parseFloat(tile.style.getPropertyValue("--spotlight")) || 0), 0);
     return {
-      width: rect.width,
-      height: rect.height,
-      opacity: Number.parseFloat(style.opacity),
-      zIndex: Number.parseInt(style.zIndex, 10),
-      captionDisplay: caption ? getComputedStyle(caption).display : "none"
+      scene: wall.dataset.scene,
+      sceneBlend: Number.parseFloat(style.getPropertyValue("--scene-blend")),
+      spotlightStrength: Number.parseFloat(style.getPropertyValue("--spotlight-strength")),
+      isSpotlight: wall.classList.contains("is-spotlight"),
+      spotlightCards: document.querySelectorAll(".photo-tile.is-spotlight-card").length,
+      strongestGhost,
+      strongestSpotlight
     };
   });
-  expect(spotlightState.width).toBeGreaterThan(260);
-  expect(spotlightState.height).toBeGreaterThan(340);
-  expect(spotlightState.opacity).toBeGreaterThan(0.88);
-  expect(spotlightState.zIndex).toBeGreaterThan(100);
-  expect(spotlightState.captionDisplay).toBe("block");
-  await page.screenshot({ path: "output/playwright/verified-album-spotlight-extract.png" });
-
-  await page.waitForFunction(() => {
-    const wall = document.querySelector(".photo-wall");
-    if (!wall) return false;
-    const strength = Number.parseFloat(getComputedStyle(wall).getPropertyValue("--spotlight-strength"));
-    return !wall.classList.contains("is-spotlight") && strength < 0.07 && !document.querySelector(".photo-tile.is-spotlight-card");
-  }, null, { timeout: 12000 });
+  expect(stableMotionState.sceneBlend).toBeLessThan(0.44);
+  expect(stableMotionState.spotlightStrength).toBeLessThan(0.04);
+  expect(stableMotionState.strongestSpotlight).toBeLessThan(0.04);
+  expect(stableMotionState.isSpotlight).toBe(false);
+  expect(stableMotionState.spotlightCards).toBe(0);
+  expect(stableMotionState.strongestGhost).toBeLessThan(0.08);
+  await page.screenshot({ path: "output/playwright/verified-album-restrained-motion.png" });
 });
 
 test("captures drag-responsive cinematic light state", async ({ page }) => {

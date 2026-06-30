@@ -11,21 +11,34 @@ a73b01d chore: initialize birthday album project
 
 - `.gitignore` now excludes local/generated folders such as `node_modules/`, `.playwright-cli/`, `test-results/`, `output/playwright/`, `.agents/`, `.codex/`, `.env*`, logs, and OS metadata.
 - `output/reference/**` is intentionally kept trackable because the project docs use the reference-video contact sheets and frames for future visual comparison.
-- The GitHub CLI is installed and logged in as `kkkchen12`, but the current token cannot create a new repository:
+- During setup, the GitHub CLI was installed and logged in as `kkkchen12`, but the first token could not create a new repository:
 
 ```text
 GraphQL: Resource not accessible by personal access token (createRepository)
 ```
 
-## Recommended Private GitHub Repository
-
-Create a private repository named:
+- After refreshing GitHub CLI permissions, the private repository was created and `main` was pushed:
 
 ```text
-AAAyichun
+https://github.com/kkkchen12/AAAyichun
 ```
 
-Use one of these two options.
+## Recommended Private GitHub Repository
+
+The private repository is:
+
+```text
+https://github.com/kkkchen12/AAAyichun
+```
+
+If the remote ever needs to be repaired, use:
+
+```powershell
+git remote set-url origin https://github.com/kkkchen12/AAAyichun.git
+git push -u origin main
+```
+
+The original setup options are kept below for reference.
 
 ### Option A: Refresh `gh` Permission
 

@@ -117,21 +117,25 @@
 - 2026-06-30 低高度横屏进一步处理标题叠压：`.stage-poem` 在横屏低高度下更靠上、更小、更淡，并在 `captures phone landscape album` 用例中断言 opacity、bottom 和字体大小，防止以后又盖住照片主体。重点截图为 `output/playwright/verified-album-iphone-landscape.png`。
 - 2026-06-30 Playwright 新增 `extracts a single photo during automatic scene evolution and then resets`，验证 spotlight 强度、前景照片尺寸、opacity、z-index、caption 显示和自动复位；本轮最终验证：`npm run check` 通过，`npm test` 11/11 通过。
 - 2026-06-30 开始建立 Git/GitHub 部署路线：原 `.git` 是空目录导致 `git status` 识别失败，已重新初始化本地 Git 仓库，分支为 `main`，初始提交为 `a73b01d chore: initialize birthday album project`；`.gitignore` 已排除 `node_modules/`、测试输出、Codex 临时目录、`.env*` 和普通截图输出，但保留 `output/reference/**` 作为参考视频对照资料。
-- 2026-06-30 当前 `gh` 已登录 `kkkchen12`，但创建远程仓库时被 token 权限挡住：`Resource not accessible by personal access token (createRepository)`。已新增 `GITHUB_SETUP.md`，后续需要用户运行 `gh auth refresh -h github.com -s repo` 或在 GitHub 网页手动创建 private repo `AAAyichun` 后再 push。
+- 2026-06-30 `gh` 初次创建远程仓库时曾被 token 权限挡住：`Resource not accessible by personal access token (createRepository)`；用户完成 `gh auth refresh -h github.com -s repo` 后，已创建并推送 private repo `https://github.com/kkkchen12/AAAyichun`。
+- 2026-06-30 用户明确反馈上一轮自动效果“完全不如之前，一堆问题，整体照片不停闪烁，动画不受控制”。本轮稳定性回收：默认关闭自动 spotlight 抽出（保留代码但 `AUTO_SPOTLIGHT_ENABLED = false`），避免空闲时突然把单张照片和全部背景照片大幅重排；自动 scene 延迟到更久空闲后才低强度混入，最高强度从接近 0.92 降到 0.36。
+- 2026-06-30 同步降低扫光、相机推拉、stage veil 和照片 ghost 强度：`--sweep-intensity` 上限降到 0.58，camera 位移/roll/tilt/dolly 降幅，scene/spotlight 相关残影不再在空闲时大面积叠加；后续要做单张抽出必须做成手动或更稳定的低频触发，不能再让它自动强抢主动画。
+- 2026-06-30 Playwright 测试改成稳定性导向：不再要求自动 spotlight 出现，而是新增/调整 `captures restrained idle cinematic motion` 与 `keeps automatic album motion restrained without spotlight flicker`，验证空闲队列仍然轻微流动，但 scene blend 受限、spotlight strength 低于 0.04、无 `.is-spotlight-card`、非 hover ghost 低于 0.08。最新验证：`npm run check` 通过，`npm test` 11/11 通过。
 
 ## Next Session TODO
 
 1. 明天先运行 `npm run dev`，打开 `http://127.0.0.1:5173/#photoWall`，同时打开 `assets/reference/reference-album-effect.mp4` 对照。
-2. 优先继续优化相册视觉：照片要继续保持更大、更满、更铺屏，队列要像视频里一整团动态相册集，而不是小卡片墙；同时保留单张照片自动抽出、背景队列退后和切换队形复位的机制。
+2. 优先继续优化相册视觉：照片要继续保持更大、更满、更铺屏，队列要像视频里一整团动态相册集，而不是小卡片墙；但不要恢复自动 spotlight 强抽出，后续单张抽出应改成手动触发或更稳定的低频展示。
 3. 继续对照参考视频微调横向照片队列的纵深、密度、光效、hover 视觉反馈和拖拽手感；后续所有 UI 继续沿用深色电影感、暗金、细光尘、不卡通的方向。
 4. 不要破坏已稳定的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不长时间暂停、不闪烁；返回封面可用。
 5. 不要回退已修好的技术路径：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不推动真实队列；不要用全局强残影覆盖全部照片。
 6. 不要回退本轮稳定性修正：不要恢复 `.photo-cards` 常驻 `drop-shadow`，不要恢复照片独立 `cardFloat`/filter 动画，hover 不要固定跳到高 z-index；残影只能克制地服务拖拽、入场、变阵和当前 hover 卡片。
+6.1 不要回退本轮动画回收：不要把自动 scene blend 再拉回 0.9 左右，不要默认开启自动 spotlight，不要让扫光/ghost/camera 同时大幅叠加，否则会重新出现整体照片闪烁和动画失控。
 7. 把占位照片标题和说明替换成真实回忆；当前 `photo-15` 到 `photo-24` 是重复补位。
 8. 把信件正文替换成用户最终想写的内容。
 9. 放入背景音乐 `assets/song.mp3`。
 10. 添加一个简单私密入口，例如输入她的昵称、生日或纪念日才能进入。
 11. 每次视觉调整后运行 `npm run check` 和 `npm test`，查看 `output/playwright/verified-*.png`，特别是 `verified-album-desktop.png`、`verified-album-auto-scene.png`、`verified-album-spotlight-extract.png`、`verified-hover-stability.png`、`verified-album-drag-motion.png`、`verified-album-iphone-landscape.png`。
 12. 做最终浏览器检查：电脑横屏、iPhone 横屏、iPhone 竖屏。
-13. Git 本地仓库已初始化；下一步按 `GITHUB_SETUP.md` 刷新 `gh` 权限或在网页创建 private repo `AAAyichun`，然后 push `main`。
+13. Git 本地仓库已初始化，私有 GitHub 仓库 `https://github.com/kkkchen12/AAAyichun` 已创建并推送 `main`；后续每次大改先测试再 commit/push。
 14. 用 Vercel 从私有 GitHub 仓库部署，拿到 HTTPS 链接；正式发送前先加私密入口。

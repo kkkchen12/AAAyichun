@@ -69,6 +69,9 @@ const story = {
 
 const $ = (selector) => document.querySelector(selector);
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const AUTO_SPOTLIGHT_ENABLED = false;
+const IDLE_SCENE_BLEND_MAX = 0.36;
+const REST_SCENE_BLEND = 0.1;
 let currentPhoto = 0;
 let shuffledPhotos = [...story.photos];
 let letterStarted = false;
@@ -796,7 +799,7 @@ function updateAlbumSweep(wall) {
   albumSweepX = -12 + phase * 124;
   albumSweepY = 50 + Math.sin(cinematicTime * 0.62 + queueOffset * 0.018) * 7.2;
   const motion = Math.min(1, Math.abs(queueVelocity) * 28 + stageMotion * 0.44);
-  albumSweepIntensity = Math.min(1, 0.34 + motion * 0.34 + albumSceneBlend * 0.26 + (albumIntroProgress < 1 ? (1 - albumIntroProgress) * 0.24 : 0));
+  albumSweepIntensity = Math.min(0.58, 0.18 + motion * 0.22 + albumSceneBlend * 0.12 + (albumIntroProgress < 1 ? (1 - albumIntroProgress) * 0.16 : 0));
   wall.style.setProperty("--sweep-x", `${albumSweepX.toFixed(2)}%`);
   wall.style.setProperty("--sweep-y", `${albumSweepY.toFixed(2)}%`);
   wall.style.setProperty("--sweep-intensity", albumSweepIntensity.toFixed(3));
@@ -805,27 +808,27 @@ function updateAlbumSweep(wall) {
 
 function updateAlbumCamera(wall, hoverVisualActive) {
   const lightboxOpen = !$("#photoLightbox").hidden;
-  const sceneWeight = albumIntroProgress < 1 ? 1 - albumIntroProgress : albumSceneBlend;
-  const motion = Math.min(1, Math.abs(queueVelocity) * 32 + stageMotion * 0.52 + sceneWeight * 0.36);
+  const sceneWeight = albumIntroProgress < 1 ? 1 - albumIntroProgress : albumSceneBlend * 0.7;
+  const motion = Math.min(1, Math.abs(queueVelocity) * 22 + stageMotion * 0.36 + sceneWeight * 0.22);
   const direction = Math.sign(queueVelocity || orbitVelocity || 1);
-  const driftX = Math.sin(cinematicTime * 0.22 + queueOffset * 0.025) * (10 + sceneWeight * 12);
-  const driftY = Math.cos(cinematicTime * 0.18 + queueOffset * 0.012) * (3.5 + sceneWeight * 4);
-  const dragPush = albumDragging ? direction * Math.min(20, Math.abs(queueVelocity) * 310) : 0;
+  const driftX = Math.sin(cinematicTime * 0.18 + queueOffset * 0.018) * (5.5 + sceneWeight * 5.5);
+  const driftY = Math.cos(cinematicTime * 0.16 + queueOffset * 0.01) * (2 + sceneWeight * 2.4);
+  const dragPush = albumDragging ? direction * Math.min(14, Math.abs(queueVelocity) * 220) : 0;
   const hoverEase = hoverVisualActive ? 0.72 : 1;
   const settle = lightboxOpen ? 0.35 : hoverEase;
   const dolly = lightboxOpen
     ? -70
-    : -18 + sceneWeight * 34 + motion * 22 + Math.sin(cinematicTime * 0.32) * (6 + sceneWeight * 6);
+    : -14 + sceneWeight * 18 + motion * 12 + Math.sin(cinematicTime * 0.26) * (3.5 + sceneWeight * 3.5);
   const scale = lightboxOpen
     ? 0.962
-    : 0.986 + sceneWeight * 0.014 + motion * 0.012 + Math.sin(cinematicTime * 0.26) * 0.004;
+    : 0.99 + sceneWeight * 0.008 + motion * 0.006 + Math.sin(cinematicTime * 0.22) * 0.0025;
 
   wall.style.setProperty("--camera-x", `${((driftX + dragPush) * settle).toFixed(2)}px`);
   wall.style.setProperty("--camera-y", `${(driftY * settle).toFixed(2)}px`);
   wall.style.setProperty("--camera-z", `${(dolly * settle).toFixed(2)}px`);
-  wall.style.setProperty("--camera-roll", `${(direction * motion * 0.34 + Math.sin(cinematicTime * 0.2) * 0.18).toFixed(3)}deg`);
-  wall.style.setProperty("--camera-tilt-x", `${(sceneWeight * -0.72 + Math.sin(cinematicTime * 0.31) * 0.32).toFixed(3)}deg`);
-  wall.style.setProperty("--camera-tilt-y", `${(direction * motion * 0.62 + Math.cos(cinematicTime * 0.23) * 0.38).toFixed(3)}deg`);
+  wall.style.setProperty("--camera-roll", `${(direction * motion * 0.18 + Math.sin(cinematicTime * 0.18) * 0.08).toFixed(3)}deg`);
+  wall.style.setProperty("--camera-tilt-x", `${(sceneWeight * -0.34 + Math.sin(cinematicTime * 0.24) * 0.16).toFixed(3)}deg`);
+  wall.style.setProperty("--camera-tilt-y", `${(direction * motion * 0.32 + Math.cos(cinematicTime * 0.2) * 0.18).toFixed(3)}deg`);
   wall.style.setProperty("--camera-scale", scale.toFixed(4));
 }
 
@@ -836,15 +839,14 @@ function updateAlbumScene(wall, now, frameScale, hoverLockActive) {
     return;
   }
   const canEvolve = albumIntroProgress >= 1
-    && now - lastInteractionAt > 1800;
+    && now - lastInteractionAt > 5200;
   const nextMode = canEvolve ? getAutoSceneMode(cinematicTime) : 0;
-  const ambientMode = (Math.floor(cinematicTime / 6) % 4) + 1;
-  const targetMode = nextMode || albumSceneMode || ambientMode;
-  const targetBlend = canEvolve ? (nextMode === 0 ? 0.62 : 0.92) : 0;
-  const blendSpeed = targetBlend > albumSceneBlend ? (targetBlend > 0.5 ? 0.016 : 0.009) : 0.03;
+  const targetMode = nextMode || albumSceneMode || 0;
+  const targetBlend = canEvolve ? (nextMode === 0 ? REST_SCENE_BLEND : IDLE_SCENE_BLEND_MAX) : 0;
+  const blendSpeed = targetBlend > albumSceneBlend ? 0.006 : 0.035;
   albumSceneBlend += (targetBlend - albumSceneBlend) * Math.min(1, blendSpeed * frameScale);
-  if (canEvolve && targetBlend > 0.01) albumSceneMode = targetMode;
-  if (!canEvolve && albumSceneBlend < 0.02) albumSceneMode = 0;
+  if (canEvolve && nextMode !== 0 && targetBlend > 0.01) albumSceneMode = targetMode;
+  if ((!canEvolve || nextMode === 0) && albumSceneBlend < 0.16) albumSceneMode = 0;
   wall.dataset.scene = String(albumSceneMode);
   wall.style.setProperty("--scene-blend", albumSceneBlend.toFixed(3));
   wall.style.setProperty("--scene-mode", String(albumSceneMode));
@@ -871,7 +873,7 @@ function updateAlbumSpotlight(wall, now, frameScale, hoverVisualActive) {
   const cycle = ((cinematicTime - 8.4) % cycleLength + cycleLength) % cycleLength;
   const pull = smoothstep(0.8, 2.1, cycle);
   const hold = 1 - smoothstep(7.0, 9.0, cycle);
-  const targetStrength = idle ? Math.min(pull, hold) : 0;
+  const targetStrength = AUTO_SPOTLIGHT_ENABLED && idle ? Math.min(pull, hold) : 0;
 
   photoSpotlightStrength += (targetStrength - photoSpotlightStrength) * Math.min(1, (targetStrength > photoSpotlightStrength ? 0.065 : 0.075) * frameScale);
   if (targetStrength > 0.04 || photoSpotlightStrength > 0.04) {

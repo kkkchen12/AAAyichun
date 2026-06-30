@@ -263,16 +263,19 @@ npm test
 - Playwright 新增 `extracts a single photo during automatic scene evolution and then resets`，验证前景照片尺寸、清晰度、层级、标题显示和自动复位。
 - 最新验证：`npm run check` 通过，`npm test` 11/11 通过。
 - 已开始建立 GitHub/Vercel 路线：本地 Git 仓库已重新初始化到 `main`，初始提交为 `a73b01d chore: initialize birthday album project`。`.gitignore` 已避免提交 `node_modules/`、测试截图、Codex 临时目录和 `.env*`。
-- 远程 private repo 还未创建成功，原因是当前 `gh` token 没有 `createRepository` 权限。下一步按 `GITHUB_SETUP.md` 刷新权限，或手动创建 `kkkchen12/AAAyichun` 私有空仓库后执行 `git push -u origin main`。
+- 远程 private repo 已在用户刷新 `gh` 权限后创建并推送成功：`https://github.com/kkkchen12/AAAyichun`。
+- 用户反馈上一版自动相册效果不如之前，主要问题是照片整体闪烁、动画不受控制。本轮已回收自动效果：默认关闭自动 spotlight 抽出，自动 scene 只保留低强度背景混合，扫光、相机推拉、stage veil 和照片残影全部降幅。
+- 测试同步改成稳定性约束：`captures restrained idle cinematic motion` 和 `keeps automatic album motion restrained without spotlight flicker` 会验证空闲时相册仍有轻微流动，但不会自动出现 spotlight 卡片、不会强残影闪烁、scene blend 不会过强。最新验证：`npm run check` 通过，`npm test` 11/11 通过。
+- GitHub private repo 已创建并推送：`https://github.com/kkkchen12/AAAyichun`。后续每次大改相册动效都要先本地验证，再 commit/push，避免不可控版本覆盖稳定状态。
 
 ## 明天重开对话快速接续
 
 明天继续时，可以直接从下面这几件事开始：
 
 1. 运行 `npm run dev`，打开 `http://127.0.0.1:5173/#photoWall`。
-2. 同时打开参考视频 `assets/reference/reference-album-effect.mp4`，也打开 `output/reference/video-timeline-crop-contact-sheet.jpg`，重点对照相册整体铺屏感、照片队列流动、前后层次、单张抽出/复位和背景质感。
-3. 当前最需要继续优化的是相册视觉，而不是先部署：照片还可以继续变得更满、更像一整团动态相册集；UI 继续沿用深酒红、暗金、玻璃、细光尘的方向，并保留 spotlight 单张抽出的高级展示。
+2. 同时打开参考视频 `assets/reference/reference-album-effect.mp4`，也打开 `output/reference/video-timeline-crop-contact-sheet.jpg`，重点对照相册整体铺屏感、照片队列流动、前后层次和背景质感。
+3. 当前最需要继续优化的是相册视觉，而不是先部署：照片还可以继续变得更满、更像一整团动态相册集；UI 继续沿用深酒红、暗金、玻璃、细光尘的方向，但不要再默认开启自动 spotlight 单张抽出。
 4. 不能破坏的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不应该让相册卡住或闪烁；左上角返回封面必须可用。
 5. 不能回退的技术约束：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不要推动真实队列；不要用全局强残影覆盖 24 张照片。
-6. GitHub 推送路线见 `GITHUB_SETUP.md`；远程仓库建议 private repo `AAAyichun`，后续用 Vercel 从该仓库导入部署。
+6. GitHub private repo 已是 `https://github.com/kkkchen12/AAAyichun`；后续用 Vercel 从该仓库导入部署。
 7. 继续改完后运行 `npm run check` 和 `npm test`。重点查看 `output/playwright/verified-album-spotlight-extract.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png` 和 `verified-album-iphone-landscape.png`。

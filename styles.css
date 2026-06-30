@@ -2393,30 +2393,30 @@ body[data-view="letter"] .home-return {
   width: min(1240px, 98vw);
   height: clamp(180px, 24vw, 330px);
   border-radius: 999px;
-  opacity: calc(0.035 + var(--scene-blend) * 0.2 + var(--drag-motion) * 0.1);
-  filter: blur(calc(16px + var(--scene-blend) * 16px));
+  opacity: calc(0.022 + var(--scene-blend) * 0.1 + var(--drag-motion) * 0.07);
+  filter: blur(calc(16px + var(--scene-blend) * 10px));
   transform:
     translate(-50%, -50%)
-    translateX(calc(var(--flow-direction) * var(--scene-blend) * -38px))
-    rotate(calc(-4deg + var(--scene-blend) * 5deg))
-    scaleX(calc(0.78 + var(--scene-blend) * 0.34));
+    translateX(calc(var(--flow-direction) * var(--scene-blend) * -20px))
+    rotate(calc(-3deg + var(--scene-blend) * 2.6deg))
+    scaleX(calc(0.78 + var(--scene-blend) * 0.16));
   background:
     linear-gradient(90deg, transparent 0 5%, rgba(255, 236, 198, 0.05) 18%, rgba(203, 81, 127, 0.18) 40%, rgba(255, 230, 176, 0.18) 58%, transparent 96%),
     repeating-linear-gradient(90deg, transparent 0 34px, rgba(255, 255, 255, 0.055) 35px 36px, transparent 37px 76px);
-  animation: stageVeilSweep 11s ease-in-out infinite;
+  animation: stageVeilSweep 18s ease-in-out infinite;
 }
 
 .veil-b {
   top: 56%;
   height: clamp(88px, 12vw, 156px);
   width: min(860px, 78vw);
-  opacity: calc(0.025 + var(--scene-blend) * 0.16 + var(--intro-reveal) * 0.16);
-  filter: blur(calc(20px + var(--scene-blend) * 18px));
+  opacity: calc(0.018 + var(--scene-blend) * 0.08 + var(--intro-reveal) * 0.12);
+  filter: blur(calc(20px + var(--scene-blend) * 10px));
   transform:
     translate(-50%, -50%)
-    translateX(calc(var(--flow-direction) * var(--scene-blend) * 64px))
-    rotate(calc(5deg - var(--scene-blend) * 7deg))
-    scaleX(calc(0.64 + var(--scene-blend) * 0.44));
+    translateX(calc(var(--flow-direction) * var(--scene-blend) * 28px))
+    rotate(calc(4deg - var(--scene-blend) * 3deg))
+    scaleX(calc(0.64 + var(--scene-blend) * 0.2));
   background:
     linear-gradient(90deg, transparent, rgba(255, 248, 224, 0.12), rgba(214, 116, 146, 0.14), transparent);
   animation-delay: -5.5s;
@@ -2483,7 +2483,7 @@ body[data-view="letter"] .home-return {
     saturate(calc(0.92 + var(--focus, 0) * 0.2))
     contrast(calc(1.04 + var(--focus, 0) * 0.1));
   overflow: visible;
-  --ghost-strength: calc((0.07 + var(--drag-motion) * 0.58) * (0.24 + var(--focus, 0) * 0.76));
+  --ghost-strength: calc((0.035 + var(--drag-motion) * 0.38) * (0.2 + var(--focus, 0) * 0.64));
   --card-radius: 10px;
   animation: none;
 }
@@ -2546,7 +2546,7 @@ body[data-view="letter"] .home-return {
   inset: -12%;
   pointer-events: none;
   z-index: 2;
-  opacity: calc(var(--sweep, 0) * 0.66);
+  opacity: calc(var(--sweep, 0) * 0.32);
   mix-blend-mode: screen;
   background:
     linear-gradient(112deg, transparent 0 32%, rgba(255, 255, 255, 0.28) 45%, rgba(255, 236, 198, 0.2) 52%, transparent 66%),
@@ -2601,7 +2601,7 @@ body[data-view="letter"] .home-return {
 .photo-tile.is-spotlight-card .tile-ghost,
 .photo-wall.is-morphing .tile-ghost,
 .photo-wall.is-intro .tile-ghost {
-  opacity: calc(var(--ghost-strength) * (0.48 + var(--scene-blend) * 0.22 + var(--intro-reveal) * 0.18));
+  opacity: calc(var(--ghost-strength) * (0.34 + var(--scene-blend) * 0.1 + var(--intro-reveal) * 0.14));
 }
 
 .photo-wall.is-dragging .ghost-b,
@@ -2609,7 +2609,7 @@ body[data-view="letter"] .home-return {
 .photo-tile.is-spotlight-card .ghost-b,
 .photo-wall.is-morphing .ghost-b,
 .photo-wall.is-intro .ghost-b {
-  opacity: calc(var(--ghost-strength) * (0.28 + var(--scene-blend) * 0.14 + var(--intro-reveal) * 0.12));
+  opacity: calc(var(--ghost-strength) * (0.18 + var(--scene-blend) * 0.08 + var(--intro-reveal) * 0.08));
 }
 
 .photo-wall.is-dragging .ghost-c,
@@ -2617,7 +2617,7 @@ body[data-view="letter"] .home-return {
 .photo-tile.is-spotlight-card .ghost-c,
 .photo-wall.is-morphing .ghost-c,
 .photo-wall.is-intro .ghost-c {
-  opacity: calc(var(--ghost-strength) * (0.18 + var(--scene-blend) * 0.08 + var(--intro-reveal) * 0.08));
+  opacity: calc(var(--ghost-strength) * (0.12 + var(--scene-blend) * 0.04 + var(--intro-reveal) * 0.06));
 }
 
 .photo-wall.is-intro .tile-ghost {
@@ -2638,7 +2638,7 @@ body[data-view="letter"] .home-return {
 }
 
 .photo-wall[data-scene="1"] .photo-tile {
-  --ghost-strength: calc((0.09 + var(--drag-motion) * 0.54 + var(--scene-blend) * 0.12) * (0.3 + var(--focus, 0) * 0.7));
+  --ghost-strength: calc((0.045 + var(--drag-motion) * 0.34 + var(--scene-blend) * 0.05) * (0.24 + var(--focus, 0) * 0.58));
 }
 
 .photo-wall[data-scene="1"] .photo-tile::before {
@@ -2660,7 +2660,7 @@ body[data-view="letter"] .home-return {
 }
 
 .photo-wall[data-scene="2"] .photo-tile {
-  --ghost-strength: calc((0.1 + var(--drag-motion) * 0.54 + var(--scene-blend) * 0.14) * (0.3 + var(--focus, 0) * 0.7));
+  --ghost-strength: calc((0.045 + var(--drag-motion) * 0.34 + var(--scene-blend) * 0.05) * (0.24 + var(--focus, 0) * 0.58));
 }
 
 .photo-wall[data-scene="2"] .photo-tile::after {
@@ -2685,11 +2685,11 @@ body[data-view="letter"] .home-return {
 }
 
 .photo-wall[data-scene="3"] .photo-tile {
-  --ghost-strength: calc((0.08 + var(--drag-motion) * 0.56 + var(--scene-blend) * 0.1) * (0.28 + var(--focus, 0) * 0.72));
+  --ghost-strength: calc((0.04 + var(--drag-motion) * 0.34 + var(--scene-blend) * 0.045) * (0.24 + var(--focus, 0) * 0.58));
 }
 
 .photo-wall[data-scene="4"] .photo-tile {
-  --ghost-strength: calc((0.08 + var(--drag-motion) * 0.5 + var(--scene-blend) * 0.12) * (0.28 + var(--focus, 0) * 0.72));
+  --ghost-strength: calc((0.04 + var(--drag-motion) * 0.32 + var(--scene-blend) * 0.045) * (0.24 + var(--focus, 0) * 0.58));
 }
 
 .photo-wall[data-scene="3"] .stage-flow {

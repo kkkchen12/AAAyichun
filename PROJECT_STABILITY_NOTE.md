@@ -154,3 +154,14 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - Low-height landscape now suppresses `.stage-poem` further: smaller, higher, and lower-opacity so it reads as atmosphere rather than a title covering the album. The phone landscape test asserts opacity, vertical position, and title size to prevent regression.
 - Added regression coverage: `extracts a single photo during automatic scene evolution and then resets`, plus stronger compact landscape checks in `captures phone landscape album`.
 - Latest verification after this pass: `npm run check` passed; full `npm test` passed 11/11.
+
+## Automatic Motion Stabilization After Flicker Feedback - 2026-06-30
+
+- User rejected the previous automatic album behavior because the whole photo group kept flickering and the animation felt uncontrolled.
+- The strongest cause was the combination of automatic spotlight extraction, high automatic scene blend, active sweep light, camera movement, and ghost layers all affecting the same 24 tiles at once.
+- Automatic spotlight extraction is now disabled by default through `AUTO_SPOTLIGHT_ENABLED = false`. The code remains available for a future manual or lower-frequency interaction, but it no longer pulls a foreground photo automatically during idle time.
+- Automatic scene evolution was reduced from a high-intensity transformation to a restrained background motion: it waits longer after interaction, caps idle blend at `IDLE_SCENE_BLEND_MAX = 0.36`, and uses `REST_SCENE_BLEND = 0.1` instead of a strong reset pulse.
+- Camera movement was reduced across drift, dolly, roll, tilt, and scale so it reads as a calm cinematic layer instead of fighting individual card motion.
+- Sweep light, stage veil, and ghost opacity were reduced. The sweep intensity is capped lower, spotlight/scene ghost multipliers are smaller, and background veil movement is slower and less opaque.
+- Regression coverage was changed to match the new stability contract: automatic motion must continue subtly, but spotlight strength must stay below `0.04`, no `.is-spotlight-card` may appear automatically, scene blend must stay below `0.44`, and non-hover ghost opacity must remain below `0.08`.
+- Latest verification: `npm run check` passed; full `npm test` passed 11/11.
