@@ -165,3 +165,21 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - Sweep light, stage veil, and ghost opacity were reduced. The sweep intensity is capped lower, spotlight/scene ghost multipliers are smaller, and background veil movement is slower and less opaque.
 - Regression coverage was changed to match the new stability contract: automatic motion must continue subtly, but spotlight strength must stay below `0.04`, no `.is-spotlight-card` may appear automatically, scene blend must stay below `0.44`, and non-hover ghost opacity must remain below `0.08`.
 - Latest verification: `npm run check` passed; full `npm test` passed 11/11.
+
+## Private Entrance Gate - 2026-06-30
+
+- Added a full-screen private entrance before the cover, album, letter, music, and photo actions. Unlocked state is stored in `localStorage` under `aaayichun-unlocked`.
+- Hash routes are guarded: visiting `/#photoWall` or `/#letter` while locked keeps `body[data-view="locked"]`; after a correct code, routing resumes to the originally requested hash.
+- Main sections and the global return control are pointer-disabled while locked, so the album cannot be manipulated behind the gate.
+- The gate is static-site friendly and does not add a backend. It is a privacy/romance entrance, not encryption or real authentication.
+- Added regression coverage: `guards the site behind a private entrance`, with screenshots `verified-private-entrance.png` and `verified-private-unlocked.png`.
+
+## Single Photo Drag And Full-Image Close - 2026-06-30
+
+- Fixed the detail-panel `查看完整照片` button by stopping both `pointerdown` and `click` propagation. Entering full-image mode now also clears any active FLIP flight/reveal state, so the same click cannot be cancelled by the outer lightbox.
+- Full-image mode now closes when the user clicks the dark area outside the rendered image. The check uses the real rendered `object-fit: contain` bounds, so clicking the image itself keeps the photo open.
+- Replaced per-tile drag continuation with a document-level photo press controller. Once a photo press starts, movement past the threshold drags that specific photo even if the pointer leaves the card.
+- The user-facing drag range problem was caused by hover/parallax and stacked cards changing the hit target between mouse move and mouse down. Directly hit photos now win first; nearby photo lookup is distance-first, not layer-first.
+- While the pointer is over a photo and no drag is active, the stage parallax resets instead of shifting all cards. This keeps the selected photo from sliding away before the user presses, which was the source of the "only a small area can drag" feeling.
+- Free photos get `.is-free-photo`, high z-index, solid material, and reset when the user double-clicks blank space or switches layout. Whole-album dragging still works from true blank space.
+- Regression coverage now verifies: button-to-full-image, outside-click close, bottom/caption-area single-photo drag, free-photo reset on layout switch, and blank-area whole-album drag. Latest verification: `npm run check` passed; full `npm test` passed 13/13.

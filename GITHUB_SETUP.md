@@ -23,6 +23,8 @@ GraphQL: Resource not accessible by personal access token (createRepository)
 https://github.com/kkkchen12/AAAyichun
 ```
 
+- A front-end private entrance has been added before deployment. The current code lives in `app.js` under `story.privateCodes` and is set to `20030518`.
+
 ## Recommended Private GitHub Repository
 
 The private repository is:
@@ -84,7 +86,14 @@ After the private GitHub repository is pushed:
 4. Output directory: `.`.
 5. Install command: leave default or empty; this is a static site.
 
-The repository can stay private, but the Vercel deployment URL is public to anyone who has the link. Add the private entrance before sending the final URL.
+The repository can stay private, but the Vercel deployment URL is public to anyone who has the link. The private entrance helps prevent casual opening, but it is not encryption or backend authentication.
+
+Before sending the final URL:
+
+1. Confirm `story.privateCodes` in `app.js` still contains the intended private code.
+2. Deploy from the private GitHub repository.
+3. Open the Vercel URL in a fresh browser or private window.
+4. Confirm a wrong code is rejected and the correct code opens the intended page.
 
 ## Versioning Rule For Future Visual Work
 

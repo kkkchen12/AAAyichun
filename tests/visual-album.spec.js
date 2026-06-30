@@ -1,15 +1,45 @@
 const { test, expect } = require("@playwright/test");
 
-test("captures album and two-step photo viewer", async ({ page }) => {
+const unlock = async (page) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("aaayichun-unlocked", "yes");
+  });
+};
+
+test("guards the site behind a private entrance", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
-  await page.waitForTimeout(1400);
+  await expect(page.locator("#privacyGate")).toBeVisible();
+  await expect(page.locator("body")).toHaveAttribute("data-view", "locked");
+  await expect(page.locator(".photo-section")).not.toHaveClass(/is-active/);
+  await page.screenshot({ path: "output/playwright/verified-private-entrance.png" });
+
+  await page.locator("#gateCode").fill("wrong");
+  await page.locator("#gateForm").evaluate((form) => form.requestSubmit());
+  await expect(page.locator("#gateError")).toContainText("暗号不对");
+  await expect(page.locator("#privacyGate")).toBeVisible();
+
+  await page.locator("#gateCode").fill("20030518");
+  await page.locator("#gateForm").evaluate((form) => form.requestSubmit());
+  await expect(page.locator("#privacyGate")).toBeHidden();
+  await expect(page.locator("body")).toHaveAttribute("data-view", "photoWall");
+  await expect(page.locator(".photo-tile").first()).toBeVisible();
+  await page.waitForTimeout(1200);
+  await page.screenshot({ path: "output/playwright/verified-private-unlocked.png" });
+});
+
+test("captures album and two-step photo viewer", async ({ page }) => {
+  await unlock(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/#photoWall");
+  await page.waitForTimeout(3600);
   await expect(page.locator(".photo-tile")).toHaveCount(24);
   await expect(page.locator(".photo-tile.is-hero-card").first()).toBeVisible();
   const desktopTileWidth = await page.locator(".photo-tile").first().evaluate((tile) => (
     Number.parseFloat(getComputedStyle(tile).width)
   ));
-  expect(desktopTileWidth).toBeGreaterThan(170);
+  expect(desktopTileWidth).toBeGreaterThan(135);
+  expect(desktopTileWidth).toBeLessThan(205);
   const albumCoverage = await page.locator(".photo-tile").evaluateAll((tiles) => {
     const visibleBoxes = tiles
       .map((tile) => {
@@ -28,7 +58,10 @@ test("captures album and two-step photo viewer", async ({ page }) => {
     };
   });
   expect(albumCoverage.width).toBeGreaterThan(880);
-  expect(albumCoverage.height).toBeGreaterThan(420);
+  expect(albumCoverage.height).toBeGreaterThan(360);
+  const heroBox = await page.locator(".photo-tile.is-hero-card").first().boundingBox();
+  expect(heroBox).not.toBeNull();
+  expect(heroBox.width).toBeLessThan(320);
   const motionState = await page.locator(".photo-tile").first().evaluate((tile) => {
     const tileStyle = getComputedStyle(tile);
     const wallStyle = getComputedStyle(document.querySelector(".photo-wall"));
@@ -48,8 +81,8 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   expect(motionState.xPx).toContain("px");
   expect(motionState.sweepX).toBeGreaterThanOrEqual(-20);
   expect(motionState.sweepX).toBeLessThanOrEqual(120);
-  expect(motionState.sweepIntensity).toBeGreaterThan(0.16);
-  expect(motionState.sweepIntensity).toBeLessThan(0.62);
+  expect(motionState.sweepIntensity).toBeGreaterThanOrEqual(0);
+  expect(motionState.sweepIntensity).toBeLessThan(0.2);
   expect(motionState.cameraX).toContain("px");
   expect(motionState.cameraZ).toBeGreaterThan(-90);
   expect(motionState.cameraZ).toBeLessThan(90);
@@ -62,13 +95,23 @@ test("captures album and two-step photo viewer", async ({ page }) => {
     return {
       animationName: cardStyle.animationName,
       cardOpacity: Number.parseFloat(cardStyle.opacity),
+      cardsAnimationName: cardsStyle.animationName,
       cardsFilter: cardsStyle.filter,
+      cardsTransitionProperty: cardsStyle.transitionProperty,
+      cardsTransitionDuration: cardsStyle.transitionDuration,
+      tileTransitionProperty: cardStyle.transitionProperty,
+      tileWillChange: cardStyle.willChange,
       imgFilter: img ? getComputedStyle(img).filter : ""
     };
   });
   expect(materialState.animationName).toBe("none");
   expect(materialState.cardOpacity).toBeGreaterThan(0.82);
+  expect(materialState.cardsAnimationName).toBe("none");
   expect(materialState.cardsFilter).toBe("none");
+  expect(materialState.cardsTransitionProperty).toBe("none");
+  expect(materialState.cardsTransitionDuration).toBe("0s");
+  expect(materialState.tileTransitionProperty).not.toContain("opacity");
+  expect(materialState.tileWillChange).not.toContain("opacity");
   expect(materialState.imgFilter).toContain("brightness");
   await page.screenshot({ path: "output/playwright/verified-album-desktop.png" });
 
@@ -86,12 +129,15 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   await expect(page.locator(".lightbox-card")).toBeVisible();
   await page.screenshot({ path: "output/playwright/verified-photo-detail.png" });
 
-  await page.locator(".lightbox-image-wrap").click();
+  await page.locator("#viewFullPhoto").click();
   await expect(page.locator("#photoLightbox")).toHaveClass(/is-full-image/);
   await page.screenshot({ path: "output/playwright/verified-photo-full.png" });
+  await page.mouse.click(40, 450);
+  await expect(page.locator("#photoLightbox")).toBeHidden();
 });
 
 test("opens photo detail reliably after hovering over a moving tile", async ({ page }) => {
+  await unlock(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
   await page.waitForTimeout(2800);
@@ -117,6 +163,7 @@ test("opens photo detail reliably after hovering over a moving tile", async ({ p
 });
 
 test("keeps the album flowing while hovering a photo", async ({ page }) => {
+  await unlock(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
   await page.waitForTimeout(3600);
@@ -153,6 +200,7 @@ test("keeps the album flowing while hovering a photo", async ({ page }) => {
 });
 
 test("captures phone landscape album", async ({ page }) => {
+  await unlock(page);
   await page.setViewportSize({ width: 932, height: 430 });
   await page.goto("/#photoWall");
   await page.waitForTimeout(1400);
@@ -173,6 +221,7 @@ test("captures phone landscape album", async ({ page }) => {
 });
 
 test("returns to the cover from routed pages and photo overlay", async ({ page }) => {
+  await unlock(page);
   await page.setViewportSize({ width: 1440, height: 900 });
 
   await page.goto("/#photoWall");
@@ -202,6 +251,7 @@ test("returns to the cover from routed pages and photo overlay", async ({ page }
 });
 
 test("captures cinematic album intro gather", async ({ page }) => {
+  await unlock(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
   await page.waitForTimeout(900);
@@ -210,6 +260,7 @@ test("captures cinematic album intro gather", async ({ page }) => {
 });
 
 test("captures restrained idle cinematic motion", async ({ page }) => {
+  await unlock(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
   await page.waitForTimeout(9600);
@@ -236,15 +287,18 @@ test("captures restrained idle cinematic motion", async ({ page }) => {
     };
   });
   const idleDrift = Math.hypot(idleState.heroPoint.x - before.x, idleState.heroPoint.y - before.y);
-  expect(idleDrift).toBeGreaterThan(0.02);
-  expect(idleState.blend).toBeLessThan(0.44);
+  expect(idleDrift).toBeGreaterThan(0.005);
+  expect(idleDrift).toBeLessThan(0.42);
+  expect(idleState.scene).toBe("0");
+  expect(idleState.blend).toBeLessThan(0.24);
   expect(idleState.spotlightStrength).toBeLessThan(0.04);
-  expect(idleState.sweepIntensity).toBeLessThan(0.62);
+  expect(idleState.sweepIntensity).toBeLessThan(0.08);
   expect(idleState.spotlightCards).toBe(0);
   await page.screenshot({ path: "output/playwright/verified-album-auto-scene.png" });
 });
 
 test("keeps automatic album motion restrained without spotlight flicker", async ({ page }) => {
+  await unlock(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
   await page.waitForTimeout(11600);
@@ -266,24 +320,42 @@ test("keeps automatic album motion restrained without spotlight flicker", async 
       strongestSpotlight
     };
   });
-  expect(stableMotionState.sceneBlend).toBeLessThan(0.44);
+  expect(stableMotionState.sceneBlend).toBeLessThan(0.24);
+  expect(stableMotionState.scene).toBe("0");
   expect(stableMotionState.spotlightStrength).toBeLessThan(0.04);
   expect(stableMotionState.strongestSpotlight).toBeLessThan(0.04);
   expect(stableMotionState.isSpotlight).toBe(false);
   expect(stableMotionState.spotlightCards).toBe(0);
-  expect(stableMotionState.strongestGhost).toBeLessThan(0.08);
+  expect(stableMotionState.strongestGhost).toBeLessThan(0.04);
   await page.screenshot({ path: "output/playwright/verified-album-restrained-motion.png" });
 });
 
 test("captures drag-responsive cinematic light state", async ({ page }) => {
+  await unlock(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
   await page.waitForTimeout(2800);
 
-  await page.mouse.move(1080, 485);
+  const blankPoint = await page.evaluate(() => {
+    const wall = document.querySelector(".photo-wall").getBoundingClientRect();
+    const candidates = [
+      [0.84, 0.78],
+      [0.16, 0.78],
+      [0.86, 0.24],
+      [0.14, 0.24],
+      [0.5, 0.86]
+    ];
+    for (const [xRatio, yRatio] of candidates) {
+      const x = wall.left + wall.width * xRatio;
+      const y = wall.top + wall.height * yRatio;
+      if (!document.elementFromPoint(x, y)?.closest(".photo-tile")) return { x, y };
+    }
+    return { x: wall.left + wall.width * 0.08, y: wall.top + wall.height * 0.88 };
+  });
+  await page.mouse.move(blankPoint.x, blankPoint.y);
   await page.mouse.down();
-  for (const x of [1020, 950, 880, 810, 740, 680, 620]) {
-    await page.mouse.move(x, 500, { steps: 6 });
+  for (const x of [blankPoint.x - 60, blankPoint.x - 130, blankPoint.x - 200, blankPoint.x - 270, blankPoint.x - 340]) {
+    await page.mouse.move(x, blankPoint.y + 15, { steps: 6 });
     await page.waitForTimeout(18);
   }
   await page.waitForTimeout(220);
@@ -294,7 +366,48 @@ test("captures drag-responsive cinematic light state", async ({ page }) => {
   await page.mouse.up();
 });
 
+test("allows a single photo to be dragged out and reset by layout switch", async ({ page }) => {
+  await unlock(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/#photoWall");
+  await page.waitForTimeout(3600);
+
+  const hero = page.locator(".photo-tile.is-hero-card").first();
+  await expect(hero).toBeVisible();
+  const box = await hero.boundingBox();
+  expect(box).not.toBeNull();
+  const startX = box.x + box.width * 0.72;
+  const startY = box.y + box.height * 0.86;
+  const targetNumber = await page.evaluate(({ x, y }) => (
+    document.elementFromPoint(x, y)?.closest(".photo-tile")?.dataset.number
+  ), { x: startX, y: startY });
+  expect(targetNumber).toBeTruthy();
+  const dragged = page.locator(`.photo-tile[data-number="${targetNumber}"]`);
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+  await page.mouse.move(startX + 210, startY - 95, { steps: 12 });
+  await page.mouse.up();
+
+  await expect(dragged).toHaveClass(/is-free-photo/);
+  const freeState = await dragged.evaluate((tile) => ({
+    x: Number.parseFloat(tile.style.getPropertyValue("--x")),
+    y: Number.parseFloat(tile.style.getPropertyValue("--y")),
+    zIndex: Number.parseInt(getComputedStyle(tile).zIndex, 10),
+    opacity: Number.parseFloat(getComputedStyle(tile).opacity)
+  }));
+  expect(freeState.x).toBeGreaterThan(58);
+  expect(freeState.y).toBeLessThan(49);
+  expect(freeState.zIndex).toBeGreaterThan(240);
+  expect(freeState.opacity).toBeGreaterThan(0.98);
+  await page.screenshot({ path: "output/playwright/verified-single-photo-drag.png" });
+
+  await page.mouse.dblclick(220, 730);
+  await expect(dragged).not.toHaveClass(/is-free-photo/);
+  await expect(page.locator(".photo-wall")).toHaveClass(/layout-1/);
+});
+
 test("captures blank-area double click layout morph", async ({ page }) => {
+  await unlock(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
   await page.waitForTimeout(900);
@@ -307,6 +420,7 @@ test("captures blank-area double click layout morph", async ({ page }) => {
 });
 
 test("captures polished cover labels and envelope", async ({ page }) => {
+  await unlock(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/");
   await expect(page.locator(".top-nav a").nth(0)).toHaveText("相册");

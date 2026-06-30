@@ -114,7 +114,7 @@ npm test
 - `npm run dev` 启动本地静态服务：`http://127.0.0.1:5173`
 - `npm run check` 检查 `app.js` 语法。
 - `npm test` 运行项目本地 `@playwright/test` 视觉验收，覆盖桌面横屏相册、手机横屏相册、照片介绍层和纯照片模式。
-- 当前还额外覆盖照片点击 FLIP、hover 后点击可靠性、hover 不长期卡住队列、返回封面、入场聚合、自动场景演化、拖动响应光效、双击空白变阵，以及封面按钮文案和信封视觉截图，截图包括 `output/playwright/verified-photo-flight.png`、`output/playwright/verified-hover-stability.png`、`output/playwright/verified-album-intro-gather.png`、`output/playwright/verified-album-auto-scene.png`、`output/playwright/verified-album-drag-motion.png`、`output/playwright/verified-album-doubleclick-morph.png`、`output/playwright/verified-cover-polish.png`、`output/playwright/verified-letter-envelope-polish.png`。
+- 当前还额外覆盖私密入口、照片点击 FLIP、hover 后点击可靠性、hover 不长期卡住队列、返回封面、入场聚合、自动场景演化、拖动响应光效、双击空白变阵，以及封面按钮文案和信封视觉截图，截图包括 `output/playwright/verified-private-entrance.png`、`output/playwright/verified-private-unlocked.png`、`output/playwright/verified-photo-flight.png`、`output/playwright/verified-hover-stability.png`、`output/playwright/verified-album-intro-gather.png`、`output/playwright/verified-album-auto-scene.png`、`output/playwright/verified-album-drag-motion.png`、`output/playwright/verified-album-doubleclick-morph.png`、`output/playwright/verified-cover-polish.png`、`output/playwright/verified-letter-envelope-polish.png`。
 - 主相册用例现在会断言桌面照片宽度、可见照片集合覆盖宽度和覆盖高度，避免后续调整又退回“照片小、空隙大”的状态；同时继续检查 transform 定位、扫光变量和 camera 变量。
 - 验收截图会生成到 `output/playwright/verified-*.png`，用于快速判断相册是否仍然符合参考视频方向。
 
@@ -129,6 +129,8 @@ npm test
 - hover 照片只做局部高光、残影和短暂点击保护锁定；真实队列不会由 hover 推动，也不会因为鼠标停在照片上长期卡住。
 - 双击空白处切换队形时会触发同一套光效反馈。
 - 点击照片时会从原照片位置做 FLIP 镜头推进，再显现介绍层；再点图片或按钮进入纯照片模式。
+- 纯照片模式里点击真实图片外侧的黑色区域可关闭返回，相当于给原图查看补了明确的退出路径。
+- 单张照片可以从相册队列里手动拖出来查看位置关系，底部文字区和照片边缘也能起拖；双击空白切换队形时，拖出的照片会回到队列。
 - 常态粒子以星尘和细光屑为主，变阵/打开照片时使用更克制的光片 burst，避免大面积花瓣造成卡通感。
 - 中央诗句被压低为电影字幕感，不再像网页大标题长期抢相册主体。
 
@@ -267,6 +269,14 @@ npm test
 - 用户反馈上一版自动相册效果不如之前，主要问题是照片整体闪烁、动画不受控制。本轮已回收自动效果：默认关闭自动 spotlight 抽出，自动 scene 只保留低强度背景混合，扫光、相机推拉、stage veil 和照片残影全部降幅。
 - 测试同步改成稳定性约束：`captures restrained idle cinematic motion` 和 `keeps automatic album motion restrained without spotlight flicker` 会验证空闲时相册仍有轻微流动，但不会自动出现 spotlight 卡片、不会强残影闪烁、scene blend 不会过强。最新验证：`npm run check` 通过，`npm test` 11/11 通过。
 - GitHub private repo 已创建并推送：`https://github.com/kkkchen12/AAAyichun`。后续每次大改相册动效都要先本地验证，再 commit/push，避免不可控版本覆盖稳定状态。
+- 部署前私密入口已加入：任何 hash 路由进入前都会先显示暗金玻璃质感口令门，暗号配置在 `app.js` 的 `story.privateCodes`，当前暗号为 `20030518`。正确输入后解锁状态会保存在本机 `localStorage`，并回到原本想打开的相册或信件路由。
+- 私密入口只是一层前端口令门，不是后端鉴权或照片加密。它适合正式链接发给她之前增加私密感和基础防误开，但 Vercel 链接本身仍然是公开 URL；正式发送前页面上不要显示开发提示或暗号配置说明。
+- Playwright 已新增私密入口回归：`guards the site behind a private entrance` 会验证未解锁状态、错误暗号提示、正确暗号解锁和 hash 路由恢复，并生成 `verified-private-entrance.png`、`verified-private-unlocked.png`。
+- 修复照片介绍页 `查看完整照片` 按钮无效的问题：按钮现在拦截 `pointerdown/click`，并在切到纯照片模式时清理未完成的照片飞入/reveal 状态。
+- 修复原图打开后不好返回的问题：纯照片模式点击图片外侧黑色区域关闭照片层，Escape 仍然可用。
+- 单张照片拖动重做为更稳定的 pointer 控制器：从照片整体、底部文字区或边缘起拖都能把这张照片拖出队列；拖动中由 document 级事件继续跟随，不会因为鼠标离开小区域就中断。
+- 为避免 hover 和重叠层级抢命中，照片上方不再触发会推开卡片的舞台视差；单张拖动近邻命中按距离优先，整面相册拖动则从真实空白区域开始。
+- Playwright 当前扩展到 13 项：新增/收紧 `查看完整照片` 按钮、纯照片外侧关闭、单张照片底部区域拖出、切换队形复位、真实空白区拖动整面相册等回归。最新验证：`npm run check` 通过，`npm test` 13/13 通过。
 
 ## 明天重开对话快速接续
 
@@ -274,8 +284,10 @@ npm test
 
 1. 运行 `npm run dev`，打开 `http://127.0.0.1:5173/#photoWall`。
 2. 同时打开参考视频 `assets/reference/reference-album-effect.mp4`，也打开 `output/reference/video-timeline-crop-contact-sheet.jpg`，重点对照相册整体铺屏感、照片队列流动、前后层次和背景质感。
-3. 当前最需要继续优化的是相册视觉，而不是先部署：照片还可以继续变得更满、更像一整团动态相册集；UI 继续沿用深酒红、暗金、玻璃、细光尘的方向，但不要再默认开启自动 spotlight 单张抽出。
+3. 当前可继续优化相册视觉，也可以开始 Vercel 预部署：照片还可以继续变得更满、更像一整团动态相册集；UI 继续沿用深酒红、暗金、玻璃、细光尘的方向，但不要再默认开启自动 spotlight 单张抽出。
 4. 不能破坏的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不应该让相册卡住或闪烁；左上角返回封面必须可用。
+4.1. 不能破坏的单张照片交互：介绍页按钮必须能进入纯照片；纯照片点击图片外黑色区域必须关闭；照片底部文字区/边缘也必须能起拖；切换队形必须让拖出的照片复位。
 5. 不能回退的技术约束：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不要推动真实队列；不要用全局强残影覆盖 24 张照片。
 6. GitHub private repo 已是 `https://github.com/kkkchen12/AAAyichun`；后续用 Vercel 从该仓库导入部署。
-7. 继续改完后运行 `npm run check` 和 `npm test`。重点查看 `output/playwright/verified-album-spotlight-extract.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png` 和 `verified-album-iphone-landscape.png`。
+7. 私密入口已经可用，当前暗号为 `20030518`；正式发给她前在部署 URL 上重新测一次错误暗号和正确暗号。
+8. 继续改完后运行 `npm run check` 和 `npm test`。重点查看 `output/playwright/verified-private-entrance.png`、`verified-single-photo-drag.png`、`verified-photo-full.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png` 和 `verified-album-iphone-landscape.png`。

@@ -12,6 +12,20 @@
   </head>
   <body>
     <canvas id="effectCanvas" aria-hidden="true"></canvas>
+    <section class="privacy-gate" id="privacyGate" aria-labelledby="gateTitle">
+      <div class="gate-glow" aria-hidden="true"></div>
+      <form class="gate-panel" id="gateForm">
+        <p class="eyebrow">Private Entrance</p>
+        <h1 id="gateTitle">只给你的爱</h1>
+        <p class="gate-copy">输入我们之间的暗号，再打开这份为你准备的回忆。</p>
+        <label class="gate-field" for="gateCode">
+          <span>暗号</span>
+          <input id="gateCode" type="password" autocomplete="off" inputmode="text" placeholder="输入我们的暗号" />
+        </label>
+        <p class="gate-error" id="gateError" aria-live="polite"></p>
+        <button class="gate-submit" type="submit">打开</button>
+      </form>
+    </section>
     <a class="home-return" href="#home" data-view="home" aria-label="返回封面">返回封面</a>
 
     <main>

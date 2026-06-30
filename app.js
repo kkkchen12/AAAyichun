@@ -5,6 +5,7 @@ const story = {
   heroTitle: "生日快乐，我最想见的人",
   heroText: "我把想你放进照片里，把没能当面说的话放进这封信里。你打开的时候，就像我在认真陪你过这个生日。",
   musicPath: "assets/song.mp3",
+  privateCodes: ["20030518"],
   photoCount: 24,
   stageInitials: "WXY",
   stagePoems: [
@@ -70,8 +71,10 @@ const story = {
 const $ = (selector) => document.querySelector(selector);
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 const AUTO_SPOTLIGHT_ENABLED = false;
-const IDLE_SCENE_BLEND_MAX = 0.36;
-const REST_SCENE_BLEND = 0.1;
+const AUTO_SCENE_ENABLED = false;
+const IDLE_SCENE_BLEND_MAX = 0.08;
+const REST_SCENE_BLEND = 0;
+const PRIVACY_UNLOCK_KEY = "aaayichun-unlocked";
 let currentPhoto = 0;
 let shuffledPhotos = [...story.photos];
 let letterStarted = false;
@@ -81,10 +84,13 @@ let audioContext;
 let synthTimer;
 let musicOn = false;
 let orbitOffset = 0;
-let orbitVelocity = 0.0024;
+let orbitVelocity = 0.0011;
 let queueOffset = 0;
-let queueVelocity = 0.009;
+let queueVelocity = 0.0016;
 let albumDragging = false;
+let photoFreeDragging = false;
+let activeFreePhoto = null;
+let activePhotoPress = null;
 let dragLastX = 0;
 let dragLastAt = 0;
 let dragDistance = 0;
@@ -112,6 +118,7 @@ let lastPointerPhotoOpenAt = 0;
 let lastPointerPhotoOpenTile = null;
 let cachedPhotoTiles = [];
 let hoveredPhotoTile = null;
+const freePhotoOffsets = new Map();
 let albumSceneBlend = 0;
 let albumSceneMode = 0;
 let albumSweepX = 50;
@@ -120,6 +127,7 @@ let albumSweepIntensity = 0;
 let photoSpotlightIndex = -1;
 let photoSpotlightStrength = 0;
 let photoSpotlightPhase = 0;
+let isUnlocked = false;
 
 const layouts = [
   { name: "Valley Arrival", label: "队形：命运交错" },
@@ -131,6 +139,7 @@ const layouts = [
 function init() {
   story.photos = buildPhotoList();
   shuffledPhotos = [...story.photos];
+  isUnlocked = hasSavedUnlock();
   $("#heroKicker").textContent = story.heroKicker;
   $("#heroTitle").textContent = story.heroTitle;
   $("#heroText").textContent = story.heroText;
@@ -138,53 +147,171 @@ function init() {
   $("#envelopeText").textContent = story.envelopeText;
   $("#letterTitle").textContent = story.letterTitle;
   renderPhotos();
+  setupPrivacyGate();
   setupPhotoStageInteraction();
   setupActions();
   setupEffects();
   setupAlbumLoop();
-  if (!routeFromHash(false)) showView("home", { updateHash: false });
+  if (!isUnlocked) {
+    lockMainContent();
+  } else if (!routeFromHash(false)) {
+    showView("home", { updateHash: false });
+  }
   revealStagePoem();
 }
 
 function routeFromHash(updateHash = true) {
+  if (!isUnlocked) {
+    lockMainContent();
+    return true;
+  }
   const viewId = window.location.hash.slice(1) || "home";
   if (!["home", "photoWall", "letter"].includes(viewId)) return false;
   showView(viewId, { resetLetter: viewId === "letter", updateHash });
   return true;
 }
 
+function setupPrivacyGate() {
+  const gate = $("#privacyGate");
+  const form = $("#gateForm");
+  const input = $("#gateCode");
+  if (!gate || !form || !input) return;
+  gate.hidden = isUnlocked;
+  gate.setAttribute("aria-hidden", isUnlocked ? "true" : "false");
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const value = normalizePrivateCode(input.value);
+    const valid = story.privateCodes.some((code) => normalizePrivateCode(code) === value);
+    if (!valid) {
+      $("#gateError").textContent = "暗号不对，再想想我们之间最熟悉的称呼。";
+      input.select();
+      gate.classList.remove("is-shaking");
+      requestAnimationFrame(() => gate.classList.add("is-shaking"));
+      return;
+    }
+    saveUnlock();
+    isUnlocked = true;
+    $("#gateError").textContent = "";
+    gate.classList.add("is-unlocking");
+    window.setTimeout(() => {
+      gate.hidden = true;
+      gate.setAttribute("aria-hidden", "true");
+      if (!routeFromHash(false)) showView("home", { updateHash: false });
+    }, prefersReducedMotion ? 0 : 520);
+  });
+  if (!isUnlocked) {
+    window.setTimeout(() => input.focus({ preventScroll: true }), 120);
+  }
+}
+
+function normalizePrivateCode(value) {
+  return String(value || "").trim().toLowerCase().replace(/\s+/g, "");
+}
+
+function hasSavedUnlock() {
+  try {
+    return localStorage.getItem(PRIVACY_UNLOCK_KEY) === "yes";
+  } catch {
+    return false;
+  }
+}
+
+function saveUnlock() {
+  try {
+    localStorage.setItem(PRIVACY_UNLOCK_KEY, "yes");
+  } catch {
+    // Some privacy modes block storage; keep the current session unlocked.
+  }
+}
+
+function lockMainContent() {
+  const gate = $("#privacyGate");
+  if (gate) {
+    gate.hidden = false;
+    gate.setAttribute("aria-hidden", "false");
+  }
+  document.querySelectorAll("main > section").forEach((section) => {
+    section.classList.remove("is-active");
+  });
+  document.body.dataset.view = "locked";
+}
+
 function setupActions() {
   document.querySelectorAll("[data-view]").forEach((trigger) => {
     trigger.addEventListener("click", (event) => {
       event.preventDefault();
+      if (!isUnlocked) {
+        lockMainContent();
+        return;
+      }
       showView(trigger.dataset.view, { resetLetter: trigger.dataset.view === "letter" });
     });
   });
 
   $("#cycleLayout").addEventListener("click", advanceLayout);
 
-  $("#openFirstPhoto").addEventListener("click", () => openPhoto(0));
+  $("#openFirstPhoto").addEventListener("click", () => {
+    if (!isUnlocked) {
+      lockMainContent();
+      return;
+    }
+    openPhoto(0);
+  });
   $("#closeLightbox").addEventListener("click", closePhoto);
   $("#prevPhoto").addEventListener("click", () => movePhoto(-1));
   $("#nextPhoto").addEventListener("click", () => movePhoto(1));
-  $("#viewFullPhoto").addEventListener("click", showFullPhoto);
+  $("#viewFullPhoto").addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+  });
+  $("#viewFullPhoto").addEventListener("click", (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    showFullPhoto();
+  });
   $(".lightbox-image-wrap").setAttribute("tabindex", "0");
   $(".lightbox-image-wrap").setAttribute("role", "button");
   $(".lightbox-image-wrap").setAttribute("aria-label", "打开完整照片");
-  $(".lightbox-image-wrap").addEventListener("click", showFullPhoto);
+  $(".lightbox-image-wrap").addEventListener("click", (event) => {
+    event.stopPropagation();
+    if ($("#photoLightbox").classList.contains("is-full-image") && isOutsideRenderedImage(event)) {
+      closePhoto();
+      return;
+    }
+    showFullPhoto();
+  });
   $(".lightbox-image-wrap").addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       showFullPhoto();
     }
   });
-  $("#lightboxImage").addEventListener("click", showFullPhoto);
+  $("#lightboxImage").addEventListener("click", (event) => {
+    event.stopPropagation();
+    showFullPhoto();
+  });
   $("#photoLightbox").addEventListener("click", (event) => {
+    const lightbox = $("#photoLightbox");
+    if (lightbox.classList.contains("is-full-image")) {
+      if (!event.target.closest(".lightbox-image-wrap") || isOutsideRenderedImage(event)) closePhoto();
+      return;
+    }
     if (event.target.id === "photoLightbox") closePhoto();
+  });
+  $("#photoLightbox").addEventListener("pointerdown", (event) => {
+    const lightbox = $("#photoLightbox");
+    if (!lightbox.classList.contains("is-full-image")) return;
+    if (!isOutsideRenderedImage(event)) return;
+    if (event.target.closest(".lightbox-close")) return;
+    closePhoto();
   });
 
   $("#openLetter").addEventListener("click", openLetter);
   $("#jumpLetter").addEventListener("click", () => {
+    if (!isUnlocked) {
+      lockMainContent();
+      return;
+    }
     showView("letter", { resetLetter: true });
   });
   $("#replayLetter").addEventListener("click", () => {
@@ -194,6 +321,10 @@ function setupActions() {
   });
 
   $("#musicToggle").addEventListener("click", async () => {
+    if (!isUnlocked) {
+      lockMainContent();
+      return;
+    }
     if (musicOn) stopMusic();
     else await startMusic();
   });
@@ -208,9 +339,16 @@ function setupActions() {
     if (event.key === "ArrowLeft") movePhoto(-1);
     if (event.key === "ArrowRight") movePhoto(1);
   });
+  document.addEventListener("pointermove", updatePhotoPress, { capture: true });
+  document.addEventListener("pointerup", finishPhotoPress, { capture: true });
+  document.addEventListener("pointercancel", cancelPhotoPress, { capture: true });
 }
 
 function showView(viewId, options = {}) {
+  if (!isUnlocked) {
+    lockMainContent();
+    return;
+  }
   const target = document.getElementById(viewId);
   if (!target) return;
   if (!$("#photoLightbox").hidden) closePhoto();
@@ -266,6 +404,10 @@ function markInteraction() {
 }
 
 function openPhotoFromTile(index, tile) {
+  if (!isUnlocked) {
+    lockMainContent();
+    return;
+  }
   markInteraction();
   openPhoto(index, "detail", tile);
 }
@@ -300,6 +442,7 @@ function renderPhotos() {
         <strong>MEMORY ${displayNumber}</strong>
         <span>${escapeHtml(photo.title)}</span>
       </span>
+      <span class="photo-hit-zone" aria-hidden="true"></span>
     `;
 
     const img = button.querySelector("img");
@@ -307,32 +450,8 @@ function renderPhotos() {
       img.replaceWith(createFallback(index));
     });
 
-    let tilePressX = 0;
-    let tilePressY = 0;
-    let tilePressActive = false;
-
     button.addEventListener("pointerdown", (event) => {
-      tilePressActive = true;
-      tilePressX = event.clientX;
-      tilePressY = event.clientY;
-      hoverMotionUntil = performance.now() + 520;
-      button.setPointerCapture(event.pointerId);
-    });
-
-    button.addEventListener("pointerup", (event) => {
-      if (button.hasPointerCapture(event.pointerId)) button.releasePointerCapture(event.pointerId);
-      if (!tilePressActive) return;
-      tilePressActive = false;
-      const moved = Math.hypot(event.clientX - tilePressX, event.clientY - tilePressY);
-      const clickThreshold = event.pointerType === "touch" ? 18 : 9;
-      if (moved > clickThreshold || suppressPhotoClick || albumDragging) return;
-      lastPointerPhotoOpenAt = performance.now();
-      lastPointerPhotoOpenTile = button;
-      openPhotoFromTile(index, button);
-    });
-
-    button.addEventListener("pointercancel", () => {
-      tilePressActive = false;
+      beginPhotoPress(event, button, index);
     });
 
     button.addEventListener("click", (event) => {
@@ -347,8 +466,10 @@ function renderPhotos() {
       openPhotoFromTile(index, button);
     });
 
+    button.addEventListener("dragstart", (event) => event.preventDefault());
+
     button.addEventListener("pointerenter", () => {
-      if (albumDragging || !$("#photoLightbox").hidden) return;
+      if (albumDragging || photoFreeDragging || activePhotoPress || !$("#photoLightbox").hidden) return;
       const now = performance.now();
       if (hoveredPhotoTile && hoveredPhotoTile !== button) {
         hoveredPhotoTile.classList.remove("is-hovered");
@@ -408,7 +529,163 @@ function createFallback(index) {
   return fallback;
 }
 
+function beginPhotoPress(event, tile, index) {
+  if (event.button !== undefined && event.button !== 0) return;
+  if (!$("#photoLightbox").hidden || albumDragging) return;
+  const lockedTile = findPhotoTileNearPoint(event.clientX, event.clientY, 34) || tile;
+  const lockedIndex = getPhotoTileIndex(lockedTile);
+  if (lockedIndex < 0) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (activePhotoPress?.tile?.hasPointerCapture?.(activePhotoPress.pointerId)) {
+    activePhotoPress.tile.releasePointerCapture(activePhotoPress.pointerId);
+  }
+  const freeOffset = freePhotoOffsets.get(lockedIndex);
+  activePhotoPress = {
+    pointerId: event.pointerId,
+    tile: lockedTile,
+    index: lockedIndex,
+    startX: event.clientX,
+    startY: event.clientY,
+    startTileX: freeOffset?.x ?? (Number.parseFloat(lockedTile.style.getPropertyValue("--x")) || 50),
+    startTileY: freeOffset?.y ?? (Number.parseFloat(lockedTile.style.getPropertyValue("--y")) || 50),
+    moved: false
+  };
+  hoverMotionUntil = performance.now() + 180;
+  try {
+    lockedTile.setPointerCapture(event.pointerId);
+  } catch {
+    // Some browsers reject capture after a cancelled pointer; document listeners still finish the gesture.
+  }
+}
+
+function updatePhotoPress(event) {
+  if (!activePhotoPress || event.pointerId !== activePhotoPress.pointerId) return;
+  event.preventDefault();
+  event.stopPropagation();
+  if (albumDragging) {
+    cancelPhotoPress(event);
+    return;
+  }
+  const moved = Math.hypot(event.clientX - activePhotoPress.startX, event.clientY - activePhotoPress.startY);
+  const threshold = event.pointerType === "touch" ? 16 : 8;
+  if (!activePhotoPress.moved && moved < threshold) return;
+  if (!activePhotoPress.moved) startFreePhotoDrag(activePhotoPress);
+  dragFreePhoto(event);
+}
+
+function startFreePhotoDrag(press) {
+  press.moved = true;
+  photoFreeDragging = true;
+  activeFreePhoto = press.tile;
+  suppressPhotoClick = true;
+  hoverFlowActive = false;
+  hoveredPhotoTile = null;
+  press.tile.classList.remove("is-hovered");
+  const wall = $("#photoGrid");
+  wall.classList.remove("is-hover-flow", "is-spotlight");
+  wall.classList.add("is-free-dragging");
+  photoSpotlightStrength = 0;
+  photoSpotlightIndex = -1;
+  queueVelocity = 0;
+  orbitVelocity = 0;
+  stageMotion = Math.max(stageMotion, 0.42);
+}
+
+function dragFreePhoto(event) {
+  const wall = $("#photoGrid");
+  const rect = wall.getBoundingClientRect();
+  if (!rect.width || !rect.height) return;
+  markInteraction();
+  const dxPct = ((event.clientX - activePhotoPress.startX) / rect.width) * 100;
+  const dyPct = ((event.clientY - activePhotoPress.startY) / rect.height) * 100;
+  const nextX = clamp(activePhotoPress.startTileX + dxPct, 2, 98);
+  const nextY = clamp(activePhotoPress.startTileY + dyPct, 5, 95);
+  freePhotoOffsets.set(activePhotoPress.index, {
+    x: nextX,
+    y: nextY,
+    rotate: clamp(dxPct * 0.16, -10, 10),
+    scale: 1.04
+  });
+  applyLayout(false);
+}
+
+function finishPhotoPress(event) {
+  if (!activePhotoPress || event.pointerId !== activePhotoPress.pointerId) return;
+  event.preventDefault();
+  event.stopPropagation();
+  const press = activePhotoPress;
+  activePhotoPress = null;
+  if (press.tile.hasPointerCapture?.(event.pointerId)) press.tile.releasePointerCapture(event.pointerId);
+  if (press.moved) {
+    photoFreeDragging = false;
+    activeFreePhoto = null;
+    $("#photoGrid").classList.remove("is-free-dragging");
+    window.setTimeout(() => {
+      suppressPhotoClick = false;
+    }, 220);
+    revealStagePoem();
+    return;
+  }
+  const moved = Math.hypot(event.clientX - press.startX, event.clientY - press.startY);
+  const clickThreshold = event.pointerType === "touch" ? 18 : 9;
+  if (moved > clickThreshold || suppressPhotoClick || albumDragging) return;
+  lastPointerPhotoOpenAt = performance.now();
+  lastPointerPhotoOpenTile = press.tile;
+  openPhotoFromTile(press.index, press.tile);
+}
+
+function cancelPhotoPress(event = {}) {
+  if (!activePhotoPress) return;
+  const press = activePhotoPress;
+  activePhotoPress = null;
+  if (press.tile.hasPointerCapture?.(press.pointerId)) press.tile.releasePointerCapture(press.pointerId);
+  if (press.moved || photoFreeDragging) {
+    photoFreeDragging = false;
+    activeFreePhoto = null;
+    $("#photoGrid").classList.remove("is-free-dragging");
+  }
+  if (event.stopPropagation) event.stopPropagation();
+}
+
+function getPhotoTileIndex(tile) {
+  const cachedIndex = cachedPhotoTiles.indexOf(tile);
+  if (cachedIndex >= 0) return cachedIndex;
+  const number = Number.parseInt(tile.dataset.number, 10);
+  return Number.isFinite(number) ? number - 1 : -1;
+}
+
+function findPhotoTileNearPoint(clientX, clientY, padding = 26) {
+  const directTile = document.elementFromPoint(clientX, clientY)?.closest?.(".photo-tile");
+  if (directTile) return directTile;
+  const tiles = cachedPhotoTiles.length ? cachedPhotoTiles : Array.from(document.querySelectorAll(".photo-tile"));
+  let match = null;
+  let matchDistance = Number.POSITIVE_INFINITY;
+  let matchLayer = Number.NEGATIVE_INFINITY;
+  tiles.forEach((tile) => {
+    const rect = tile.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
+    const dx = Math.max(rect.left - clientX, 0, clientX - rect.right);
+    const dy = Math.max(rect.top - clientY, 0, clientY - rect.bottom);
+    const distance = Math.hypot(dx, dy);
+    if (distance > padding) return;
+    const style = getComputedStyle(tile);
+    if ((Number.parseFloat(style.opacity) || 1) < 0.25) return;
+    const layer = Number.parseInt(style.zIndex, 10) || Number.parseFloat(tile.style.getPropertyValue("--layer")) || 0;
+    if (distance < matchDistance - 0.5 || Math.abs(distance - matchDistance) <= 0.5 && layer >= matchLayer) {
+      match = tile;
+      matchDistance = distance;
+      matchLayer = layer;
+    }
+  });
+  return match;
+}
+
 function openPhoto(index, mode = "detail", sourceTile = null) {
+  if (!isUnlocked) {
+    lockMainContent();
+    return;
+  }
   markInteraction();
   currentPhoto = index;
   const photo = shuffledPhotos[currentPhoto];
@@ -486,8 +763,33 @@ function showFullPhoto() {
   const lightbox = $("#photoLightbox");
   if (lightbox.hidden) return;
   if (lightbox.classList.contains("is-full-image")) return;
+  clearTimeout(photoRevealTimer);
+  document.querySelectorAll(".photo-flight").forEach((flight) => flight.remove());
+  $("#photoGrid").classList.remove("is-photo-revealing");
+  lightbox.classList.remove("is-revealing", "has-flight");
   lightbox.classList.add("is-full-image");
   burst(12);
+}
+
+function isOutsideRenderedImage(event) {
+  const image = $("#lightboxImage");
+  const rect = image.getBoundingClientRect();
+  const naturalWidth = image.naturalWidth || rect.width || 1;
+  const naturalHeight = image.naturalHeight || rect.height || 1;
+  const imageRatio = naturalWidth / naturalHeight;
+  const boxRatio = rect.width / rect.height;
+  let renderWidth = rect.width;
+  let renderHeight = rect.height;
+  if (imageRatio > boxRatio) {
+    renderHeight = rect.width / imageRatio;
+  } else {
+    renderWidth = rect.height * imageRatio;
+  }
+  const left = rect.left + (rect.width - renderWidth) / 2;
+  const right = left + renderWidth;
+  const top = rect.top + (rect.height - renderHeight) / 2;
+  const bottom = top + renderHeight;
+  return event.clientX < left || event.clientX > right || event.clientY < top || event.clientY > bottom;
 }
 
 function closePhoto() {
@@ -526,8 +828,31 @@ function applyLayout(updateCopy = true) {
   tiles.forEach((tile, index) => {
     let point = getLayoutPoint(layoutIndex, index, tiles.length);
     point = applySpotlightPoint(point, index, tiles.length);
+    const freeOffset = freePhotoOffsets.get(index);
+    if (freeOffset) {
+      point = {
+        ...point,
+        x: freeOffset.x,
+        y: freeOffset.y,
+        rotate: freeOffset.rotate,
+        yaw: 0,
+        pitch: -1.2,
+        scale: freeOffset.scale,
+        depth: 820,
+        layer: 260 + index,
+        opacity: 1,
+        focus: 1,
+        blur: 0,
+        drift: 0,
+        spotlight: 0,
+        ghostX: 0,
+        ghostY: 0,
+        ghostRotate: 0
+      };
+    }
     tile.classList.toggle("is-hero-card", point.focus >= 0.9);
     tile.classList.toggle("is-spotlight-card", point.spotlight >= 0.52);
+    tile.classList.toggle("is-free-photo", Boolean(freeOffset));
     tile.style.setProperty("--x", `${point.x}%`);
     tile.style.setProperty("--y", `${point.y}%`);
     tile.style.setProperty("--x-px", `${((point.x / 100) * stageWidth).toFixed(2)}px`);
@@ -596,6 +921,26 @@ function setupPhotoStageInteraction() {
   };
 
   const update = (event) => {
+    if (!pendingDrag && !albumDragging && event.target.closest(".photo-tile")) {
+      wall.classList.remove("is-interacting");
+      wall.style.setProperty("--stage-shift-x", "0px");
+      wall.style.setProperty("--stage-shift-y", "0px");
+      wall.style.setProperty("--stage-tilt-x", "0deg");
+      wall.style.setProperty("--stage-tilt-y", "0deg");
+      stagePointerX = 0;
+      stagePointerY = 0;
+      wall.style.setProperty("--pointer-x", "50%");
+      wall.style.setProperty("--pointer-y", "50%");
+      lastPointerStyleX = Number.NaN;
+      lastPointerStyleY = Number.NaN;
+      tiles().forEach((tile) => {
+        tile.style.setProperty("--px", "0px");
+        tile.style.setProperty("--py", "0px");
+        tile.style.setProperty("--tilt-x", "0deg");
+        tile.style.setProperty("--tilt-y", "0deg");
+      });
+      return;
+    }
     const rect = wall.getBoundingClientRect();
     const x = (event.clientX - rect.left) / rect.width - 0.5;
     const y = (event.clientY - rect.top) / rect.height - 0.5;
@@ -677,6 +1022,15 @@ function setupPhotoStageInteraction() {
 
   wall.addEventListener("pointerdown", (event) => {
     if (event.button !== undefined && event.button !== 0) return;
+    if (event.target.closest(".photo-tile")) return;
+    const nearTile = findPhotoTileNearPoint(event.clientX, event.clientY);
+    if (nearTile) {
+      const nearIndex = getPhotoTileIndex(nearTile);
+      if (nearIndex >= 0) {
+        beginPhotoPress(event, nearTile, nearIndex);
+        return;
+      }
+    }
     markInteraction();
     pendingDrag = true;
     dragPointerId = event.pointerId;
@@ -755,27 +1109,27 @@ function setupAlbumLoop() {
     const hoverVisualActive = hoverFlowActive || hoverLockActive;
     updateAlbumScene(wall, now, frameScale, hoverLockActive);
     updateAlbumSpotlight(wall, now, frameScale, hoverVisualActive);
-    updateAlbumSweep(wall);
+    updateAlbumSweep(wall, hoverVisualActive);
     updateAlbumCamera(wall, hoverVisualActive);
     stageMotion *= Math.pow(0.94, frameScale);
     wall.style.setProperty("--drag-motion", stageMotion.toFixed(3));
     wall.style.setProperty("--flow-direction", String(Math.sign(queueVelocity || 1)));
     wall.style.setProperty("--cinematic-phase", String((cinematicTime % 1000).toFixed(3)));
-    if (!albumDragging && $("#photoLightbox").hidden) {
+    if (!albumDragging && !photoFreeDragging && $("#photoLightbox").hidden) {
       if (!hoverLockActive) queueOffset += queueVelocity * frameScale;
       queueVelocity *= Math.pow(albumIntroProgress < 1 ? 0.992 : 0.986, frameScale);
       if (hoverLockActive) {
         queueVelocity *= Math.pow(0.72, frameScale);
         if (Math.abs(queueVelocity) < 0.001) queueVelocity = 0;
       } else {
-        const minVelocity = albumIntroProgress < 1 ? 0.0042 : 0.0031;
+        const minVelocity = albumIntroProgress < 1 ? 0.003 : 0.0012;
         if (Math.abs(queueVelocity) < minVelocity) queueVelocity = queueVelocity < 0 ? -minVelocity : minVelocity;
       }
       const introBoost = albumIntroProgress < 1 ? 0.54 * (1 - albumIntroProgress) : 0;
-      stageMotion = Math.max(stageMotion, hoverVisualActive ? 0.16 : 0, introBoost, Math.min(0.82, Math.abs(queueVelocity) * 14));
+      stageMotion = Math.max(stageMotion, hoverVisualActive ? 0.08 : 0, introBoost, Math.min(0.42, Math.abs(queueVelocity) * 9));
       orbitOffset += orbitVelocity * frameScale;
       orbitVelocity *= Math.pow(0.992, frameScale);
-      if (!hoverLockActive && Math.abs(orbitVelocity) < 0.0018) orbitVelocity = orbitVelocity < 0 ? -0.0018 : 0.0018;
+      if (!hoverLockActive && Math.abs(orbitVelocity) < 0.0007) orbitVelocity = orbitVelocity < 0 ? -0.0007 : 0.0007;
       const layoutInterval = 16;
       if (now - lastLayoutApplyAt >= layoutInterval) {
         applyLayout(false);
@@ -793,52 +1147,57 @@ function setupAlbumLoop() {
   requestAnimationFrame(tick);
 }
 
-function updateAlbumSweep(wall) {
+function updateAlbumSweep(wall, hoverVisualActive) {
   const cycle = (cinematicTime * 0.074 + queueOffset * 0.005) % 1;
   const phase = cycle < 0 ? cycle + 1 : cycle;
   albumSweepX = -12 + phase * 124;
   albumSweepY = 50 + Math.sin(cinematicTime * 0.62 + queueOffset * 0.018) * 7.2;
-  const motion = Math.min(1, Math.abs(queueVelocity) * 28 + stageMotion * 0.44);
-  albumSweepIntensity = Math.min(0.58, 0.18 + motion * 0.22 + albumSceneBlend * 0.12 + (albumIntroProgress < 1 ? (1 - albumIntroProgress) * 0.16 : 0));
+  const visibleMotion = albumDragging || hoverVisualActive || albumIntroProgress < 1 || stageMotion > 0.18;
+  const motion = Math.min(1, Math.abs(queueVelocity) * 10 + stageMotion * 0.18);
+  albumSweepIntensity = visibleMotion
+    ? Math.min(0.18, 0.025 + motion * 0.055 + (albumIntroProgress < 1 ? (1 - albumIntroProgress) * 0.07 : 0))
+    : 0;
   wall.style.setProperty("--sweep-x", `${albumSweepX.toFixed(2)}%`);
   wall.style.setProperty("--sweep-y", `${albumSweepY.toFixed(2)}%`);
   wall.style.setProperty("--sweep-intensity", albumSweepIntensity.toFixed(3));
-  wall.style.setProperty("--sweep-angle", `${(-13 + Math.sin(cinematicTime * 0.4) * 5).toFixed(2)}deg`);
+  wall.style.setProperty("--sweep-angle", `${(-13 + Math.sin(cinematicTime * 0.4) * 1.4).toFixed(2)}deg`);
 }
 
 function updateAlbumCamera(wall, hoverVisualActive) {
   const lightboxOpen = !$("#photoLightbox").hidden;
-  const sceneWeight = albumIntroProgress < 1 ? 1 - albumIntroProgress : albumSceneBlend * 0.7;
-  const motion = Math.min(1, Math.abs(queueVelocity) * 22 + stageMotion * 0.36 + sceneWeight * 0.22);
+  const sceneWeight = albumIntroProgress < 1 ? (1 - albumIntroProgress) * 0.55 : albumSceneBlend * 0.18;
+  const motion = Math.min(1, Math.abs(queueVelocity) * 8 + stageMotion * 0.12 + sceneWeight * 0.08);
   const direction = Math.sign(queueVelocity || orbitVelocity || 1);
-  const driftX = Math.sin(cinematicTime * 0.18 + queueOffset * 0.018) * (5.5 + sceneWeight * 5.5);
-  const driftY = Math.cos(cinematicTime * 0.16 + queueOffset * 0.01) * (2 + sceneWeight * 2.4);
-  const dragPush = albumDragging ? direction * Math.min(14, Math.abs(queueVelocity) * 220) : 0;
-  const hoverEase = hoverVisualActive ? 0.72 : 1;
+  const idleCamera = albumIntroProgress >= 1 && !albumDragging && !hoverVisualActive && stageMotion < 0.18 && !lightboxOpen;
+  const driftX = idleCamera ? 0 : Math.sin(cinematicTime * 0.18 + queueOffset * 0.018) * (1.2 + sceneWeight * 1.4);
+  const driftY = idleCamera ? 0 : Math.cos(cinematicTime * 0.16 + queueOffset * 0.01) * (0.38 + sceneWeight * 0.62);
+  const dragPush = albumDragging ? direction * Math.min(7, Math.abs(queueVelocity) * 100) : 0;
+  const hoverEase = hoverVisualActive ? 0.62 : 1;
   const settle = lightboxOpen ? 0.35 : hoverEase;
   const dolly = lightboxOpen
     ? -70
-    : -14 + sceneWeight * 18 + motion * 12 + Math.sin(cinematicTime * 0.26) * (3.5 + sceneWeight * 3.5);
+    : idleCamera ? -4 : -5 + sceneWeight * 5 + motion * 3 + Math.sin(cinematicTime * 0.26) * (0.55 + sceneWeight * 0.7);
   const scale = lightboxOpen
     ? 0.962
-    : 0.99 + sceneWeight * 0.008 + motion * 0.006 + Math.sin(cinematicTime * 0.22) * 0.0025;
+    : idleCamera ? 0.997 : 0.996 + sceneWeight * 0.0015 + motion * 0.0015 + Math.sin(cinematicTime * 0.22) * 0.0007;
 
   wall.style.setProperty("--camera-x", `${((driftX + dragPush) * settle).toFixed(2)}px`);
   wall.style.setProperty("--camera-y", `${(driftY * settle).toFixed(2)}px`);
   wall.style.setProperty("--camera-z", `${(dolly * settle).toFixed(2)}px`);
-  wall.style.setProperty("--camera-roll", `${(direction * motion * 0.18 + Math.sin(cinematicTime * 0.18) * 0.08).toFixed(3)}deg`);
-  wall.style.setProperty("--camera-tilt-x", `${(sceneWeight * -0.34 + Math.sin(cinematicTime * 0.24) * 0.16).toFixed(3)}deg`);
-  wall.style.setProperty("--camera-tilt-y", `${(direction * motion * 0.32 + Math.cos(cinematicTime * 0.2) * 0.18).toFixed(3)}deg`);
+  wall.style.setProperty("--camera-roll", `${(idleCamera ? 0 : direction * motion * 0.035 + Math.sin(cinematicTime * 0.18) * 0.012).toFixed(3)}deg`);
+  wall.style.setProperty("--camera-tilt-x", `${(idleCamera ? 0 : sceneWeight * -0.08 + Math.sin(cinematicTime * 0.24) * 0.02).toFixed(3)}deg`);
+  wall.style.setProperty("--camera-tilt-y", `${(idleCamera ? 0 : direction * motion * 0.06 + Math.cos(cinematicTime * 0.2) * 0.025).toFixed(3)}deg`);
   wall.style.setProperty("--camera-scale", scale.toFixed(4));
 }
 
 function updateAlbumScene(wall, now, frameScale, hoverLockActive) {
-  if (albumDragging || !$("#photoLightbox").hidden) {
+  if (albumDragging || photoFreeDragging || !$("#photoLightbox").hidden) {
     wall.style.setProperty("--scene-blend", albumSceneBlend.toFixed(3));
     wall.style.setProperty("--scene-mode", String(albumSceneMode));
     return;
   }
-  const canEvolve = albumIntroProgress >= 1
+  const canEvolve = AUTO_SCENE_ENABLED
+    && albumIntroProgress >= 1
     && now - lastInteractionAt > 5200;
   const nextMode = canEvolve ? getAutoSceneMode(cinematicTime) : 0;
   const targetMode = nextMode || albumSceneMode || 0;
@@ -846,7 +1205,7 @@ function updateAlbumScene(wall, now, frameScale, hoverLockActive) {
   const blendSpeed = targetBlend > albumSceneBlend ? 0.006 : 0.035;
   albumSceneBlend += (targetBlend - albumSceneBlend) * Math.min(1, blendSpeed * frameScale);
   if (canEvolve && nextMode !== 0 && targetBlend > 0.01) albumSceneMode = targetMode;
-  if ((!canEvolve || nextMode === 0) && albumSceneBlend < 0.16) albumSceneMode = 0;
+  if ((!canEvolve || nextMode === 0) && albumSceneBlend < 0.02) albumSceneMode = 0;
   wall.dataset.scene = String(albumSceneMode);
   wall.style.setProperty("--scene-blend", albumSceneBlend.toFixed(3));
   wall.style.setProperty("--scene-mode", String(albumSceneMode));
@@ -914,23 +1273,26 @@ function triggerLayoutMorph(manual = false) {
     lastAutoMorphAt = now;
   }
   layoutIndex = (layoutIndex + 1) % layouts.length;
+  freePhotoOffsets.clear();
+  photoFreeDragging = false;
+  activeFreePhoto = null;
   photoSpotlightStrength = 0;
   photoSpotlightIndex = -1;
   photoSpotlightPhase = 0;
-  queueVelocity = queueVelocity >= 0 ? (manual ? 0.028 : 0.018) : (manual ? -0.028 : -0.018);
-  orbitVelocity = orbitVelocity >= 0 ? (manual ? 0.006 : 0.0044) : (manual ? -0.006 : -0.0044);
-  stageMotion = 1;
+  queueVelocity = queueVelocity >= 0 ? (manual ? 0.01 : 0.006) : (manual ? -0.01 : -0.006);
+  orbitVelocity = orbitVelocity >= 0 ? (manual ? 0.0025 : 0.0016) : (manual ? -0.0025 : -0.0016);
+  stageMotion = 0.58;
   const wall = $("#photoGrid");
-  wall.classList.remove("is-spotlight");
+  wall.classList.remove("is-spotlight", "is-free-dragging");
   wall.style.setProperty("--spotlight-strength", "0");
   wall.style.setProperty("--spotlight-index", "-1");
   wall.style.setProperty("--drag-motion", "1");
   wall.style.setProperty("--flow-direction", String(Math.sign(queueVelocity || 1)));
   wall.classList.add("is-morphing");
   clearTimeout(morphTimer);
-  morphTimer = window.setTimeout(() => wall.classList.remove("is-morphing"), manual ? 1100 : 1500);
+  morphTimer = window.setTimeout(() => wall.classList.remove("is-morphing"), manual ? 980 : 1280);
   applyLayout();
-  burst(manual ? 58 : 34);
+  burst(manual ? 24 : 18);
 }
 
 function revealStagePoem() {
@@ -956,7 +1318,7 @@ function getLayoutPoint(type, index, total) {
     const center = Math.max(0, 1 - absPhase / ribbonSpan);
     const side = Math.min(absPhase / ribbonSpan, 1);
     const direction = phase < 0 ? -1 : 1;
-    const wave = Math.sin(phase * 0.64 + cinematicTime * 0.8);
+    const wave = Math.sin(phase * 0.64 + cinematicTime * 0.34);
     if (isRibbon) {
       const lanePattern = [0, -1.3, 1.04, -0.5, 1.42, -0.86, 0.58, -1.5, 1.18, -0.26, 0.86, -1.08];
       const laneRaw = lanePattern[index % lanePattern.length];
@@ -964,21 +1326,21 @@ function getLayoutPoint(type, index, total) {
       const lane = laneRaw * laneInfluence;
       const laneDepth = laneInfluence * (124 - Math.abs(laneRaw) * 84);
       const laneFocus = Math.max(0, 0.18 - Math.abs(lane) * 0.04 + laneInfluence * 0.07);
-      const crest = Math.sin(cinematicTime * 0.72 + index * 0.84);
+      const crest = Math.sin(cinematicTime * 0.28 + index * 0.84);
       const focus = Math.min(1, center + laneFocus);
       const ribbonPoint = {
-        x: 50 + phase * 3.52 + lane * (1.2 + side * 2.22) + wave * (0.34 + side * 1.02),
-        y: 54.8 - center * 5.1 + lane * (8.8 + side * 6.6) + Math.sin(phase * 0.72) * (1.05 + side * 1.25) + crest * laneInfluence * 1.42 + breath * center * 0.6,
-        rotate: phase * 1.02 + lane * 5.5 + wave * 1.32 + breath * center * 0.62,
-        yaw: -phase * (8.3 + side * 3.1) + lane * 9.4,
-        pitch: center * 5.4 - 3.4 - side * 2.15 - lane * 2.5,
-        scale: 0.64 + center * 0.82 + laneInfluence * (0.13 - Math.abs(laneRaw) * 0.022) + center * breath * 0.018,
-        depth: -470 + center * 860 + laneDepth + center * breath * 42,
+        x: 50 + phase * 3.28 + lane * (1.02 + side * 1.82) + wave * (0.16 + side * 0.48),
+        y: 54.2 - center * 3.6 + lane * (7.1 + side * 5.2) + Math.sin(phase * 0.72) * (0.65 + side * 0.8) + crest * laneInfluence * 0.56,
+        rotate: phase * 0.72 + lane * 4.4 + wave * 0.78,
+        yaw: -phase * (6.1 + side * 2.1) + lane * 7.2,
+        pitch: center * 3.6 - 2.8 - side * 1.5 - lane * 1.8,
+        scale: 0.58 + center * 0.56 + laneInfluence * (0.08 - Math.abs(laneRaw) * 0.014),
+        depth: -420 + center * 650 + laneDepth * 0.64,
         layer: 18 + Math.round(focus * 94) + Math.round(18 - absPhase) + Math.round((lane + 1.6) * 3),
-        opacity: Math.min(1, 0.68 + center * 0.3 + laneInfluence * 0.08 - Math.abs(lane) * 0.015),
+        opacity: Math.min(1, 0.82 + center * 0.16 + laneInfluence * 0.04 - Math.abs(lane) * 0.01),
         focus,
-        blur: (1 - focus) * 1.35 + Math.abs(lane) * 0.08,
-        drift: breath * (2.8 + center * 6.1 + laneInfluence * 3.2),
+        blur: (1 - focus) * 0.42 + Math.abs(lane) * 0.025,
+        drift: breath * (0.6 + center * 1.4 + laneInfluence * 0.8),
         phase,
         ghostX: direction * (18 + side * 76) + lane * 22,
         ghostY: wave * (5 + side * 14) + lane * 14,
@@ -1004,9 +1366,9 @@ function getLayoutPoint(type, index, total) {
       scale: 0.4 + spine * 0.28,
       depth: -520 + spine * 230,
       layer: 6 + Math.round(spine * 16),
-      opacity: 0.22 + spine * 0.46,
+      opacity: 0.68 + spine * 0.24,
       focus: spine * 0.24,
-      blur: 2.4 + (1 - spine) * 1.4,
+      blur: 0.7 + (1 - spine) * 0.5,
       drift: breath * 2,
       phase,
       ghostX: direction * 60,
@@ -1072,7 +1434,7 @@ function getLayoutPoint(type, index, total) {
     depth: 12 + fract(Math.sin(index * 2.71) * 1000) * 92,
     layer: 8 + (index % 18),
     focus: 0.25,
-    blur: 1.8,
+    blur: 1.1,
     drift: drift * 2
   };
 }
@@ -1321,7 +1683,7 @@ function getIntroPoint(index, total, target) {
     layer: target.layer,
     opacity: lerp(startOpacity, target.opacity || 1, mix),
     focus: lerp(0.12, target.focus || 0, mix),
-    blur: lerp(2.8, target.blur || 0, mix),
+    blur: lerp(1.2, target.blur || 0, mix),
     drift: target.drift || 0,
     phase: target.phase || 0,
     ghostX: (target.ghostX || 0) * (0.4 + mix * 0.6),
@@ -1343,6 +1705,10 @@ function smoothstep(edge0, edge1, value) {
   return x * x * (3 - 2 * x);
 }
 
+function clamp(value, min, max) {
+  return Math.max(min, Math.min(max, value));
+}
+
 function easeOutCubic(value) {
   return 1 - Math.pow(1 - Math.min(Math.max(value, 0), 1), 3);
 }
@@ -1353,6 +1719,10 @@ function wrapPhase(index, total, offset) {
 }
 
 async function openLetter() {
+  if (!isUnlocked) {
+    lockMainContent();
+    return;
+  }
   const letter = $("#letter");
   if (letter.classList.contains("is-letter-opening")) return;
   letter.classList.add("is-letter-opening");
@@ -1395,6 +1765,7 @@ async function typeLetter() {
 }
 
 async function startMusic() {
+  if (!isUnlocked) return;
   if (musicOn) return;
   musicOn = true;
   updateMusicButton();
@@ -1485,11 +1856,11 @@ function setupEffects() {
     const ambientGlint = ambientPage && Math.random() > 0.68;
     const sceneBlend = albumActive ? albumSceneBlend : 0;
     const sceneActive = albumActive && albumSceneMode !== 0 && sceneBlend > 0.12;
-    const motionBoost = albumActive ? stageMotion : 0;
+    const motionBoost = albumActive ? Math.min(stageMotion, 0.22) : 0;
     const quietAlbumParticle = albumActive && !burstMode;
     const flowSign = Math.sign(queueVelocity || 1);
     const size = quietAlbumParticle
-      ? isNear ? 0.9 + Math.random() * (1.8 + sceneBlend * 1.2) : isDust ? 0.42 + Math.random() * (1.05 + sceneBlend * 0.72) : 0.62 + Math.random() * (1.45 + sceneBlend)
+      ? isNear ? 0.5 + Math.random() * 0.9 : isDust ? 0.28 + Math.random() * 0.52 : 0.36 + Math.random() * 0.82
       : ambientPage ? ambientGlint ? 0.9 + Math.random() * 2.1 : isNear ? 0.8 + Math.random() * 2.4 : 0.38 + Math.random() * 1.35
       : isDust ? 0.8 + Math.random() * 2.6 : isNear ? 3.4 + Math.random() * 7 : burstMode ? 2.4 + Math.random() * 6.2 : 1.8 + Math.random() * 5;
     return {
@@ -1512,21 +1883,21 @@ function setupEffects() {
         ? (Math.random() - 0.5) * (8 + motionBoost * 5)
         : quietAlbumParticle
           ? sceneActive
-            ? flowSign * (0.52 + Math.random() * 1.15 + sceneBlend * 1.1)
-            : (Math.random() - 0.5) * (0.12 + motionBoost * 0.36)
+            ? flowSign * (0.18 + Math.random() * 0.38)
+            : (Math.random() - 0.5) * (0.035 + motionBoost * 0.08)
           : ambientPage
             ? (Math.random() - 0.5) * (ambientGlint ? 0.18 : 0.12)
           : isNear ? -0.55 - Math.random() * 0.75 : (Math.random() - 0.5) * (0.34 + motionBoost * 0.55),
       speedY: burstMode
         ? -3 - Math.random() * (5.5 + motionBoost * 3)
         : quietAlbumParticle
-          ? sceneActive ? (Math.random() - 0.5) * (0.04 + sceneBlend * 0.08) : -0.012 - Math.random() * 0.06
+          ? sceneActive ? (Math.random() - 0.5) * 0.025 : -0.006 - Math.random() * 0.022
           : ambientPage
             ? -0.012 - Math.random() * (ambientGlint ? 0.055 : 0.035)
           : isDust ? -0.08 - Math.random() * 0.16 : isNear ? -0.3 - Math.random() * 0.55 : -0.18 - Math.random() * 0.38,
       rotate: Math.random() * Math.PI,
       spin: (Math.random() - 0.5) * (isNear ? 0.075 : 0.045),
-      life: ambientPage ? 380 + Math.random() * 360 : sceneActive ? 180 + Math.random() * 170 : isDust ? 340 + Math.random() * 220 : burstMode ? 90 + Math.random() * 56 : isNear ? 180 + Math.random() * 110 : 260 + Math.random() * 140,
+      life: ambientPage ? 380 + Math.random() * 360 : quietAlbumParticle ? 460 + Math.random() * 420 : sceneActive ? 180 + Math.random() * 170 : isDust ? 340 + Math.random() * 220 : burstMode ? 90 + Math.random() * 56 : isNear ? 180 + Math.random() * 110 : 260 + Math.random() * 140,
       color: quietAlbumParticle || burstMode
         ? ["#fff4d2", "#e5b86a", "#f8e5b8", "#ffffff"][Math.floor(Math.random() * 4)]
         : ambientPage
@@ -1607,15 +1978,18 @@ function setupEffects() {
     const homeActive = pageView === "home";
     const sceneBlend = albumActive ? albumSceneBlend : 0;
     const sceneActive = albumActive && albumSceneMode !== 0 && sceneBlend > 0.18;
-    const particleLimit = albumActive ? Math.round(145 + sceneBlend * 82) : homeActive ? 220 : 185;
-    if (particles.length < particleLimit && Math.random() > (albumActive ? sceneActive ? 0.16 : 0.46 : homeActive ? 0.34 : 0.44)) particles.push(makeParticle(false, sceneActive && Math.random() > 0.76 ? "near" : "dust"));
+    const particleLimit = albumActive ? 52 : homeActive ? 220 : 185;
+    if (albumActive && particles.length > particleLimit) {
+      particles.splice(0, particles.length - particleLimit);
+    }
+    if (particles.length < particleLimit && Math.random() > (albumActive ? 0.82 : homeActive ? 0.34 : 0.44)) particles.push(makeParticle(false, sceneActive && Math.random() > 0.76 ? "near" : "dust"));
     if (sceneActive && particles.length < particleLimit && Math.random() > 0.64) particles.push(makeParticle(false, "mid"));
     if (!albumActive && particles.length < particleLimit && Math.random() > (homeActive ? 0.54 : 0.64)) particles.push(makeParticle(false, "mid"));
     if (!albumActive && particles.length < particleLimit && Math.random() > 0.88) particles.push(makeParticle(false, "near"));
 
     for (let i = particles.length - 1; i >= 0; i -= 1) {
       const p = particles[i];
-      const albumFlow = albumActive ? Math.sign(queueVelocity || 1) * (stageMotion + sceneBlend * 0.38) * (p.layer === "near" ? 1.35 : 0.7) : 0;
+      const albumFlow = albumActive ? Math.sign(queueVelocity || 1) * Math.min(stageMotion, 0.18) * (p.layer === "near" ? 0.34 : 0.16) : 0;
       p.x += p.speedX + Math.sin(p.life * 0.03) * 0.18 + albumFlow;
       p.y += p.speedY;
       p.rotate += p.spin;
