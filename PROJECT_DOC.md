@@ -277,6 +277,8 @@ npm test
 - 单张照片拖动重做为更稳定的 pointer 控制器：从照片整体、底部文字区或边缘起拖都能把这张照片拖出队列；拖动中由 document 级事件继续跟随，不会因为鼠标离开小区域就中断。
 - 为避免 hover 和重叠层级抢命中，照片上方不再触发会推开卡片的舞台视差；单张拖动近邻命中按距离优先，整面相册拖动则从真实空白区域开始。
 - Playwright 当前扩展到 13 项：新增/收紧 `查看完整照片` 按钮、纯照片外侧关闭、单张照片底部区域拖出、切换队形复位、真实空白区拖动整面相册等回归。最新验证：`npm run check` 通过，`npm test` 13/13 通过。
+- 在不改动上述交互链路的前提下，继续按参考视频加强相册舞台：默认横向 ribbon 略微拉宽、下沉并增加纵深，照片队列更像铺开的整团相册，背景低频光场、底部暗金椭圆光、舞台流光和照片边缘材质都进一步加强。
+- 这轮质感增强仍然避开会重新导致闪烁的路径：不恢复 `.photo-cards` 全局 filter/drop-shadow，不恢复单卡 `cardFloat` 动画，不开启默认自动 spotlight；主相册测试新增 `.stage-flow` 和 `.photo-cards::after` 可见度断言，防止后续把舞台光感又改没。
 
 ## 明天重开对话快速接续
 
@@ -287,7 +289,7 @@ npm test
 3. 当前可继续优化相册视觉，也可以开始 Vercel 预部署：照片还可以继续变得更满、更像一整团动态相册集；UI 继续沿用深酒红、暗金、玻璃、细光尘的方向，但不要再默认开启自动 spotlight 单张抽出。
 4. 不能破坏的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不应该让相册卡住或闪烁；左上角返回封面必须可用。
 4.1. 不能破坏的单张照片交互：介绍页按钮必须能进入纯照片；纯照片点击图片外黑色区域必须关闭；照片底部文字区/边缘也必须能起拖；切换队形必须让拖出的照片复位。
-5. 不能回退的技术约束：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不要推动真实队列；不要用全局强残影覆盖 24 张照片。
+5. 不能回退的技术约束：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不要推动真实队列；不要用全局强残影覆盖 24 张照片；不要恢复全局 filter/drop-shadow、单卡浮动动画或默认自动 spotlight。
 6. GitHub private repo 已是 `https://github.com/kkkchen12/AAAyichun`；后续用 Vercel 从该仓库导入部署。
 7. 私密入口已经可用，当前暗号为 `20030518`；正式发给她前在部署 URL 上重新测一次错误暗号和正确暗号。
 8. 继续改完后运行 `npm run check` 和 `npm test`。重点查看 `output/playwright/verified-private-entrance.png`、`verified-single-photo-drag.png`、`verified-photo-full.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png` 和 `verified-album-iphone-landscape.png`。

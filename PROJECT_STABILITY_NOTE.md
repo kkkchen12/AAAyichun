@@ -183,3 +183,12 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - While the pointer is over a photo and no drag is active, the stage parallax resets instead of shifting all cards. This keeps the selected photo from sliding away before the user presses, which was the source of the "only a small area can drag" feeling.
 - Free photos get `.is-free-photo`, high z-index, solid material, and reset when the user double-clicks blank space or switches layout. Whole-album dragging still works from true blank space.
 - Regression coverage now verifies: button-to-full-image, outside-click close, bottom/caption-area single-photo drag, free-photo reset on layout switch, and blank-area whole-album drag. Latest verification: `npm run check` passed; full `npm test` passed 13/13.
+
+## Reference-Video Lightfield And Material Pass - 2026-06-30
+
+- The latest visual pass deliberately keeps the fixed button, full-image close, and document-level single-photo drag pipeline unchanged. It only adjusts layout density, lightfields, and material styling.
+- The default `type === 0` ribbon is slightly wider, deeper, and lower on the stage. Side lanes keep more scale, focus, and depth so the desktop album reads as a fuller cinematic photo group.
+- The album background, `.photo-cards::before/::after`, `.stage-flow`, `.stage-trail`, and `.stage-veil` now provide stronger low-frequency wine/gold light without using a global `.photo-cards` filter.
+- Photo cards use a more solid premium material treatment: stronger border, shadow, edge light, inner media glow, and a restrained image sweep. This should improve texture without returning to transparent glass cards.
+- Do not use this pass as permission to restore unstable effects. Keep `.photo-cards` global filter/drop-shadow disabled, keep per-card `cardFloat`/filter animation disabled, and keep automatic spotlight disabled by default.
+- Regression coverage now also guards the stage lightfield visibility in the main album test by checking `.stage-flow` and `.photo-cards::after`, while the existing interaction tests continue to guard the full-image button and single-photo drag range.

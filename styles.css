@@ -2283,11 +2283,12 @@ body[data-view="locked"] .home-return {
 /* Real-photo polish: keep the album cinematic and let the photos carry the scene. */
 .photo-wall {
   background:
-    radial-gradient(ellipse at 50% 55%, rgba(135, 38, 78, 0.22), transparent 28%),
-    radial-gradient(ellipse at 50% 80%, rgba(214, 160, 92, 0.13), transparent 34%),
+    radial-gradient(ellipse at 50% 58%, rgba(122, 35, 78, 0.28), transparent 31%),
+    radial-gradient(ellipse at 50% 82%, rgba(226, 164, 88, 0.18), transparent 38%),
+    radial-gradient(ellipse at 28% 47%, rgba(105, 72, 142, 0.12), transparent 24%),
     radial-gradient(circle at 17% 30%, rgba(128, 88, 128, 0.08), transparent 20%),
-    radial-gradient(circle at 86% 28%, rgba(214, 190, 140, 0.07), transparent 23%),
-    linear-gradient(180deg, rgba(5, 2, 9, 0.4), rgba(2, 2, 6, 0.16)),
+    radial-gradient(circle at 86% 28%, rgba(214, 190, 140, 0.08), transparent 23%),
+    linear-gradient(180deg, rgba(7, 2, 12, 0.48), rgba(2, 2, 6, 0.2)),
     #030307;
   --pointer-x: 50%;
   --pointer-y: 50%;
@@ -2315,30 +2316,36 @@ body[data-view="locked"] .home-return {
 }
 
 .photo-wall::before {
-  opacity: 0.3;
+  opacity: 0.36;
 }
 
 .photo-wall::after {
   background:
-    linear-gradient(100deg, transparent 0 38%, rgba(255, 226, 170, 0.035) 48%, transparent 60%),
-    radial-gradient(ellipse at 50% 54%, transparent 0 34%, rgba(3, 2, 7, 0.36) 76%),
-    linear-gradient(90deg, rgba(3, 2, 7, 0.88), transparent 18%, transparent 82%, rgba(3, 2, 7, 0.88)),
-    linear-gradient(180deg, rgba(3, 2, 7, 0.76), transparent 25%, transparent 74%, rgba(3, 2, 7, 0.86));
+    linear-gradient(100deg, transparent 0 36%, rgba(255, 226, 170, 0.052) 49%, transparent 62%),
+    radial-gradient(ellipse at 50% 66%, rgba(229, 184, 106, 0.08), transparent 24%),
+    radial-gradient(ellipse at 50% 54%, transparent 0 35%, rgba(3, 2, 7, 0.34) 76%),
+    linear-gradient(90deg, rgba(3, 2, 7, 0.9), transparent 16%, transparent 84%, rgba(3, 2, 7, 0.9)),
+    linear-gradient(180deg, rgba(3, 2, 7, 0.72), transparent 25%, transparent 72%, rgba(3, 2, 7, 0.88));
 }
 
 .photo-cards::before {
-  width: min(1180px, 92vw);
-  aspect-ratio: 6.8;
-  border-color: rgba(255, 230, 178, 0.09);
+  width: min(1260px, 98vw);
+  aspect-ratio: 7.4;
+  border-color: rgba(255, 230, 178, 0.12);
   box-shadow:
-    0 0 76px rgba(207, 166, 108, 0.08),
-    inset 0 0 58px rgba(207, 166, 108, 0.06);
+    0 0 96px rgba(207, 166, 108, 0.11),
+    0 0 180px rgba(114, 39, 84, 0.12),
+    inset 0 0 72px rgba(207, 166, 108, 0.08);
 }
 
 .photo-cards::after {
-  width: min(720px, 64vw);
-  opacity: 0.58;
-  filter: blur(10px);
+  width: min(930px, 76vw);
+  height: clamp(92px, 10vw, 138px);
+  opacity: 0.68;
+  filter: blur(14px);
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(255, 224, 156, 0.22), rgba(185, 70, 115, 0.12) 42%, transparent 72%),
+    linear-gradient(90deg, transparent, rgba(255, 236, 198, 0.08), transparent);
 }
 
 .stage-lightfields,
@@ -2367,8 +2374,8 @@ body[data-view="locked"] .home-return {
   top: var(--sweep-y);
   width: min(520px, 40vw);
   height: 118%;
-  opacity: calc(0.02 + var(--sweep-intensity) * 0.11);
-  filter: blur(22px);
+  opacity: calc(0.028 + var(--sweep-intensity) * 0.12);
+  filter: blur(24px);
   transform:
     translate(-50%, -50%)
     rotate(var(--sweep-angle))
@@ -2384,8 +2391,8 @@ body[data-view="locked"] .home-return {
   width: min(760px, 64vw);
   height: clamp(100px, 14vw, 210px);
   border-radius: 999px;
-  opacity: calc(0.014 + var(--sweep-intensity) * 0.08);
-  filter: blur(26px);
+  opacity: calc(0.024 + var(--sweep-intensity) * 0.09);
+  filter: blur(30px);
   transform:
     translate(-50%, -50%)
     rotate(4deg)
@@ -2459,8 +2466,8 @@ body[data-view="locked"] .home-return {
   width: min(980px, 86vw);
   height: clamp(74px, 10vw, 128px);
   border-radius: 999px;
-  opacity: calc(0.035 + var(--drag-motion) * 0.18);
-  filter: blur(calc(14px + var(--drag-motion) * 14px));
+  opacity: calc(0.052 + var(--drag-motion) * 0.18);
+  filter: blur(calc(18px + var(--drag-motion) * 16px));
   transform:
     translate(-50%, -50%)
     translateX(calc(var(--flow-direction) * var(--drag-motion) * -42px))
@@ -2483,12 +2490,12 @@ body[data-view="locked"] .home-return {
 
 .stage-flow {
   left: 50%;
-  top: 53%;
-  width: min(1120px, 94vw);
-  height: clamp(92px, 11vw, 150px);
+  top: 56%;
+  width: min(1280px, 100vw);
+  height: clamp(118px, 14vw, 190px);
   border-radius: 999px;
-  opacity: calc(0.035 + var(--drag-motion) * 0.16 + var(--intro-reveal) * 0.1 + var(--scene-blend) * 0.045);
-  filter: blur(calc(10px + var(--drag-motion) * 18px));
+  opacity: calc(0.055 + var(--drag-motion) * 0.16 + var(--intro-reveal) * 0.1 + var(--scene-blend) * 0.045);
+  filter: blur(calc(14px + var(--drag-motion) * 18px));
   transform:
     translate(-50%, -50%)
     translateX(calc(var(--flow-direction) * var(--drag-motion) * -92px))
@@ -2500,10 +2507,10 @@ body[data-view="locked"] .home-return {
 }
 
 .flow-b {
-  top: 47%;
-  width: min(780px, 72vw);
-  height: clamp(52px, 7vw, 86px);
-  opacity: calc(0.018 + var(--drag-motion) * 0.08 + var(--intro-reveal) * 0.08 + var(--scene-blend) * 0.035);
+  top: 49%;
+  width: min(980px, 84vw);
+  height: clamp(68px, 8.4vw, 112px);
+  opacity: calc(0.026 + var(--drag-motion) * 0.08 + var(--intro-reveal) * 0.08 + var(--scene-blend) * 0.035);
   transform:
     translate(-50%, -50%)
     translateX(calc(var(--flow-direction) * var(--drag-motion) * 116px))
@@ -2566,8 +2573,8 @@ body[data-view="locked"] .home-return {
   width: min(1240px, 98vw);
   height: clamp(180px, 24vw, 330px);
   border-radius: 999px;
-  opacity: calc(0.01 + var(--scene-blend) * 0.035 + var(--drag-motion) * 0.035);
-  filter: blur(calc(16px + var(--scene-blend) * 10px));
+  opacity: calc(0.016 + var(--scene-blend) * 0.035 + var(--drag-motion) * 0.035);
+  filter: blur(calc(18px + var(--scene-blend) * 10px));
   transform:
     translate(-50%, -50%)
     translateX(calc(var(--flow-direction) * var(--scene-blend) * -20px))
@@ -2642,15 +2649,16 @@ body[data-view="locked"] .home-return {
 }
 
 .photo-tile {
-  border-color: rgba(255, 236, 198, 0.34);
+  border-color: rgba(255, 236, 198, 0.4);
   background:
-    linear-gradient(145deg, rgba(255, 248, 232, 0.16), rgba(255, 255, 255, 0.032)),
-    linear-gradient(180deg, rgba(28, 22, 20, 0.96), rgba(8, 6, 10, 0.98));
+    linear-gradient(145deg, rgba(255, 248, 232, 0.19), rgba(255, 255, 255, 0.035)),
+    linear-gradient(180deg, rgba(35, 25, 24, 0.98), rgba(8, 6, 10, 0.99));
   box-shadow:
-    0 24px 54px rgba(0, 0, 0, 0.72),
-    0 0 18px rgba(180, 126, 84, 0.14),
-    inset 0 1px 0 rgba(255, 255, 255, 0.26),
-    inset 0 -16px 24px rgba(0, 0, 0, 0.28);
+    0 28px 62px rgba(0, 0, 0, 0.76),
+    0 0 26px rgba(180, 126, 84, 0.18),
+    0 0 0 1px rgba(255, 244, 220, 0.035),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -18px 28px rgba(0, 0, 0, 0.32);
   filter:
     blur(var(--blur, 0px))
     brightness(calc(0.92 + var(--focus, 0) * 0.14))
@@ -2669,8 +2677,9 @@ body[data-view="locked"] .home-return {
 .photo-tile.is-hero-card {
   border-color: rgba(255, 236, 198, 0.5);
   box-shadow:
-    0 34px 92px rgba(0, 0, 0, 0.76),
-    0 0 46px rgba(229, 184, 106, 0.24),
+    0 38px 106px rgba(0, 0, 0, 0.78),
+    0 0 58px rgba(229, 184, 106, 0.3),
+    0 0 96px rgba(136, 47, 88, 0.12),
     0 0 0 1px rgba(255, 245, 220, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.24);
 }
@@ -2738,9 +2747,9 @@ body[data-view="locked"] .home-return {
   overflow: hidden;
   background-color: #070609;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 248, 224, 0.2),
-    inset 0 0 22px rgba(255, 236, 198, 0.06),
-    inset 0 -36px 46px rgba(0, 0, 0, 0.18);
+    inset 0 0 0 1px rgba(255, 248, 224, 0.24),
+    inset 0 0 28px rgba(255, 236, 198, 0.08),
+    inset 0 -40px 52px rgba(0, 0, 0, 0.2);
 }
 
 .photo-media::before {
@@ -2749,7 +2758,7 @@ body[data-view="locked"] .home-return {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: calc(0.08 + var(--focus, 0) * 0.06);
+  opacity: calc(0.1 + var(--focus, 0) * 0.07);
   background:
     linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 17%, transparent 70%, rgba(255, 236, 198, 0.08)),
     radial-gradient(ellipse at 50% 112%, rgba(0, 0, 0, 0.46), transparent 46%);
@@ -2762,7 +2771,7 @@ body[data-view="locked"] .home-return {
   inset: -12%;
   pointer-events: none;
   z-index: 2;
-  opacity: calc(var(--sweep, 0) * 0.12);
+  opacity: calc(0.012 + var(--sweep, 0) * 0.14);
   mix-blend-mode: normal;
   background:
     linear-gradient(112deg, transparent 0 32%, rgba(255, 255, 255, 0.28) 45%, rgba(255, 236, 198, 0.2) 52%, transparent 66%),

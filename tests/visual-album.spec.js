@@ -91,6 +91,8 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   const materialState = await page.locator(".photo-tile.is-hero-card").first().evaluate((tile) => {
     const cardStyle = getComputedStyle(tile);
     const cardsStyle = getComputedStyle(document.querySelector(".photo-cards"));
+    const flowStyle = getComputedStyle(document.querySelector(".stage-flow"));
+    const cardsAfter = getComputedStyle(document.querySelector(".photo-cards"), "::after");
     const img = tile.querySelector("img");
     return {
       animationName: cardStyle.animationName,
@@ -101,6 +103,8 @@ test("captures album and two-step photo viewer", async ({ page }) => {
       cardsTransitionDuration: cardsStyle.transitionDuration,
       tileTransitionProperty: cardStyle.transitionProperty,
       tileWillChange: cardStyle.willChange,
+      stageFlowOpacity: Number.parseFloat(flowStyle.opacity),
+      stageGlowOpacity: Number.parseFloat(cardsAfter.opacity),
       imgFilter: img ? getComputedStyle(img).filter : ""
     };
   });
@@ -112,6 +116,8 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   expect(materialState.cardsTransitionDuration).toBe("0s");
   expect(materialState.tileTransitionProperty).not.toContain("opacity");
   expect(materialState.tileWillChange).not.toContain("opacity");
+  expect(materialState.stageFlowOpacity).toBeGreaterThan(0.04);
+  expect(materialState.stageGlowOpacity).toBeGreaterThan(0.6);
   expect(materialState.imgFilter).toContain("brightness");
   await page.screenshot({ path: "output/playwright/verified-album-desktop.png" });
 

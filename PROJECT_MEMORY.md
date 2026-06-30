@@ -129,6 +129,10 @@
 - 2026-06-30 单张照片拖动改成舞台级稳定控制器：照片整体按下后由 document 级 pointermove/pointerup 继续跟随，底部文字区和照片边缘也能作为拖动起点；拖出的照片会带 `.is-free-photo` 高层级实体材质，双击空白或切换队形会重置回队列。
 - 2026-06-30 修复“只有小区域能拖”的根因：hover/视差会让重叠照片在按下前互相抢命中。现在直接命中的照片优先，近邻命中按距离优先；鼠标在照片上方时不再让舞台视差把照片推开，避免拖动前照片自己挪走。
 - 2026-06-30 Playwright 已补充并收紧相关回归：`captures album and two-step photo viewer` 会验证按钮进入纯照片和点击周围关闭；`allows a single photo to be dragged out and reset by layout switch` 从照片底部文字区域起拖，验证单张照片可拖出并可随队形切换重置；整面相册拖动测试改为自动寻找真实空白点。最新验证：`npm run check` 通过，`npm test` 13/13 通过。
+- 2026-06-30 在保留上述稳定交互的前提下，继续按参考视频做相册舞台质感加强：默认 `type === 0` ribbon 轻微拉宽、下沉并增加纵深，侧翼照片保留更强 scale/depth/focus，整体更像一整团铺开的动态相册，而不是中心一小排卡片。
+- 2026-06-30 CSS 光场和照片材质继续加强：相册背景增加深酒红/暗金/少量紫色层次，`.photo-cards::before/::after`、`.stage-flow`、`.stage-trail` 和 `.stage-veil` 的低频光带更明显；照片边框、阴影、内侧高光和真实图片掠光更扎实，避免回到透明玻璃片感觉。
+- 2026-06-30 这轮视觉加强没有恢复会导致闪烁的高成本路径：仍然不恢复 `.photo-cards` 全局 filter/drop-shadow，不恢复每张照片独立 `cardFloat` 动画，不开启默认自动 spotlight，不改变 `查看完整照片`、纯照片外侧关闭、单张照片拖动和队形切换复位链路。
+- 2026-06-30 主相册 Playwright 用例新增 stage 光场回归断言，要求 `.stage-flow` 和 `.photo-cards::after` 的可见度保持在当前电影感区间；重点截图继续看 `output/playwright/verified-album-desktop.png`、`verified-album-drag-motion.png`、`verified-single-photo-drag.png` 和 `verified-photo-full.png`。
 
 ## Next Session TODO
 
@@ -137,6 +141,7 @@
 3. 继续对照参考视频微调横向照片队列的纵深、密度、光效、hover 视觉反馈和拖拽手感；后续所有 UI 继续沿用深色电影感、暗金、细光尘、不卡通的方向。
 4. 不要破坏已稳定的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不长时间暂停、不闪烁；返回封面可用。
 4.1 不要破坏本轮单张照片交互：介绍页 `查看完整照片` 按钮必须可用，纯照片模式点击图片外黑色区域必须能关闭，照片底部文字区/边缘也应能拖出单张照片，切换队形时拖出的照片必须回到队列。
+4.2 后续视觉增强可以继续提高光场、照片材质和铺屏层次，但必须先保留现有低成本路径：不要恢复全局 filter/drop-shadow、独立照片浮动动画或默认自动 spotlight。
 5. 不要回退已修好的技术路径：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不推动真实队列；不要用全局强残影覆盖全部照片。
 6. 不要回退本轮稳定性修正：不要恢复 `.photo-cards` 常驻 `drop-shadow`，不要恢复照片独立 `cardFloat`/filter 动画，hover 不要固定跳到高 z-index；残影只能克制地服务拖拽、入场、变阵和当前 hover 卡片。
 6.1 不要回退本轮动画回收：不要把自动 scene blend 再拉回 0.9 左右，不要默认开启自动 spotlight，不要让扫光/ghost/camera 同时大幅叠加，否则会重新出现整体照片闪烁和动画失控。

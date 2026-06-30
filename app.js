@@ -1313,7 +1313,7 @@ function getLayoutPoint(type, index, total) {
   const breath = Math.sin(cinematicTime * 1.25 + index * 0.35);
 
   if (type === 0) {
-    const ribbonSpan = 12.2;
+    const ribbonSpan = 12.8;
     const isRibbon = absPhase <= ribbonSpan;
     const center = Math.max(0, 1 - absPhase / ribbonSpan);
     const side = Math.min(absPhase / ribbonSpan, 1);
@@ -1324,27 +1324,27 @@ function getLayoutPoint(type, index, total) {
       const laneRaw = lanePattern[index % lanePattern.length];
       const laneInfluence = smoothstep(0.1, 0.72, side);
       const lane = laneRaw * laneInfluence;
-      const laneDepth = laneInfluence * (124 - Math.abs(laneRaw) * 84);
-      const laneFocus = Math.max(0, 0.18 - Math.abs(lane) * 0.04 + laneInfluence * 0.07);
+      const laneDepth = laneInfluence * (148 - Math.abs(laneRaw) * 82);
+      const laneFocus = Math.max(0, 0.2 - Math.abs(lane) * 0.04 + laneInfluence * 0.08);
       const crest = Math.sin(cinematicTime * 0.28 + index * 0.84);
       const focus = Math.min(1, center + laneFocus);
       const ribbonPoint = {
-        x: 50 + phase * 3.28 + lane * (1.02 + side * 1.82) + wave * (0.16 + side * 0.48),
-        y: 54.2 - center * 3.6 + lane * (7.1 + side * 5.2) + Math.sin(phase * 0.72) * (0.65 + side * 0.8) + crest * laneInfluence * 0.56,
-        rotate: phase * 0.72 + lane * 4.4 + wave * 0.78,
-        yaw: -phase * (6.1 + side * 2.1) + lane * 7.2,
-        pitch: center * 3.6 - 2.8 - side * 1.5 - lane * 1.8,
-        scale: 0.58 + center * 0.56 + laneInfluence * (0.08 - Math.abs(laneRaw) * 0.014),
-        depth: -420 + center * 650 + laneDepth * 0.64,
+        x: 50 + phase * 3.42 + lane * (1.06 + side * 1.96) + wave * (0.14 + side * 0.54),
+        y: 55.6 - center * 3.2 + lane * (7.35 + side * 5.65) + Math.sin(phase * 0.72) * (0.6 + side * 0.86) + crest * laneInfluence * 0.58,
+        rotate: phase * 0.68 + lane * 4.7 + wave * 0.72,
+        yaw: -phase * (6.4 + side * 2.25) + lane * 7.6,
+        pitch: center * 3.4 - 2.6 - side * 1.6 - lane * 1.7,
+        scale: 0.6 + center * 0.55 + laneInfluence * (0.095 - Math.abs(laneRaw) * 0.012),
+        depth: -450 + center * 680 + laneDepth * 0.7,
         layer: 18 + Math.round(focus * 94) + Math.round(18 - absPhase) + Math.round((lane + 1.6) * 3),
         opacity: Math.min(1, 0.82 + center * 0.16 + laneInfluence * 0.04 - Math.abs(lane) * 0.01),
         focus,
         blur: (1 - focus) * 0.42 + Math.abs(lane) * 0.025,
         drift: breath * (0.6 + center * 1.4 + laneInfluence * 0.8),
         phase,
-        ghostX: direction * (18 + side * 76) + lane * 22,
-        ghostY: wave * (5 + side * 14) + lane * 14,
-        ghostRotate: direction * (3.4 + side * 10.5) + lane * 6.2
+        ghostX: direction * (20 + side * 84) + lane * 24,
+        ghostY: wave * (5 + side * 15) + lane * 14,
+        ghostRotate: direction * (3.4 + side * 11.2) + lane * 6.4
       };
       const introPoint = getIntroPoint(index, total, ribbonPoint);
       if (introPoint) return introPoint;
@@ -1358,8 +1358,8 @@ function getLayoutPoint(type, index, total) {
     const stackSlot = index % 4;
     const stackX = stackSlot === 0 ? -7.8 : stackSlot === 1 ? 7.8 : stackSlot === 2 ? -2.8 : 2.8;
     const tailPoint = {
-      x: 50 + stackX + Math.sin(tail * 1.52 + queueOffset * 0.12) * 2.8,
-      y: 54 + direction * (8.6 + tail * 8.4),
+      x: 50 + stackX * 1.05 + Math.sin(tail * 1.52 + queueOffset * 0.12) * 3,
+      y: 55.6 + direction * (8.9 + tail * 8.6),
       rotate: direction * (82 + tail * 5.8) + stackX * 0.35,
       yaw: direction * (18 + tail * 8.5),
       pitch: -direction * (28 - spine * 8),
