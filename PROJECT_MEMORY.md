@@ -140,6 +140,8 @@
 - 2026-06-30 这不是恢复自动 scene：`AUTO_SCENE_ENABLED` 仍为 `false`，空闲相册仍保持稳定低幅流动；拖动、打开照片、离开相册和入场都会清掉手动 scene pulse。Playwright 已在 `captures blank-area double click layout morph` 中断言变阵时 scene blend 出现且低于 0.44，2.1 秒后回落到 scene 0 / blend < 0.08。
 - 2026-06-30 单张照片拖动按最新反馈继续修正：位置计算改成跟手中心点 + `FREE_PHOTO_DRAG_GAIN`，边界放宽到 `FREE_PHOTO_LIMITS`，拖出的照片 `scale` 固定为 1；拖单张时会压低 `stageMotion` 和 `--drag-motion`，不再让整面相册镜头、光场或照片组出现放大感。
 - 2026-06-30 Playwright 收紧 `allows a single photo to be dragged out and reset by layout switch`：用更大拖动距离验证拖出范围，并断言没有 `.is-dragging`、有 `.is-free-dragging`、`--drag-motion` 保持低值、`--camera-scale` 不放大、拖出照片自身 scale 约等于 1。
+- 2026-06-30 继续按参考视频补“暗金舞台体积感”：`stage-aperture` 在入场后保留低强度体积光和横向反射光带，增强照片队列下方的空间落点；这只使用 CSS 光层和伪元素，不恢复 `.photo-cards` 全局 filter/drop-shadow。
+- 2026-06-30 照片材质继续加厚：`.photo-media` 增强内缘光、顶部微反光和暗部压边，`.photo-tile::after` 增强相纸边框、暗金外缘光和投影；Playwright 主相册用例新增 aperture 光层和相纸 inset shadow 断言。
 
 ## Next Session TODO
 
@@ -151,6 +153,7 @@
 4.2 后续视觉增强可以继续提高光场、照片材质和铺屏层次，但必须先保留现有低成本路径：不要恢复全局 filter/drop-shadow、独立照片浮动动画或默认自动 spotlight。
 4.3 新增的 `在相册中聚焦` 是手动 spotlight 入口，不要改回空闲自动强抽出；聚焦后再次点击前景照片或点击暗场应取消，双击暗场应切换队形并复位。
 4.4 手动变阵可以有短暂 scene pulse，但不要重新开启空闲自动 scene；变阵脉冲必须有上限、自动回落，并继续通过回归测试保护。
+4.5 舞台体积光和照片材质可继续增强，但必须走低强度 CSS 光层、`.stage-aperture` 伪元素、`.photo-media`/`.photo-tile::after` 伪元素路径；不要恢复全局 filter/drop-shadow 或单卡独立动画来换质感。
 5. 不要回退已修好的技术路径：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不推动真实队列；不要用全局强残影覆盖全部照片。
 6. 不要回退本轮稳定性修正：不要恢复 `.photo-cards` 常驻 `drop-shadow`，不要恢复照片独立 `cardFloat`/filter 动画，hover 不要固定跳到高 z-index；残影只能克制地服务拖拽、入场、变阵和当前 hover 卡片。
 6.1 不要回退本轮动画回收：不要把自动 scene blend 再拉回 0.9 左右，不要默认开启自动 spotlight，不要让扫光/ghost/camera 同时大幅叠加，否则会重新出现整体照片闪烁和动画失控。

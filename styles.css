@@ -2642,10 +2642,52 @@ body[data-view="locked"] .home-return {
 
 .stage-aperture {
   inset: 0;
-  opacity: calc(var(--intro-reveal) * 0.86);
+  opacity: calc(0.11 + var(--intro-reveal) * 0.72 + var(--scene-blend) * 0.06 + var(--drag-motion) * 0.04);
   background:
-    radial-gradient(ellipse at 50% 54%, transparent 0 22%, rgba(255, 224, 172, 0.06) 28%, rgba(0, 0, 0, 0.42) 62%, rgba(0, 0, 0, 0.76) 100%);
+    radial-gradient(ellipse at 50% 54%, transparent 0 22%, rgba(255, 224, 172, 0.055) 28%, rgba(0, 0, 0, 0.38) 62%, rgba(0, 0, 0, 0.72) 100%),
+    linear-gradient(180deg, rgba(4, 2, 8, 0.14), transparent 34%, rgba(0, 0, 0, 0.28));
   transition: opacity 280ms ease;
+}
+
+.stage-aperture::before,
+.stage-aperture::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  pointer-events: none;
+  border-radius: 999px;
+  mix-blend-mode: normal;
+}
+
+.stage-aperture::before {
+  top: 64%;
+  width: min(1160px, 92vw);
+  height: clamp(170px, 20vw, 285px);
+  opacity: calc(0.2 + var(--drag-motion) * 0.16 + var(--scene-blend) * 0.12);
+  filter: blur(30px);
+  transform:
+    translate(-50%, -50%)
+    translateX(calc(var(--flow-direction) * var(--drag-motion) * -34px))
+    rotate(calc(-1.8deg + var(--scene-blend) * 2.2deg))
+    scaleX(calc(0.86 + var(--drag-motion) * 0.12 + var(--scene-blend) * 0.08));
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(255, 224, 156, 0.22), rgba(160, 70, 110, 0.15) 42%, transparent 74%),
+    linear-gradient(90deg, transparent, rgba(255, 236, 198, 0.08), transparent);
+}
+
+.stage-aperture::after {
+  top: 51%;
+  width: min(1280px, 98vw);
+  height: clamp(58px, 6.8vw, 102px);
+  opacity: calc(0.08 + var(--drag-motion) * 0.08 + var(--scene-blend) * 0.06);
+  filter: blur(18px);
+  transform:
+    translate(-50%, -50%)
+    translateX(calc(var(--flow-direction) * var(--drag-motion) * 46px))
+    rotate(0.6deg)
+    scaleX(calc(0.92 + var(--scene-blend) * 0.08));
+  background:
+    linear-gradient(90deg, transparent 0 9%, rgba(255, 244, 218, 0.11) 28%, rgba(225, 173, 96, 0.2) 50%, rgba(168, 67, 112, 0.1) 72%, transparent 94%);
 }
 
 @keyframes cinematicBeam {
@@ -2785,9 +2827,10 @@ body[data-view="locked"] .home-return {
   overflow: hidden;
   background-color: #070609;
   box-shadow:
-    inset 0 0 0 1px rgba(255, 248, 224, 0.24),
-    inset 0 0 28px rgba(255, 236, 198, 0.08),
-    inset 0 -40px 52px rgba(0, 0, 0, 0.2);
+    inset 0 0 0 1px rgba(255, 248, 224, 0.28),
+    inset 0 0 28px rgba(255, 236, 198, 0.1),
+    inset 0 18px 32px rgba(255, 255, 255, 0.035),
+    inset 0 -42px 56px rgba(0, 0, 0, 0.26);
 }
 
 .photo-media::before {
@@ -2796,9 +2839,10 @@ body[data-view="locked"] .home-return {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: calc(0.1 + var(--focus, 0) * 0.07);
+  opacity: calc(0.12 + var(--focus, 0) * 0.075);
   background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent 17%, transparent 70%, rgba(255, 236, 198, 0.08)),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent 17%, transparent 70%, rgba(255, 236, 198, 0.1)),
+    radial-gradient(circle at 22% 12%, rgba(255, 255, 255, 0.14), transparent 18%),
     radial-gradient(ellipse at 50% 112%, rgba(0, 0, 0, 0.46), transparent 46%);
   mix-blend-mode: soft-light;
 }
@@ -2809,11 +2853,11 @@ body[data-view="locked"] .home-return {
   inset: -12%;
   pointer-events: none;
   z-index: 2;
-  opacity: calc(0.012 + var(--sweep, 0) * 0.14);
+  opacity: calc(0.018 + var(--sweep, 0) * 0.16 + var(--focus, 0) * 0.018);
   mix-blend-mode: normal;
   background:
-    linear-gradient(112deg, transparent 0 32%, rgba(255, 255, 255, 0.28) 45%, rgba(255, 236, 198, 0.2) 52%, transparent 66%),
-    radial-gradient(circle at 54% 28%, rgba(255, 245, 214, 0.16), transparent 24%);
+    linear-gradient(112deg, transparent 0 30%, rgba(255, 255, 255, 0.34) 45%, rgba(255, 236, 198, 0.22) 53%, transparent 68%),
+    radial-gradient(circle at 54% 28%, rgba(255, 245, 214, 0.18), transparent 24%);
   filter: blur(0.4px);
 }
 
@@ -3049,11 +3093,13 @@ body[data-view="locked"] .home-return {
 }
 
 .photo-tile::after {
-  border-color: rgba(255, 242, 208, calc(0.08 + var(--focus, 0) * 0.12));
+  border-color: rgba(255, 242, 208, calc(0.1 + var(--focus, 0) * 0.13));
   box-shadow:
-    inset 0 -32px 54px rgba(0, 0, 0, calc(0.42 - var(--focus, 0) * 0.13)),
-    inset 0 0 0 1px rgba(0, 0, 0, 0.18),
-    0 0 calc(12px + var(--focus, 0) * 34px + var(--sweep, 0) * 22px) rgba(229, 184, 106, calc(0.05 + var(--focus, 0) * 0.18 + var(--sweep, 0) * 0.08));
+    inset 0 1px 0 rgba(255, 255, 255, calc(0.06 + var(--focus, 0) * 0.08)),
+    inset 0 -32px 54px rgba(0, 0, 0, calc(0.44 - var(--focus, 0) * 0.13)),
+    inset 0 0 0 1px rgba(0, 0, 0, 0.2),
+    0 0 calc(12px + var(--focus, 0) * 34px + var(--sweep, 0) * 22px) rgba(229, 184, 106, calc(0.055 + var(--focus, 0) * 0.19 + var(--sweep, 0) * 0.085)),
+    0 16px calc(32px + var(--focus, 0) * 42px) rgba(0, 0, 0, calc(0.24 + var(--focus, 0) * 0.16));
 }
 
 .photo-wall.is-dragging .photo-cards {

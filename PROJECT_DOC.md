@@ -285,6 +285,8 @@ npm test
 - Playwright 已加强 `captures blank-area double click layout morph`：变阵瞬间必须有受控 scene blend，但强度不能超过稳定阈值；等待后必须回到 scene 0，避免再次出现整体照片闪烁或动画不受控制。
 - 单张照片拖动继续扩大可移动范围：拖动时用跟手中心点和放大位移增益计算位置，允许照片接近舞台外沿；同时把拖出照片 `scale` 固定为 1，并压低 `--drag-motion`，避免拖单张时整面相册跟着放大或触发整组舞台动效。
 - Playwright 已收紧 `allows a single photo to be dragged out and reset by layout switch`：拖动距离加大，测试会确认没有进入整面相册拖动、`--drag-motion` 保持低值、`--camera-scale` 不放大、拖出照片本身不被 scale 放大。
+- 继续按参考视频补舞台体积感：`stage-aperture` 入场后也保留低强度底部体积光和横向反射光带，让照片像站在暗金舞台上，而不是悬在纯黑背景里；这只走 CSS 光层，不恢复全局 `.photo-cards` filter。
+- 照片材质继续往实体相纸推：增强 `.photo-media` 内缘光、顶部微反光、暗部压边和扫光，让真实照片更厚、更亮、更有边缘质感；Playwright 主相册用例新增 aperture 光层和相纸 `box-shadow` 断言，防止后续把这一层质感删掉。
 
 ## 明天重开对话快速接续
 
@@ -297,6 +299,7 @@ npm test
 4.1. 不能破坏的单张照片交互：介绍页按钮必须能进入纯照片；纯照片点击图片外黑色区域必须关闭；照片底部文字区/边缘也必须能起拖；单张拖动范围要接近舞台外沿，且不能触发整面相册放大；切换队形必须让拖出的照片复位。
 4.2. 手动聚焦交互不能破坏：介绍页 `在相册中聚焦` 必须能把当前照片抽回相册前景；再次点击前景照片或点击暗场取消；双击暗场切换队形并复位。
 4.3. 手动变阵脉冲不能破坏：双击空白时可以短暂出现 scene 光场/深度，但必须自动回落；不要重新打开空闲自动 scene。
+4.4. 舞台体积光和相纸材质可以继续增强，但必须保持低强度、CSS 光层和单卡伪元素路径；不要用全局 filter/drop-shadow 或独立卡片动画换质感。
 5. 不能回退的技术约束：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不要推动真实队列；不要用全局强残影覆盖 24 张照片；不要恢复全局 filter/drop-shadow、单卡浮动动画或默认自动 spotlight。
 6. GitHub private repo 已是 `https://github.com/kkkchen12/AAAyichun`；后续用 Vercel 从该仓库导入部署。
 7. 私密入口已经可用，当前暗号为 `20030518`；正式发给她前在部署 URL 上重新测一次错误暗号和正确暗号。

@@ -215,3 +215,11 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - `FREE_PHOTO_LIMITS` intentionally allows a small overscan past the stage edge. This gives the interaction room without changing whole-album blank-space dragging.
 - Dragging a single photo no longer boosts the whole stage: `startFreePhotoDrag()` clears manual scene pulse, zeroes queue/orbit velocity, caps `stageMotion`, and keeps the dragged photo scale at `1`.
 - Regression coverage asserts that free-photo drag does not enter `.is-dragging`, does enter `.is-free-dragging`, keeps `--drag-motion` low, keeps `--camera-scale` below zoom territory, and leaves the dragged photo at scale 1.
+
+## Low-Cost Stage Volume And Photo Paper Material - 2026-06-30
+
+- Added persistent low-strength volume and reflection light through `.stage-aperture::before/::after`. This gives the album a grounded dark-gold stage plane after the intro without adding global filters or changing layout math.
+- Strength is tied to existing `--drag-motion` and `--scene-blend` variables, but the baseline is intentionally low. It should enrich the scene, not become another uncontrolled automatic effect.
+- Photo material was thickened through `.photo-media` and `.photo-tile::after`: stronger inset edge light, subtle top sheen, darker bottom edge, warmer sweep, and a restrained external shadow.
+- Do not replace this with `.photo-cards` filter/drop-shadow or per-card animation. The point of this pass is premium material using cheap pseudo-elements that do not perturb hit testing.
+- Regression coverage in the main album test now checks aperture visibility and photo-media inset shadow while continuing to assert no `.photo-cards` global filter, no card animation, and no opacity animation.

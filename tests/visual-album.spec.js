@@ -92,6 +92,9 @@ test("captures album and two-step photo viewer", async ({ page }) => {
     const cardStyle = getComputedStyle(tile);
     const cardsStyle = getComputedStyle(document.querySelector(".photo-cards"));
     const flowStyle = getComputedStyle(document.querySelector(".stage-flow"));
+    const apertureStyle = getComputedStyle(document.querySelector(".stage-aperture"));
+    const apertureGlow = getComputedStyle(document.querySelector(".stage-aperture"), "::before");
+    const mediaStyle = getComputedStyle(tile.querySelector(".photo-media"));
     const cardsAfter = getComputedStyle(document.querySelector(".photo-cards"), "::after");
     const img = tile.querySelector("img");
     return {
@@ -104,6 +107,9 @@ test("captures album and two-step photo viewer", async ({ page }) => {
       tileTransitionProperty: cardStyle.transitionProperty,
       tileWillChange: cardStyle.willChange,
       stageFlowOpacity: Number.parseFloat(flowStyle.opacity),
+      apertureOpacity: Number.parseFloat(apertureStyle.opacity),
+      apertureGlowOpacity: Number.parseFloat(apertureGlow.opacity),
+      mediaShadow: mediaStyle.boxShadow,
       stageGlowOpacity: Number.parseFloat(cardsAfter.opacity),
       imgFilter: img ? getComputedStyle(img).filter : ""
     };
@@ -117,6 +123,9 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   expect(materialState.tileTransitionProperty).not.toContain("opacity");
   expect(materialState.tileWillChange).not.toContain("opacity");
   expect(materialState.stageFlowOpacity).toBeGreaterThan(0.04);
+  expect(materialState.apertureOpacity).toBeGreaterThan(0.08);
+  expect(materialState.apertureGlowOpacity).toBeGreaterThan(0.16);
+  expect(materialState.mediaShadow).toContain("inset");
   expect(materialState.stageGlowOpacity).toBeGreaterThan(0.6);
   expect(materialState.imgFilter).toContain("brightness");
   await page.screenshot({ path: "output/playwright/verified-album-desktop.png" });
