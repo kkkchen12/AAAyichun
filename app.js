@@ -2,7 +2,7 @@ const story = {
   herName: "宝贝",
   fromName: "我",
   heroKicker: "Happy Birthday",
-  heroTitle: "生日快乐，我最想见的人",
+  heroTitle: "亲爱的以纯，生日快乐",
   heroText: "我把想你放进照片里，把没能当面说的话放进这封信里。你打开的时候，就像我在认真陪你过这个生日。",
   musicPath: "assets/song.mp3",
   privateCodes: ["20030518"],
@@ -27,43 +27,123 @@ const story = {
   photos: [
     {
       image: "assets/photos/photo-1.jpg",
-      title: "第一张想放在这里的照片",
-      caption: "这里写这张照片背后的那一天，越具体越好，比如当时在哪里、你为什么一直记得。"
+      title: "第一次报备",
+      caption: "这是我们才刚认识时，你给我发的学习分享。那时候的你，也就是这么可爱。"
     },
     {
       image: "assets/photos/photo-2.jpg",
-      title: "一起走过的某一天",
-      caption: "可以放合照、风景、聊天截图、车票，重点是让她知道你真的记得这些小事。"
+      title: "意境深远的风景",
+      caption: "这张照片是我在你朋友圈中找到的，一个截然不同的意境，当然也用在了我给你写的那本书上。"
     },
     {
       image: "assets/photos/photo-3.jpg",
-      title: "我很想你的时候",
-      caption: "这张适合放她最好看的照片，或者你最想她的时候反复看的那一张。"
+      title: "来自乌鲁木齐的微笑",
+      caption: "那是第一次收到你来自乌鲁木齐的美好。虽然那天你还在故意生我气，但现在想想，只记得那时的美好。"
     },
     {
       image: "assets/photos/photo-4.jpg",
-      title: "下次见面之前",
-      caption: "可以放你所在城市的夜晚、准备的礼物，或者你想带她去的地方。"
+      title: "你喜欢的这张",
+      caption: "这张照片我看过很多次，因为你说你喜欢，所以它成为了我的手机壁纸，每天都能见到好多次。"
     },
     {
       image: "assets/photos/photo-5.jpg",
-      title: "我喜欢你的一个瞬间",
-      caption: "把一句夸她的话写得具体一点，比模板化的情话更容易打动她。"
+      title: "不一样美丽的咖啡",
+      caption: "来自日常的一张分享。当然不一样的不只是咖啡，更是妻子萌萌又美丽的样子。"
     },
     {
       image: "assets/photos/photo-6.jpg",
-      title: "我们还会有很多以后",
-      caption: "这里可以写一个你们约好但还没有完成的计划。"
+      title: "这张是飒飒的风格",
+      caption: "这张是我的百变妻子的其中一个缩影，凌厉的眼神也是很有魅力的啦。"
     },
     {
       image: "assets/photos/photo-7.jpg",
-      title: "今天想把祝福给你",
-      caption: "生日当天最重要的一句话，可以放在这张照片里。"
+      title: "爱，鲜花和你",
+      caption: "值得铭记的一刻，妻子第一次收到我的表白花花。虽然隔着遥远的距离，但还是值得铭记的啦。"
     },
     {
       image: "assets/photos/photo-8.jpg",
-      title: "最后一张留给拥抱",
-      caption: "等见面的时候，把这段时间缺席的拥抱都补回来。"
+      title: "要亲亲的宝宝",
+      caption: "同样来自分享的一张日常照片，但是要亲亲的宝宝永远都是最好的啦。"
+    },
+    {
+      image: "assets/photos/photo-9.jpg",
+      title: "第一次正式见面",
+      caption: "见面正式表白后的纪念啦，执子之手，与子偕老。"
+    },
+    {
+      image: "assets/photos/photo-10.jpg",
+      title: "与我美丽的妻子见面",
+      caption: "这张照片我纠结要不要放，但是呢，老婆她是很有感觉的啦，那就放下我们这里的第一张合照啦。"
+    },
+    {
+      image: "assets/photos/photo-11.jpg",
+      title: "新宿舍的妻子",
+      caption: "妻子拿着我给的大疆，在即将搬入的新宿舍拍下了这个美好的时刻。"
+    },
+    {
+      image: "assets/photos/photo-12.jpg",
+      title: "吃虾虾的以纯",
+      caption: "这张照片毫无疑问是美好的照片。如果没猜错的话，是我们上次去过的那家吧；如果是的话，原谅我不想说出来哈哈哈。"
+    },
+    {
+      image: "assets/photos/photo-13.jpg",
+      title: "公开的合照",
+      caption: "这是一张妻子公开在所有人面前的合照，拥有值得庆祝的勇气和我们的爱。"
+    },
+    {
+      image: "assets/photos/photo-14.jpg",
+      title: "好看的照片",
+      caption: "这张其实我不知道是在哪一个场景拍的，但是就是好看好看，妻子就是好看！"
+    },
+    {
+      image: "assets/photos/photo-15.jpg",
+      title: "迪士尼的可爱公主",
+      caption: "时间瞬间拉回到去迪士尼的那天，那天蒙蒙细雨，但也浇不灭妻子的热情，以及我们的爱。"
+    },
+    {
+      image: "assets/photos/photo-16.jpg",
+      title: "第一次的生日",
+      caption: "这张照片我知道老婆不一定想放的啦。虽然我觉得这么拍也是很好看的，但这还是很有意义的一张啦。"
+    },
+    {
+      image: "assets/photos/photo-17.jpg",
+      title: "手托住的世界",
+      caption: "妻子曾经说这张很有感觉，我同意，也喜欢她在我手心里的感觉，好像托住了整个世界。"
+    },
+    {
+      image: "assets/photos/photo-18.jpg",
+      title: "来自大疆的记录",
+      caption: "这张同样是宝宝使用大疆记录下的美好一瞬间，我猜应该是和室友一起去的呢。"
+    },
+    {
+      image: "assets/photos/photo-19.jpg",
+      title: "阳光下的我们",
+      caption: "阳光下是我们两个的身影，好像时间定格在这一刻，美好不期而遇。"
+    },
+    {
+      image: "assets/photos/photo-20.jpg",
+      title: "微笑的天使",
+      caption: "这张来自图书馆的照片。如果世界上有天使的话，一定是满怀笑意的妻子，这一切温馨而又美丽。"
+    },
+    {
+      image: "assets/photos/photo-21.jpg",
+      title: "两个人的合照",
+      caption: "其实就是想放我们的合照。如果有要说的，难得一次我出现半边脸哈哈哈哈哈。"
+    },
+    {
+      image: "assets/photos/photo-22.jpg",
+      title: "卖萌的妻子",
+      caption: "虽然这张是我截图下来的，但是没办法，这么可爱的妻子谁能不爱呢。"
+    },
+    {
+      image: "assets/photos/photo-23.jpg",
+      title: "美丽的以纯",
+      caption: "没有什么特别的意思，就是单纯很纯真的美。"
+    },
+    {
+      image: "assets/photos/photo-24.jpg",
+      title: "不知道在想什么的纯纯",
+      caption: "眼神不知道被什么吸引了的纯纯，还是那么可可爱爱。"
     }
   ]
 };
