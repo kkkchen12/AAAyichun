@@ -38,8 +38,8 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   const desktopTileWidth = await page.locator(".photo-tile").first().evaluate((tile) => (
     Number.parseFloat(getComputedStyle(tile).width)
   ));
-  expect(desktopTileWidth).toBeGreaterThan(135);
-  expect(desktopTileWidth).toBeLessThan(205);
+  expect(desktopTileWidth).toBeGreaterThan(120);
+  expect(desktopTileWidth).toBeLessThan(185);
   const albumCoverage = await page.locator(".photo-tile").evaluateAll((tiles) => {
     const visibleBoxes = tiles
       .map((tile) => {
@@ -94,6 +94,8 @@ test("captures album and two-step photo viewer", async ({ page }) => {
     const flowStyle = getComputedStyle(document.querySelector(".stage-flow"));
     const apertureStyle = getComputedStyle(document.querySelector(".stage-aperture"));
     const apertureGlow = getComputedStyle(document.querySelector(".stage-aperture"), "::before");
+    const depthRail = document.querySelector(".photo-depth-rail");
+    const depthPhoto = document.querySelector(".depth-photo");
     const mediaStyle = getComputedStyle(tile.querySelector(".photo-media"));
     const cardsAfter = getComputedStyle(document.querySelector(".photo-cards"), "::after");
     const img = tile.querySelector("img");
@@ -109,6 +111,11 @@ test("captures album and two-step photo viewer", async ({ page }) => {
       stageFlowOpacity: Number.parseFloat(flowStyle.opacity),
       apertureOpacity: Number.parseFloat(apertureStyle.opacity),
       apertureGlowOpacity: Number.parseFloat(apertureGlow.opacity),
+      depthRailCount: document.querySelectorAll(".depth-photo").length,
+      depthRailPointerEvents: depthRail ? getComputedStyle(depthRail).pointerEvents : "",
+      depthPhotoOpacity: depthPhoto ? Number.parseFloat(getComputedStyle(depthPhoto).opacity) : 0,
+      depthPhotoTransform: depthPhoto ? getComputedStyle(depthPhoto).transform : "none",
+      depthPhotoWidth: depthPhoto ? Number.parseFloat(getComputedStyle(depthPhoto).width) : 0,
       mediaShadow: mediaStyle.boxShadow,
       stageGlowOpacity: Number.parseFloat(cardsAfter.opacity),
       imgFilter: img ? getComputedStyle(img).filter : ""
@@ -125,6 +132,12 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   expect(materialState.stageFlowOpacity).toBeGreaterThan(0.04);
   expect(materialState.apertureOpacity).toBeGreaterThan(0.08);
   expect(materialState.apertureGlowOpacity).toBeGreaterThan(0.16);
+  expect(materialState.depthRailCount).toBeGreaterThanOrEqual(8);
+  expect(materialState.depthRailPointerEvents).toBe("none");
+  expect(materialState.depthPhotoOpacity).toBeGreaterThan(0.12);
+  expect(materialState.depthPhotoOpacity).toBeLessThan(0.54);
+  expect(materialState.depthPhotoTransform).not.toBe("none");
+  expect(materialState.depthPhotoWidth).toBeLessThan(desktopTileWidth);
   expect(materialState.mediaShadow).toContain("inset");
   expect(materialState.stageGlowOpacity).toBeGreaterThan(0.6);
   expect(materialState.imgFilter).toContain("brightness");

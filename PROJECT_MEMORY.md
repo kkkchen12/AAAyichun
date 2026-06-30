@@ -142,6 +142,11 @@
 - 2026-06-30 Playwright 收紧 `allows a single photo to be dragged out and reset by layout switch`：用更大拖动距离验证拖出范围，并断言没有 `.is-dragging`、有 `.is-free-dragging`、`--drag-motion` 保持低值、`--camera-scale` 不放大、拖出照片自身 scale 约等于 1。
 - 2026-06-30 继续按参考视频补“暗金舞台体积感”：`stage-aperture` 在入场后保留低强度体积光和横向反射光带，增强照片队列下方的空间落点；这只使用 CSS 光层和伪元素，不恢复 `.photo-cards` 全局 filter/drop-shadow。
 - 2026-06-30 照片材质继续加厚：`.photo-media` 增强内缘光、顶部微反光和暗部压边，`.photo-tile::after` 增强相纸边框、暗金外缘光和投影；Playwright 主相册用例新增 aperture 光层和相纸 inset shadow 断言。
+- 2026-06-30 新增远景照片轨道 `.photo-depth-rail`：在主照片层后方渲染 10 张小尺寸真实照片缩略图，形成参考视频里的远景照片群和更强纵深。它 `pointer-events: none`，不参与点击、拖动、详情打开、单张拖出或队形切换。
+- 2026-06-30 远景轨道只由现有 `applyLayout()` 同步 transform/opacity，并缓存 `cachedDepthFrames`，避免 RAF 循环每帧全局查 DOM；相机变量由 `updateAlbumCamera()` 输出 `--rail-camera-*`，CSS 不做复杂乘法，提高浏览器兼容性。
+- 2026-06-30 默认照片尺寸从上一轮偏大的 190px 上限回收到约 172px 上限，layout 1/2/3 和手机横屏/竖屏同步收窄。方向是“更密、更有纵深、更接近参考视频的照片群”，不是退回小卡片；远景层负责补密度，主照片负责清晰焦点。
+- 2026-06-30 相纸材质继续增强侧边厚度：`.photo-tile` 和 `.photo-tile::after` 新增左右 inset 边缘光/压暗，让真实照片更像实体相纸；仍禁止恢复 `.photo-cards` 全局 filter/drop-shadow、单卡 `cardFloat`/filter 动画或默认自动 spotlight。
+- 2026-06-30 Playwright 主相册用例新增远景轨道回归：断言 `.depth-photo` 至少 8 张、轨道不可命中、透明度受控、使用 transform、尺寸小于主照片，并继续检查无全局 filter、无单卡动画、aperture/相纸质感存在。
 
 ## Next Session TODO
 

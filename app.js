@@ -76,6 +76,7 @@ const IDLE_SCENE_BLEND_MAX = 0.08;
 const REST_SCENE_BLEND = 0;
 const MANUAL_SCENE_PULSE_MS = 1550;
 const MANUAL_SCENE_PULSE_MAX = 0.38;
+const DEPTH_RAIL_COUNT = 10;
 const FREE_PHOTO_DRAG_GAIN = 1.72;
 const FREE_PHOTO_LIMITS = {
   minX: -4,
@@ -126,6 +127,7 @@ let lastLayoutApplyAt = 0;
 let lastPointerPhotoOpenAt = 0;
 let lastPointerPhotoOpenTile = null;
 let cachedPhotoTiles = [];
+let cachedDepthFrames = [];
 let hoveredPhotoTile = null;
 const freePhotoOffsets = new Map();
 let albumSceneBlend = 0;
@@ -534,7 +536,27 @@ function renderPhotos() {
   });
 
   cachedPhotoTiles = Array.from(grid.querySelectorAll(".photo-tile"));
+  renderDepthRail();
   applyLayout();
+}
+
+function renderDepthRail() {
+  const rail = $("#photoDepthRail");
+  if (!rail) return;
+  rail.innerHTML = "";
+  cachedDepthFrames = [];
+  const count = Math.min(DEPTH_RAIL_COUNT, shuffledPhotos.length);
+  for (let index = 0; index < count; index += 1) {
+    const photoIndex = (index * 3 + 1) % shuffledPhotos.length;
+    const photo = shuffledPhotos[photoIndex];
+    const frame = document.createElement("span");
+    frame.className = "depth-photo";
+    frame.style.setProperty("--photo-url", `url(${JSON.stringify(photo.image)})`);
+    frame.style.setProperty("--depth-delay", `${-(index * 0.18).toFixed(2)}s`);
+    frame.innerHTML = `<span></span>`;
+    rail.appendChild(frame);
+    cachedDepthFrames.push(frame);
+  }
 }
 
 function buildPhotoList() {
@@ -897,6 +919,8 @@ function applyLayout(updateCopy = true) {
     revealStagePoem();
   }
 
+  updateDepthRail(stageWidth, stageHeight);
+
   tiles.forEach((tile, index) => {
     let point = getLayoutPoint(layoutIndex, index, tiles.length);
     point = applySpotlightPoint(point, index, tiles.length);
@@ -958,6 +982,31 @@ function applyLayout(updateCopy = true) {
     tile.style.setProperty("--ghost-c-x", `${(flow * motion * ghostX * 0.34).toFixed(2)}px`);
     tile.style.setProperty("--ghost-c-y", `${(motion * ghostY * 0.42).toFixed(2)}px`);
     tile.style.setProperty("--ghost-c-rotate", `${(flow * motion * ghostRotate * 0.36).toFixed(2)}deg`);
+  });
+}
+
+function updateDepthRail(stageWidth, stageHeight) {
+  const frames = cachedDepthFrames.length ? cachedDepthFrames : Array.from(document.querySelectorAll(".depth-photo"));
+  if (!frames.length) return;
+  const count = frames.length;
+  frames.forEach((frame, index) => {
+    const phase = wrapPhase(index * 2.2, count * 1.7, queueOffset * 0.26);
+    const absPhase = Math.abs(phase);
+    const front = Math.max(0, 1 - absPhase / (count * 0.82));
+    const side = phase < 0 ? -1 : 1;
+    const wave = Math.sin(cinematicTime * 0.34 + index * 0.9);
+    const x = 50 + phase * 8.4 + wave * 0.8;
+    const y = 49.5 + Math.sin(phase * 0.64 + cinematicTime * 0.18) * 7.4 + (index % 2 ? 3.4 : -2.6);
+    const scale = 0.62 + front * 0.24 + (index % 4 === 0 ? 0.06 : 0);
+    const depth = -850 + front * 250;
+    frame.style.setProperty("--x-px", `${((x / 100) * stageWidth).toFixed(2)}px`);
+    frame.style.setProperty("--y-px", `${((y / 100) * stageHeight).toFixed(2)}px`);
+    frame.style.setProperty("--depth", `${depth.toFixed(1)}px`);
+    frame.style.setProperty("--rotate", `${(side * 22 + wave * 4 + (index % 3 - 1) * 5).toFixed(2)}deg`);
+    frame.style.setProperty("--yaw", `${(-side * (38 + front * 14)).toFixed(2)}deg`);
+    frame.style.setProperty("--scale", scale.toFixed(3));
+    frame.style.setProperty("--opacity", (0.16 + front * 0.28 + albumIntroProgress * 0.04).toFixed(3));
+    frame.style.setProperty("--rail-glow", (0.06 + front * 0.13 + albumSceneBlend * 0.08).toFixed(3));
   });
 }
 
@@ -1258,13 +1307,25 @@ function updateAlbumCamera(wall, hoverVisualActive) {
   const scale = lightboxOpen
     ? 0.962
     : idleCamera ? 0.997 : 0.996 + sceneWeight * 0.0015 + motion * 0.0015 + Math.sin(cinematicTime * 0.22) * 0.0007;
+  const cameraX = (driftX + dragPush) * settle;
+  const cameraY = driftY * settle;
+  const cameraZ = dolly * settle;
+  const cameraRoll = idleCamera ? 0 : direction * motion * 0.035 + Math.sin(cinematicTime * 0.18) * 0.012;
+  const cameraTiltX = idleCamera ? 0 : sceneWeight * -0.08 + Math.sin(cinematicTime * 0.24) * 0.02;
+  const cameraTiltY = idleCamera ? 0 : direction * motion * 0.06 + Math.cos(cinematicTime * 0.2) * 0.025;
 
-  wall.style.setProperty("--camera-x", `${((driftX + dragPush) * settle).toFixed(2)}px`);
-  wall.style.setProperty("--camera-y", `${(driftY * settle).toFixed(2)}px`);
-  wall.style.setProperty("--camera-z", `${(dolly * settle).toFixed(2)}px`);
-  wall.style.setProperty("--camera-roll", `${(idleCamera ? 0 : direction * motion * 0.035 + Math.sin(cinematicTime * 0.18) * 0.012).toFixed(3)}deg`);
-  wall.style.setProperty("--camera-tilt-x", `${(idleCamera ? 0 : sceneWeight * -0.08 + Math.sin(cinematicTime * 0.24) * 0.02).toFixed(3)}deg`);
-  wall.style.setProperty("--camera-tilt-y", `${(idleCamera ? 0 : direction * motion * 0.06 + Math.cos(cinematicTime * 0.2) * 0.025).toFixed(3)}deg`);
+  wall.style.setProperty("--camera-x", `${cameraX.toFixed(2)}px`);
+  wall.style.setProperty("--camera-y", `${cameraY.toFixed(2)}px`);
+  wall.style.setProperty("--camera-z", `${cameraZ.toFixed(2)}px`);
+  wall.style.setProperty("--camera-roll", `${cameraRoll.toFixed(3)}deg`);
+  wall.style.setProperty("--camera-tilt-x", `${cameraTiltX.toFixed(3)}deg`);
+  wall.style.setProperty("--camera-tilt-y", `${cameraTiltY.toFixed(3)}deg`);
+  wall.style.setProperty("--rail-camera-x", `${(cameraX * 0.42).toFixed(2)}px`);
+  wall.style.setProperty("--rail-camera-y", `${(cameraY * 0.34).toFixed(2)}px`);
+  wall.style.setProperty("--rail-camera-z", `${(cameraZ * 0.38).toFixed(2)}px`);
+  wall.style.setProperty("--rail-camera-roll", `${(cameraRoll * 0.34).toFixed(3)}deg`);
+  wall.style.setProperty("--rail-camera-tilt-x", `${(cameraTiltX * 0.45).toFixed(3)}deg`);
+  wall.style.setProperty("--rail-camera-tilt-y", `${(cameraTiltY * 0.45).toFixed(3)}deg`);
   wall.style.setProperty("--camera-scale", scale.toFixed(4));
 }
 

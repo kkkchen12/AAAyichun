@@ -287,6 +287,11 @@ npm test
 - Playwright 已收紧 `allows a single photo to be dragged out and reset by layout switch`：拖动距离加大，测试会确认没有进入整面相册拖动、`--drag-motion` 保持低值、`--camera-scale` 不放大、拖出照片本身不被 scale 放大。
 - 继续按参考视频补舞台体积感：`stage-aperture` 入场后也保留低强度底部体积光和横向反射光带，让照片像站在暗金舞台上，而不是悬在纯黑背景里；这只走 CSS 光层，不恢复全局 `.photo-cards` filter。
 - 照片材质继续往实体相纸推：增强 `.photo-media` 内缘光、顶部微反光、暗部压边和扫光，让真实照片更厚、更亮、更有边缘质感；Playwright 主相册用例新增 aperture 光层和相纸 `box-shadow` 断言，防止后续把这一层质感删掉。
+- 新增 `.photo-depth-rail` 远景照片轨道：它位于主照片层后方，使用真实照片生成一组更小、更暗、更远的相纸缩略图，补足参考视频里“远处仍有照片群在流动”的密度和纵深。
+- 远景轨道完全不参与点击和拖动，`pointer-events: none`，只跟随现有 RAF 布局写入 `transform` 和受控 opacity；DOM 节点会在渲染后缓存，避免每帧全局查询。
+- 默认桌面照片尺寸从上一轮偏大的状态收回到更克制的区间，让相册更像一整团密集照片队列，而不是一张巨大的中心卡片；手机横屏和竖屏规则同步收窄，避免小屏拥挤。
+- 相纸材质继续加厚但仍走低成本路径：通过 `.photo-tile`、`.photo-tile::after` 和 `.photo-media` 的内侧边缘光、侧边压暗和暗金外缘光实现，不恢复全局 filter/drop-shadow 或单卡浮动动画。
+- Playwright 主相册用例新增远景轨道断言：验证 `.depth-photo` 数量、不可命中、透明度范围、transform 定位、尺寸小于主照片，同时继续守住无 `.photo-cards` 全局 filter、无单卡动画、无 opacity 动画。
 
 ## 明天重开对话快速接续
 

@@ -2690,6 +2690,90 @@ body[data-view="locked"] .home-return {
     linear-gradient(90deg, transparent 0 9%, rgba(255, 244, 218, 0.11) 28%, rgba(225, 173, 96, 0.2) 50%, rgba(168, 67, 112, 0.1) 72%, transparent 94%);
 }
 
+.photo-depth-rail {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  transform-style: preserve-3d;
+  transform:
+    translate3d(
+      calc(var(--stage-shift-x, 0px) + var(--rail-camera-x, 0px)),
+      calc(var(--stage-shift-y, 0px) + var(--rail-camera-y, 0px)),
+      var(--rail-camera-z, 0px)
+    )
+    rotateX(var(--rail-camera-tilt-x, 0deg))
+    rotateY(var(--rail-camera-tilt-y, 0deg))
+    rotate(var(--rail-camera-roll, 0deg));
+  opacity: calc(0.72 + var(--intro-reveal) * 0.16);
+  contain: layout paint;
+  will-change: transform;
+}
+
+.depth-photo {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: clamp(58px, 4.8vw, 92px);
+  aspect-ratio: 0.72;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 238, 200, 0.18);
+  background:
+    linear-gradient(145deg, rgba(255, 248, 232, 0.1), rgba(255, 248, 232, 0.018)),
+    rgba(9, 6, 11, 0.9);
+  box-shadow:
+    0 22px 58px rgba(0, 0, 0, 0.62),
+    0 0 34px rgba(205, 142, 82, var(--rail-glow, 0.08)),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  opacity: var(--opacity, 0.22);
+  overflow: hidden;
+  transform:
+    translate3d(calc(var(--x-px, 50vw) - 50%), calc(var(--y-px, 50vh) - 50%), var(--depth, -720px))
+    rotateY(var(--yaw, 0deg))
+    rotate(var(--rotate, 0deg))
+    scale(var(--scale, 0.72));
+  transform-origin: 50% 50%;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.depth-photo > span {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(180deg, rgba(255, 248, 232, 0.03), rgba(0, 0, 0, 0.16)),
+    var(--photo-url);
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.9) contrast(1.06) saturate(0.96);
+}
+
+.depth-photo::before,
+.depth-photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.depth-photo::before {
+  z-index: 1;
+  background:
+    linear-gradient(118deg, rgba(255, 255, 255, 0.16), transparent 22%, transparent 72%, rgba(255, 236, 198, 0.06)),
+    radial-gradient(ellipse at 50% 105%, rgba(0, 0, 0, 0.48), transparent 50%);
+  mix-blend-mode: screen;
+  opacity: 0.46;
+}
+
+.depth-photo::after {
+  z-index: 2;
+  border: 1px solid rgba(255, 242, 208, 0.13);
+  border-radius: inherit;
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.26),
+    inset 0 -24px 42px rgba(0, 0, 0, 0.42);
+}
+
 @keyframes cinematicBeam {
   0%,
   20% {
@@ -2720,12 +2804,17 @@ body[data-view="locked"] .home-return {
 .photo-wall.is-dense .photo-tile,
 .photo-wall.is-wide-set .photo-tile,
 .photo-wall.layout-0 .photo-tile {
-  width: clamp(126px, 9.9vw, 190px);
+  width: clamp(110px, 8.75vw, 172px);
   border-radius: 10px;
 }
 
 .photo-wall.layout-1 .photo-tile {
-  width: clamp(124px, 9.6vw, 184px);
+  width: clamp(108px, 8.45vw, 166px);
+}
+
+.photo-wall.layout-2 .photo-tile,
+.photo-wall.layout-3 .photo-tile {
+  width: clamp(96px, 7.55vw, 148px);
 }
 
 .photo-tile {
@@ -2736,9 +2825,11 @@ body[data-view="locked"] .home-return {
   box-shadow:
     0 28px 62px rgba(0, 0, 0, 0.76),
     0 0 26px rgba(180, 126, 84, 0.18),
-    0 0 0 1px rgba(255, 244, 220, 0.035),
-    inset 0 1px 0 rgba(255, 255, 255, 0.3),
-    inset 0 -18px 28px rgba(0, 0, 0, 0.32);
+    0 0 0 1px rgba(255, 244, 220, 0.04),
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -18px 28px rgba(0, 0, 0, 0.34),
+    inset 3px 0 8px rgba(255, 242, 214, 0.055),
+    inset -3px 0 8px rgba(0, 0, 0, 0.24);
   filter:
     blur(var(--blur, 0px))
     brightness(calc(0.92 + var(--focus, 0) * 0.14))
@@ -3097,6 +3188,8 @@ body[data-view="locked"] .home-return {
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, calc(0.06 + var(--focus, 0) * 0.08)),
     inset 0 -32px 54px rgba(0, 0, 0, calc(0.44 - var(--focus, 0) * 0.13)),
+    inset 3px 0 10px rgba(255, 241, 214, 0.055),
+    inset -3px 0 10px rgba(0, 0, 0, 0.2),
     inset 0 0 0 1px rgba(0, 0, 0, 0.2),
     0 0 calc(12px + var(--focus, 0) * 34px + var(--sweep, 0) * 22px) rgba(229, 184, 106, calc(0.055 + var(--focus, 0) * 0.19 + var(--sweep, 0) * 0.085)),
     0 16px calc(32px + var(--focus, 0) * 42px) rgba(0, 0, 0, calc(0.24 + var(--focus, 0) * 0.16));
@@ -3343,7 +3436,19 @@ body[data-view="locked"] .home-return {
   .photo-wall.is-dense .photo-tile,
   .photo-wall.is-wide-set .photo-tile,
   .photo-wall.layout-0 .photo-tile {
-    width: clamp(92px, 12.4vw, 146px);
+    width: clamp(84px, 11.1vw, 132px);
+  }
+
+  .photo-wall.layout-1 .photo-tile {
+    width: clamp(82px, 10.8vw, 128px);
+  }
+
+  .photo-depth-rail {
+    opacity: calc(0.46 + var(--intro-reveal) * 0.1);
+  }
+
+  .depth-photo {
+    width: clamp(40px, 5.8vw, 66px);
   }
 
   .lightbox {
@@ -3383,7 +3488,19 @@ body[data-view="locked"] .home-return {
   .photo-wall.is-dense .photo-tile,
   .photo-wall.is-wide-set .photo-tile,
   .photo-wall.layout-0 .photo-tile {
-    width: clamp(112px, 30vw, 150px);
+    width: clamp(102px, 27vw, 138px);
+  }
+
+  .photo-wall.layout-1 .photo-tile {
+    width: clamp(98px, 26vw, 132px);
+  }
+
+  .photo-depth-rail {
+    opacity: calc(0.42 + var(--intro-reveal) * 0.12);
+  }
+
+  .depth-photo {
+    width: clamp(42px, 12vw, 64px);
   }
 
   .lightbox {

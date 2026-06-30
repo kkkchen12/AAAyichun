@@ -223,3 +223,12 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - Photo material was thickened through `.photo-media` and `.photo-tile::after`: stronger inset edge light, subtle top sheen, darker bottom edge, warmer sweep, and a restrained external shadow.
 - Do not replace this with `.photo-cards` filter/drop-shadow or per-card animation. The point of this pass is premium material using cheap pseudo-elements that do not perturb hit testing.
 - Regression coverage in the main album test now checks aperture visibility and photo-media inset shadow while continuing to assert no `.photo-cards` global filter, no card animation, and no opacity animation.
+
+## Depth Rail And Compact Photo Density - 2026-06-30
+
+- Added a non-interactive `.photo-depth-rail` behind the main `.photo-cards` layer. It renders a small fixed set of real photo thumbnails as a distant cinematic track, closer to the reference video's dense background album flow.
+- The depth rail is pointer-disabled and only uses `transform` plus bounded opacity variables. It does not participate in photo hit testing, pointer capture, detail opening, single-photo drag, or layout switching.
+- Depth rail DOM nodes are cached after render, so the RAF layout loop does not need to query the document every frame.
+- Default desktop photo card size was pulled back from the previous oversized pass. The album now reads as a denser group of photos instead of one large card wall, while keeping enough coverage and strong central focus.
+- Photo paper material was strengthened with side-edge inset light and darker opposite-edge pressure, still through `.photo-tile`/`.photo-tile::after` rather than global filters or per-card animations.
+- Regression coverage now asserts the depth rail exists, is pointer-disabled, has visible bounded opacity, uses transform positioning, remains smaller than the main photos, and still keeps the existing no-global-filter/no-card-animation guards.
