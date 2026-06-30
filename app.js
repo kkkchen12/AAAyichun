@@ -74,6 +74,15 @@ const AUTO_SPOTLIGHT_ENABLED = false;
 const AUTO_SCENE_ENABLED = false;
 const IDLE_SCENE_BLEND_MAX = 0.08;
 const REST_SCENE_BLEND = 0;
+const MANUAL_SCENE_PULSE_MS = 1550;
+const MANUAL_SCENE_PULSE_MAX = 0.38;
+const FREE_PHOTO_DRAG_GAIN = 1.72;
+const FREE_PHOTO_LIMITS = {
+  minX: -4,
+  maxX: 104,
+  minY: -5,
+  maxY: 105
+};
 const PRIVACY_UNLOCK_KEY = "aaayichun-unlocked";
 let currentPhoto = 0;
 let shuffledPhotos = [...story.photos];
@@ -121,6 +130,8 @@ let hoveredPhotoTile = null;
 const freePhotoOffsets = new Map();
 let albumSceneBlend = 0;
 let albumSceneMode = 0;
+let manualScenePulseMode = 0;
+let manualScenePulseStartedAt = 0;
 let albumSweepX = 50;
 let albumSweepY = 50;
 let albumSweepIntensity = 0;
@@ -263,7 +274,6 @@ function setupActions() {
   $("#prevPhoto").addEventListener("click", () => movePhoto(-1));
   $("#nextPhoto").addEventListener("click", () => movePhoto(1));
   $("#viewFullPhoto").addEventListener("pointerdown", (event) => {
-    event.preventDefault();
     event.stopPropagation();
   });
   $("#viewFullPhoto").addEventListener("click", (event) => {
@@ -272,7 +282,6 @@ function setupActions() {
     showFullPhoto();
   });
   $("#focusPhotoStage").addEventListener("pointerdown", (event) => {
-    event.preventDefault();
     event.stopPropagation();
   });
   $("#focusPhotoStage").addEventListener("click", (event) => {
@@ -371,7 +380,10 @@ function showView(viewId, options = {}) {
   if (options.updateHash !== false && window.location.hash !== `#${viewId}`) {
     history.replaceState(null, "", `#${viewId}`);
   }
-  if (viewId !== "photoWall") clearPhotoSpotlight();
+  if (viewId !== "photoWall") {
+    clearPhotoSpotlight();
+    clearManualScenePulse();
+  }
 
   if (viewId === "letter" && options.resetLetter) {
     resetLetterView();
@@ -392,6 +404,7 @@ function startAlbumIntro(force = false) {
   albumIntroStart = performance.now();
   albumSceneBlend = 0;
   albumSceneMode = 0;
+  clearManualScenePulse();
   clearPhotoSpotlight();
   stageMotion = Math.max(stageMotion, 0.86);
   queueVelocity = queueVelocity >= 0 ? 0.022 : -0.022;
@@ -556,15 +569,20 @@ function beginPhotoPress(event, tile, index) {
   if (activePhotoPress?.tile?.hasPointerCapture?.(activePhotoPress.pointerId)) {
     activePhotoPress.tile.releasePointerCapture(activePhotoPress.pointerId);
   }
+  const tileRect = lockedTile.getBoundingClientRect();
   const freeOffset = freePhotoOffsets.get(lockedIndex);
+  const currentTileX = freeOffset?.x ?? (Number.parseFloat(lockedTile.style.getPropertyValue("--x")) || 50);
+  const currentTileY = freeOffset?.y ?? (Number.parseFloat(lockedTile.style.getPropertyValue("--y")) || 50);
   activePhotoPress = {
     pointerId: event.pointerId,
     tile: lockedTile,
     index: lockedIndex,
     startX: event.clientX,
     startY: event.clientY,
-    startTileX: freeOffset?.x ?? (Number.parseFloat(lockedTile.style.getPropertyValue("--x")) || 50),
-    startTileY: freeOffset?.y ?? (Number.parseFloat(lockedTile.style.getPropertyValue("--y")) || 50),
+    startTileX: currentTileX,
+    startTileY: currentTileY,
+    grabOffsetX: tileRect.width ? (event.clientX - (tileRect.left + tileRect.width / 2)) / tileRect.width : 0,
+    grabOffsetY: tileRect.height ? (event.clientY - (tileRect.top + tileRect.height / 2)) / tileRect.height : 0,
     moved: false
   };
   hoverMotionUntil = performance.now() + 180;
@@ -602,9 +620,11 @@ function startFreePhotoDrag(press) {
   wall.classList.remove("is-hover-flow");
   wall.classList.add("is-free-dragging");
   clearPhotoSpotlight();
+  clearManualScenePulse();
   queueVelocity = 0;
   orbitVelocity = 0;
-  stageMotion = Math.max(stageMotion, 0.42);
+  stageMotion = Math.min(stageMotion, 0.08);
+  wall.style.setProperty("--drag-motion", stageMotion.toFixed(3));
 }
 
 function dragFreePhoto(event) {
@@ -612,15 +632,21 @@ function dragFreePhoto(event) {
   const rect = wall.getBoundingClientRect();
   if (!rect.width || !rect.height) return;
   markInteraction();
-  const dxPct = ((event.clientX - activePhotoPress.startX) / rect.width) * 100;
-  const dyPct = ((event.clientY - activePhotoPress.startY) / rect.height) * 100;
-  const nextX = clamp(activePhotoPress.startTileX + dxPct, 2, 98);
-  const nextY = clamp(activePhotoPress.startTileY + dyPct, 5, 95);
+  const dxPct = ((event.clientX - activePhotoPress.startX) / rect.width) * 100 * FREE_PHOTO_DRAG_GAIN;
+  const dyPct = ((event.clientY - activePhotoPress.startY) / rect.height) * 100 * FREE_PHOTO_DRAG_GAIN;
+  const grabOffsetXPct = (activePhotoPress.grabOffsetX || 0) * ((activePhotoPress.tile.offsetWidth || 0) / rect.width) * 100;
+  const grabOffsetYPct = (activePhotoPress.grabOffsetY || 0) * ((activePhotoPress.tile.offsetHeight || 0) / rect.height) * 100;
+  const pointerCenterX = ((event.clientX - rect.left) / rect.width) * 100 - grabOffsetXPct;
+  const pointerCenterY = ((event.clientY - rect.top) / rect.height) * 100 - grabOffsetYPct;
+  const freeX = activePhotoPress.startTileX + dxPct;
+  const freeY = activePhotoPress.startTileY + dyPct;
+  const nextX = clamp((freeX * 0.64) + (pointerCenterX * 0.36), FREE_PHOTO_LIMITS.minX, FREE_PHOTO_LIMITS.maxX);
+  const nextY = clamp((freeY * 0.64) + (pointerCenterY * 0.36), FREE_PHOTO_LIMITS.minY, FREE_PHOTO_LIMITS.maxY);
   freePhotoOffsets.set(activePhotoPress.index, {
     x: nextX,
     y: nextY,
-    rotate: clamp(dxPct * 0.16, -10, 10),
-    scale: 1.04
+    rotate: clamp(dxPct * 0.08, -6, 6),
+    scale: 1
   });
   applyLayout(false);
 }
@@ -954,6 +980,7 @@ function setupPhotoStageInteraction() {
     hoveredPhotoTile = null;
     hoverMotionUntil = 0;
     clearPhotoSpotlight();
+    clearManualScenePulse();
     dragDistance = 0;
     orbitVelocity = 0;
     queueVelocity = 0;
@@ -1247,6 +1274,25 @@ function updateAlbumScene(wall, now, frameScale, hoverLockActive) {
     wall.style.setProperty("--scene-mode", String(albumSceneMode));
     return;
   }
+  const manualPulseActive = manualScenePulseMode > 0
+    && albumIntroProgress >= 1
+    && now - manualScenePulseStartedAt < MANUAL_SCENE_PULSE_MS;
+  if (manualPulseActive) {
+    const elapsed = now - manualScenePulseStartedAt;
+    const normalized = clamp(elapsed / MANUAL_SCENE_PULSE_MS, 0, 1);
+    const envelope = Math.sin(normalized * Math.PI);
+    const targetBlend = MANUAL_SCENE_PULSE_MAX * envelope;
+    albumSceneMode = manualScenePulseMode;
+    albumSceneBlend += (targetBlend - albumSceneBlend) * Math.min(1, 0.19 * frameScale);
+    wall.dataset.scene = String(albumSceneMode);
+    wall.style.setProperty("--scene-blend", albumSceneBlend.toFixed(3));
+    wall.style.setProperty("--scene-mode", String(albumSceneMode));
+    return;
+  }
+  if (manualScenePulseMode > 0 && now - manualScenePulseStartedAt >= MANUAL_SCENE_PULSE_MS) {
+    manualScenePulseMode = 0;
+    manualScenePulseStartedAt = 0;
+  }
   const canEvolve = AUTO_SCENE_ENABLED
     && albumIntroProgress >= 1
     && now - lastInteractionAt > 5200;
@@ -1339,6 +1385,7 @@ function triggerLayoutMorph(manual = false) {
   photoFreeDragging = false;
   activeFreePhoto = null;
   clearPhotoSpotlight();
+  if (manual) startManualScenePulse(layoutIndex);
   queueVelocity = queueVelocity >= 0 ? (manual ? 0.01 : 0.006) : (manual ? -0.01 : -0.006);
   orbitVelocity = orbitVelocity >= 0 ? (manual ? 0.0025 : 0.0016) : (manual ? -0.0025 : -0.0016);
   stageMotion = 0.58;
@@ -1351,6 +1398,31 @@ function triggerLayoutMorph(manual = false) {
   morphTimer = window.setTimeout(() => wall.classList.remove("is-morphing"), manual ? 980 : 1280);
   applyLayout();
   burst(manual ? 24 : 18);
+}
+
+function startManualScenePulse(nextLayoutIndex) {
+  const sceneCycle = [1, 3, 2, 4];
+  manualScenePulseMode = sceneCycle[nextLayoutIndex % sceneCycle.length];
+  manualScenePulseStartedAt = performance.now();
+  albumSceneMode = manualScenePulseMode;
+  albumSceneBlend = Math.max(albumSceneBlend, 0.08);
+  const wall = $("#photoGrid");
+  if (!wall) return;
+  wall.dataset.scene = String(albumSceneMode);
+  wall.style.setProperty("--scene-mode", String(albumSceneMode));
+  wall.style.setProperty("--scene-blend", albumSceneBlend.toFixed(3));
+}
+
+function clearManualScenePulse() {
+  manualScenePulseMode = 0;
+  manualScenePulseStartedAt = 0;
+  albumSceneBlend = 0;
+  albumSceneMode = 0;
+  const wall = $("#photoGrid");
+  if (!wall) return;
+  wall.dataset.scene = "0";
+  wall.style.setProperty("--scene-blend", "0");
+  wall.style.setProperty("--scene-mode", "0");
 }
 
 function clearPhotoSpotlight() {

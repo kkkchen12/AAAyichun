@@ -281,6 +281,10 @@ npm test
 - 这轮质感增强仍然避开会重新导致闪烁的路径：不恢复 `.photo-cards` 全局 filter/drop-shadow，不恢复单卡 `cardFloat` 动画，不开启默认自动 spotlight；主相册测试新增 `.stage-flow` 和 `.photo-cards::after` 可见度断言，防止后续把舞台光感又改没。
 - 照片介绍页新增 `在相册中聚焦`：它不是自动动画，而是用户主动把当前照片放回相册舞台前景，背景照片形成景深队列，贴近参考视频里“单张照片抽出再复位”的效果。再次点击前景照片或点击暗场空白会取消聚焦，双击暗场会切换队形并让聚焦照片复位。
 - Playwright 新增手动聚焦回归，截图为 `output/playwright/verified-manual-spotlight.png`；后续改 spotlight 时要守住：默认自动 spotlight 关闭、手动入口可用、再次点击前景照片可取消、切换队形可复位。
+- 双击空白切换队形现在会触发短促的手动 scene pulse：在用户主动变阵时短暂混入照片墙/花束/交叉/竖幕的高级光场和深度感，约 1.55 秒后回到稳定队列。它不等同于自动 scene，默认空闲自动 scene 仍然关闭。
+- Playwright 已加强 `captures blank-area double click layout morph`：变阵瞬间必须有受控 scene blend，但强度不能超过稳定阈值；等待后必须回到 scene 0，避免再次出现整体照片闪烁或动画不受控制。
+- 单张照片拖动继续扩大可移动范围：拖动时用跟手中心点和放大位移增益计算位置，允许照片接近舞台外沿；同时把拖出照片 `scale` 固定为 1，并压低 `--drag-motion`，避免拖单张时整面相册跟着放大或触发整组舞台动效。
+- Playwright 已收紧 `allows a single photo to be dragged out and reset by layout switch`：拖动距离加大，测试会确认没有进入整面相册拖动、`--drag-motion` 保持低值、`--camera-scale` 不放大、拖出照片本身不被 scale 放大。
 
 ## 明天重开对话快速接续
 
@@ -290,8 +294,9 @@ npm test
 2. 同时打开参考视频 `assets/reference/reference-album-effect.mp4`，也打开 `output/reference/video-timeline-crop-contact-sheet.jpg`，重点对照相册整体铺屏感、照片队列流动、前后层次和背景质感。
 3. 当前可继续优化相册视觉，也可以开始 Vercel 预部署：照片还可以继续变得更满、更像一整团动态相册集；UI 继续沿用深酒红、暗金、玻璃、细光尘的方向，但不要再默认开启自动 spotlight 单张抽出。
 4. 不能破坏的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不应该让相册卡住或闪烁；左上角返回封面必须可用。
-4.1. 不能破坏的单张照片交互：介绍页按钮必须能进入纯照片；纯照片点击图片外黑色区域必须关闭；照片底部文字区/边缘也必须能起拖；切换队形必须让拖出的照片复位。
+4.1. 不能破坏的单张照片交互：介绍页按钮必须能进入纯照片；纯照片点击图片外黑色区域必须关闭；照片底部文字区/边缘也必须能起拖；单张拖动范围要接近舞台外沿，且不能触发整面相册放大；切换队形必须让拖出的照片复位。
 4.2. 手动聚焦交互不能破坏：介绍页 `在相册中聚焦` 必须能把当前照片抽回相册前景；再次点击前景照片或点击暗场取消；双击暗场切换队形并复位。
+4.3. 手动变阵脉冲不能破坏：双击空白时可以短暂出现 scene 光场/深度，但必须自动回落；不要重新打开空闲自动 scene。
 5. 不能回退的技术约束：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不要推动真实队列；不要用全局强残影覆盖 24 张照片；不要恢复全局 filter/drop-shadow、单卡浮动动画或默认自动 spotlight。
 6. GitHub private repo 已是 `https://github.com/kkkchen12/AAAyichun`；后续用 Vercel 从该仓库导入部署。
 7. 私密入口已经可用，当前暗号为 `20030518`；正式发给她前在部署 URL 上重新测一次错误暗号和正确暗号。

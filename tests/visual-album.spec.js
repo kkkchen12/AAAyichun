@@ -460,18 +460,33 @@ test("allows a single photo to be dragged out and reset by layout switch", async
   const dragged = page.locator(`.photo-tile[data-number="${targetNumber}"]`);
   await page.mouse.move(startX, startY);
   await page.mouse.down();
-  await page.mouse.move(startX + 210, startY - 95, { steps: 12 });
+  await page.mouse.move(startX + 420, startY - 220, { steps: 18 });
+  const activeDragState = await page.locator(".photo-wall").evaluate((wall) => {
+    const style = getComputedStyle(wall);
+    return {
+      isAlbumDragging: wall.classList.contains("is-dragging"),
+      isFreeDragging: wall.classList.contains("is-free-dragging"),
+      dragMotion: Number.parseFloat(style.getPropertyValue("--drag-motion")) || 0,
+      cameraScale: Number.parseFloat(style.getPropertyValue("--camera-scale")) || 1
+    };
+  });
+  expect(activeDragState.isAlbumDragging).toBe(false);
+  expect(activeDragState.isFreeDragging).toBe(true);
+  expect(activeDragState.dragMotion).toBeLessThan(0.13);
+  expect(activeDragState.cameraScale).toBeLessThan(1.001);
   await page.mouse.up();
 
   await expect(dragged).toHaveClass(/is-free-photo/);
   const freeState = await dragged.evaluate((tile) => ({
     x: Number.parseFloat(tile.style.getPropertyValue("--x")),
     y: Number.parseFloat(tile.style.getPropertyValue("--y")),
+    scale: Number.parseFloat(tile.style.getPropertyValue("--scale")),
     zIndex: Number.parseInt(getComputedStyle(tile).zIndex, 10),
     opacity: Number.parseFloat(getComputedStyle(tile).opacity)
   }));
-  expect(freeState.x).toBeGreaterThan(58);
-  expect(freeState.y).toBeLessThan(49);
+  expect(freeState.x).toBeGreaterThan(82);
+  expect(freeState.y).toBeLessThan(30);
+  expect(freeState.scale).toBeCloseTo(1, 2);
   expect(freeState.zIndex).toBeGreaterThan(240);
   expect(freeState.opacity).toBeGreaterThan(0.98);
   await page.screenshot({ path: "output/playwright/verified-single-photo-drag.png" });
@@ -491,7 +506,27 @@ test("captures blank-area double click layout morph", async ({ page }) => {
   await page.mouse.dblclick(220, 730);
   await expect(page.locator(".photo-wall")).toHaveClass(/layout-1/);
   await expect(page.locator(".photo-wall")).toHaveClass(/is-morphing/);
+  const pulseState = await page.locator(".photo-wall").evaluate((wall) => {
+    const style = getComputedStyle(wall);
+    return {
+      scene: wall.dataset.scene,
+      blend: Number.parseFloat(style.getPropertyValue("--scene-blend"))
+    };
+  });
+  expect(pulseState.scene).not.toBe("0");
+  expect(pulseState.blend).toBeGreaterThan(0.05);
+  expect(pulseState.blend).toBeLessThan(0.44);
   await page.screenshot({ path: "output/playwright/verified-album-doubleclick-morph.png" });
+  await page.waitForTimeout(2100);
+  const settledState = await page.locator(".photo-wall").evaluate((wall) => {
+    const style = getComputedStyle(wall);
+    return {
+      scene: wall.dataset.scene,
+      blend: Number.parseFloat(style.getPropertyValue("--scene-blend"))
+    };
+  });
+  expect(settledState.scene).toBe("0");
+  expect(settledState.blend).toBeLessThan(0.08);
 });
 
 test("captures polished cover labels and envelope", async ({ page }) => {

@@ -136,6 +136,10 @@
 - 2026-06-30 将“单张照片拿出来再复位”的创意从自动 spotlight 改成手动可控：照片介绍页新增 `在相册中聚焦` 按钮，点击后关闭介绍层并回到相册，把当前照片抽到前景，背景照片退成有景深的队列；再次点击前景照片或点击暗场空白会取消聚焦，双击空白切换队形也会复位。
 - 2026-06-30 手动聚焦仍使用 `applySpotlightPoint()` 的稳定布局算法，但由 `manualSpotlightIndex` 控制；默认自动 spotlight 继续保持关闭，拖动单张照片、整面相册拖动、离开相册页面和切换队形都会调用 `clearPhotoSpotlight()`，避免旧状态残留或重新闪烁。
 - 2026-06-30 Playwright 新增 `manually spotlights a photo on the album stage and resets on layout switch`，验证介绍页按钮、前景 spotlight class/层级/caption、再次点击前景照片复位、再次手动聚焦后双击空白切换队形复位；新增重点截图为 `output/playwright/verified-manual-spotlight.png`。
+- 2026-06-30 新增“手动变阵场景脉冲”：双击相册空白或隐藏切换按钮触发 `triggerLayoutMorph(true)` 时，会用 `manualScenePulseMode` 和 `manualScenePulseStartedAt` 短暂混入照片墙/花束/交叉/竖幕 scene，最长约 1.55 秒，强度上限 `MANUAL_SCENE_PULSE_MAX = 0.38`，随后自动回到 scene 0。
+- 2026-06-30 这不是恢复自动 scene：`AUTO_SCENE_ENABLED` 仍为 `false`，空闲相册仍保持稳定低幅流动；拖动、打开照片、离开相册和入场都会清掉手动 scene pulse。Playwright 已在 `captures blank-area double click layout morph` 中断言变阵时 scene blend 出现且低于 0.44，2.1 秒后回落到 scene 0 / blend < 0.08。
+- 2026-06-30 单张照片拖动按最新反馈继续修正：位置计算改成跟手中心点 + `FREE_PHOTO_DRAG_GAIN`，边界放宽到 `FREE_PHOTO_LIMITS`，拖出的照片 `scale` 固定为 1；拖单张时会压低 `stageMotion` 和 `--drag-motion`，不再让整面相册镜头、光场或照片组出现放大感。
+- 2026-06-30 Playwright 收紧 `allows a single photo to be dragged out and reset by layout switch`：用更大拖动距离验证拖出范围，并断言没有 `.is-dragging`、有 `.is-free-dragging`、`--drag-motion` 保持低值、`--camera-scale` 不放大、拖出照片自身 scale 约等于 1。
 
 ## Next Session TODO
 
@@ -143,9 +147,10 @@
 2. 优先继续优化相册视觉：照片要继续保持更大、更满、更铺屏，队列要像视频里一整团动态相册集，而不是小卡片墙；但不要恢复自动 spotlight 强抽出，后续单张抽出应改成手动触发或更稳定的低频展示。
 3. 继续对照参考视频微调横向照片队列的纵深、密度、光效、hover 视觉反馈和拖拽手感；后续所有 UI 继续沿用深色电影感、暗金、细光尘、不卡通的方向。
 4. 不要破坏已稳定的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不长时间暂停、不闪烁；返回封面可用。
-4.1 不要破坏本轮单张照片交互：介绍页 `查看完整照片` 按钮必须可用，纯照片模式点击图片外黑色区域必须能关闭，照片底部文字区/边缘也应能拖出单张照片，切换队形时拖出的照片必须回到队列。
+4.1 不要破坏本轮单张照片交互：介绍页 `查看完整照片` 按钮必须可用，纯照片模式点击图片外黑色区域必须能关闭，照片底部文字区/边缘也应能拖出单张照片，单张拖动范围要接近舞台外沿且不能触发整面相册放大，切换队形时拖出的照片必须回到队列。
 4.2 后续视觉增强可以继续提高光场、照片材质和铺屏层次，但必须先保留现有低成本路径：不要恢复全局 filter/drop-shadow、独立照片浮动动画或默认自动 spotlight。
 4.3 新增的 `在相册中聚焦` 是手动 spotlight 入口，不要改回空闲自动强抽出；聚焦后再次点击前景照片或点击暗场应取消，双击暗场应切换队形并复位。
+4.4 手动变阵可以有短暂 scene pulse，但不要重新开启空闲自动 scene；变阵脉冲必须有上限、自动回落，并继续通过回归测试保护。
 5. 不要回退已修好的技术路径：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不推动真实队列；不要用全局强残影覆盖全部照片。
 6. 不要回退本轮稳定性修正：不要恢复 `.photo-cards` 常驻 `drop-shadow`，不要恢复照片独立 `cardFloat`/filter 动画，hover 不要固定跳到高 z-index；残影只能克制地服务拖拽、入场、变阵和当前 hover 卡片。
 6.1 不要回退本轮动画回收：不要把自动 scene blend 再拉回 0.9 左右，不要默认开启自动 spotlight，不要让扫光/ghost/camera 同时大幅叠加，否则会重新出现整体照片闪烁和动画失控。

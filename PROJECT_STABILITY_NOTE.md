@@ -200,3 +200,18 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - Manual spotlight state is tracked with `manualSpotlightIndex` and cleared through `clearPhotoSpotlight()`. Dragging a single photo, dragging the whole album, leaving the album page, starting the album intro, or switching layout clears it.
 - Clicking the foreground spotlight photo again cancels manual spotlight without opening the detail panel; clicking dark blank stage space also cancels when the hit target is clear. Double-clicking blank space still changes layout and resets the spotlight photo back into the queue.
 - Regression coverage now verifies the detail-panel button, spotlight foreground class/layer/caption, foreground-click cancel, and double-click layout reset. The screenshot is `output/playwright/verified-manual-spotlight.png`.
+
+## Manual Scene Pulse On Layout Morph - 2026-06-30
+
+- Added a bounded manual scene pulse for user-triggered layout morphs. It is started only by `triggerLayoutMorph(true)`, not by idle time.
+- The pulse uses `manualScenePulseMode`, `manualScenePulseStartedAt`, `MANUAL_SCENE_PULSE_MS = 1550`, and `MANUAL_SCENE_PULSE_MAX = 0.38` to briefly blend toward one of the existing scene layouts, then decay back to scene 0.
+- `AUTO_SCENE_ENABLED` remains `false`. This does not restore automatic scene evolution, automatic spotlight, or any idle forced rearrangement.
+- Dragging, opening photos, leaving the album, and restarting the intro clear the manual pulse. This keeps user control and prevents scene state from sticking after interactions.
+- Regression coverage in `captures blank-area double click layout morph` now checks that scene blend appears during manual morph, remains below `0.44`, and settles back to scene 0 / low blend after the pulse window.
+
+## Free Photo Drag Range And No-Zoom Guard - 2026-06-30
+
+- Free-photo dragging now uses `FREE_PHOTO_DRAG_GAIN` plus pointer-center tracking, so the selected photo can be moved close to the visible stage edge instead of feeling trapped in a small local region.
+- `FREE_PHOTO_LIMITS` intentionally allows a small overscan past the stage edge. This gives the interaction room without changing whole-album blank-space dragging.
+- Dragging a single photo no longer boosts the whole stage: `startFreePhotoDrag()` clears manual scene pulse, zeroes queue/orbit velocity, caps `stageMotion`, and keeps the dragged photo scale at `1`.
+- Regression coverage asserts that free-photo drag does not enter `.is-dragging`, does enter `.is-free-dragging`, keeps `--drag-motion` low, keeps `--camera-scale` below zoom territory, and leaves the dragged photo at scale 1.
