@@ -311,6 +311,8 @@ npm test
 - 新增 `全览截图` 面板：它不是阅读模式，而是截图模式，会用自动缩小字号和多栏排版把整封信压进一个画面，点击面板旁边暗色空白退出。Playwright 会断言全览内容无横向/纵向溢出，并输出 `verified-letter-overview.png`。
 - 导入两首正式歌曲：`assets/music/until-you-arrive.mp3` 用于相册页自动循环播放《直到你降临》，`assets/music/love-you.mp3` 用于信件页自动循环播放《爱你》；右上角音乐按钮可手动暂停/恢复当前页面歌曲。
 - 顶部导航已移到全局层，封面显示 `相册` / `信` / 音乐，相册和信件页隐藏文字导航但保留右上角音乐按钮，避免按钮被当前页面 section 拦截。
+- 修复 `再把爱读一遍`：按钮现在直接重启信件逐字显示，清空正文、移除完成态并把信纸滚动回顶部，不再复用已经打开后的信封动画流程。
+- Vercel 生产链接为 `https://aaayichun.vercel.app`，项目名 `aaayichun`，已连接私有 GitHub 仓库 `https://github.com/kkkchen12/AAAyichun`。`.vercelignore` 会排除测试输出、参考视频和开发目录，但保留正式页面、照片、音乐和主视觉资源。
 
 ## 明天重开对话快速接续
 
@@ -327,6 +329,6 @@ npm test
 4.5. 信件交互不能破坏：点击信封后仍然逐字显示；双击信纸必须立即显示全文；长信信纸必须可滚动到底部并看到右下角署名；`全览截图` 必须在一个画面里显示整封信，并且点击外侧空白能退出。
 4.6. 音乐交互不能破坏：进入相册页应尝试播放《直到你降临》，进入信件页应尝试播放《爱你》；右上角音乐按钮在相册和信件页都必须可点击，用来暂停或恢复当前页面歌曲。
 5. 不能回退的技术约束：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不要推动真实队列；不要用全局强残影覆盖 24 张照片；不要恢复全局 filter/drop-shadow、单卡浮动动画或默认自动 spotlight。
-6. GitHub private repo 已是 `https://github.com/kkkchen12/AAAyichun`；后续用 Vercel 从该仓库导入部署。
-7. 私密入口已经可用，当前暗号为 `20030518`；正式发给她前在部署 URL 上重新测一次错误暗号、正确暗号、相册音乐、信件音乐和右上角音乐开关。
+6. GitHub private repo 已是 `https://github.com/kkkchen12/AAAyichun`；Vercel 生产链接是 `https://aaayichun.vercel.app`。
+7. 私密入口已经可用，当前暗号为 `20030518`；正式发给她前在部署 URL 上重新测一次错误暗号、正确暗号、相册音乐、信件音乐、右上角音乐开关和 `再把爱读一遍`。
 8. 继续改完后运行 `npm run check` 和 `npm test`。重点查看 `output/playwright/verified-private-entrance.png`、`verified-single-photo-drag.png`、`verified-photo-full.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png` 和 `verified-album-iphone-landscape.png`。

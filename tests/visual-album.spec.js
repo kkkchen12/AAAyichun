@@ -608,6 +608,19 @@ test("captures polished cover labels and envelope", async ({ page }) => {
   )).toBeGreaterThan(0.96);
   await page.screenshot({ path: "output/playwright/verified-letter-full-text.png" });
 
+  await page.locator(".letter-paper").evaluate((paper) => {
+    paper.scrollTop = paper.scrollHeight;
+  });
+  await page.locator("#replayLetter").click();
+  await expect(page.locator("#letterBody")).not.toHaveClass(/is-complete/);
+  await expect(page.locator("#letterBody p").first()).toBeVisible();
+  await expect.poll(async () => (
+    await page.locator(".letter-paper").evaluate((paper) => paper.scrollTop)
+  )).toBe(0);
+  await page.locator(".letter-paper").dblclick();
+  await expect(page.locator("#letterBody")).toHaveClass(/is-complete/);
+  await expect(page.locator("#letterBody p")).toHaveCount(51);
+
   const isScrollable = await page.locator(".letter-paper").evaluate((paper) => paper.scrollHeight > paper.clientHeight);
   expect(isScrollable).toBe(true);
   await page.locator(".letter-paper").evaluate((paper) => {

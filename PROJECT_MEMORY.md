@@ -159,6 +159,13 @@
 - 2026-07-01 音乐逻辑从单一 `story.musicPath` 改成 `story.music.album/letter`，用 `currentMusicKey`、`musicSuppressedView` 和 `handleViewMusic()` 按当前页面切换曲目。自动播放失败时不再回退合成音，右上角按钮可手动重试当前页面歌曲。
 - 2026-07-01 顶部导航从封面 section 移到全局层。封面页显示 `相册` / `信` / 音乐，相册和信件页隐藏文字导航但保留右上角音乐按钮，避免音乐按钮被 `.letter-section` 或 `.photo-section` 拦截。
 
+## 2026-07-01 Deployment And Final Replay Fix
+
+- Fixed the letter replay action: `#replayLetter` now directly restarts the typewriter instead of calling `openLetter()` while the letter is already open. It clears existing text, removes `is-complete`, resets `.letter-paper` scrollTop to 0, and starts `typeLetter()` again.
+- Added regression coverage for replaying the letter after the full-text reveal, including the scroll reset and a second full-text reveal.
+- Vercel project `aaayichun` is connected to `https://github.com/kkkchen12/AAAyichun`; production alias is `https://aaayichun.vercel.app`.
+- `.vercelignore` excludes local/test/reference files from Vercel while keeping the static app and final `assets/` resources needed by other computers.
+
 ## Next Session TODO
 
 1. 明天先运行 `npm run dev`，打开 `http://127.0.0.1:5173/#photoWall`，同时打开 `assets/reference/reference-album-effect.mp4` 对照。

@@ -475,10 +475,7 @@ function setupActions() {
     showView("letter", { resetLetter: true });
   });
   $("#replayLetter").addEventListener("click", () => {
-    stopLetterTyping();
-    letterStarted = false;
-    $("#letterBody").innerHTML = "";
-    openLetter();
+    replayLetter();
   });
   $("#openLetterOverview").addEventListener("click", () => {
     if (!isUnlocked) {
@@ -2108,8 +2105,31 @@ async function openLetter() {
   }, 520);
   window.setTimeout(() => {
     letter.classList.add("is-letter-open");
+    letter.classList.remove("is-letter-opening");
     if (!letterStarted) typeLetter();
   }, 1250);
+}
+
+function replayLetter() {
+  if (!isUnlocked) {
+    lockMainContent();
+    return;
+  }
+  const letter = $("#letter");
+  const paper = $(".letter-paper");
+  const target = $("#letterBody");
+  stopLetterTyping();
+  letterStarted = false;
+  letter.classList.add("is-letter-open");
+  letter.classList.remove("is-letter-opening");
+  $("#envelopeWrap").classList.add("is-open");
+  target.innerHTML = "";
+  target.classList.remove("is-complete");
+  if (paper) paper.scrollTop = 0;
+  if (!musicOn && musicSuppressedView !== "letter") void startMusic("letter");
+  requestAnimationFrame(() => {
+    void typeLetter();
+  });
 }
 
 async function typeLetter() {

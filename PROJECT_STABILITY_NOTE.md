@@ -263,3 +263,11 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - Browser autoplay rejection no longer starts the synthetic fallback tone. If the browser blocks autoplay, the button remains available for a user-gesture retry with the real track.
 - The top navigation was moved outside the hero section into a global layer. Non-home views hide the text nav links but keep the music button visible and clickable above album/letter sections.
 - Regression coverage stubs `HTMLMediaElement.play()` in Playwright, verifies album entry requests `until-you-arrive.mp3`, verifies letter entry requests `love-you.mp3`, and checks the right-top button can pause and resume the letter track.
+
+## Letter Replay And Vercel Deployment - 2026-07-01
+
+- Fixed the `#replayLetter` action. It no longer reuses the envelope-opening path after the letter is already open; it now cancels active typing, clears the body, resets the paper scroll position, removes the completed state, and restarts the typewriter directly.
+- `openLetter()` now removes `is-letter-opening` once the letter is fully open, preventing stale opening state from blocking later letter actions.
+- Regression coverage now clicks `#replayLetter` after the full letter is shown, verifies the completed state is cleared, verifies the paper scroll returns to the top, then double-clicks to reveal the full letter again.
+- Vercel production deployment is configured under the project name `aaayichun` and aliased at `https://aaayichun.vercel.app`.
+- `.vercelignore` keeps deployment output focused on the static app and final assets. It excludes local test artifacts, reference video material, development folders, and project notes, but keeps `index.html`, `app.js`, `styles.css`, `assets/photos`, `assets/music`, and `assets/hero-letter.png` available for the public site.
