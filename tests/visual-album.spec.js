@@ -37,6 +37,9 @@ test("guards the site behind a private entrance", async ({ page }) => {
   await expect(page.locator("#privacyGate")).toBeHidden();
   await expect(page.locator("body")).toHaveAttribute("data-view", "photoWall");
   await expect(page.locator(".photo-tile").first()).toBeVisible();
+  await expect.poll(async () => (
+    await page.evaluate(() => window.__musicPlayCalls.join("|"))
+  )).toContain("until-you-arrive.mp3");
   await page.waitForTimeout(1200);
   await page.screenshot({ path: "output/playwright/verified-private-unlocked.png" });
 });
@@ -179,6 +182,31 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   await page.screenshot({ path: "output/playwright/verified-photo-full.png" });
   await page.mouse.click(40, 450);
   await expect(page.locator("#photoLightbox")).toBeHidden();
+});
+
+test("plays matching music from album and letter module clicks", async ({ page }) => {
+  await unlock(page);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto("/");
+
+  await page.evaluate(() => {
+    window.__musicPlayCalls = [];
+  });
+  await page.locator(".top-nav a").first().click();
+  await expect(page.locator("body")).toHaveAttribute("data-view", "photoWall");
+  await expect.poll(async () => (
+    await page.evaluate(() => window.__musicPlayCalls.join("|"))
+  )).toContain("until-you-arrive.mp3");
+
+  await page.goto("/");
+  await page.evaluate(() => {
+    window.__musicPlayCalls = [];
+  });
+  await page.locator("#jumpLetter").click();
+  await expect(page.locator("body")).toHaveAttribute("data-view", "letter");
+  await expect.poll(async () => (
+    await page.evaluate(() => window.__musicPlayCalls.join("|"))
+  )).toContain("love-you.mp3");
 });
 
 test("manually spotlights a photo on the album stage and resets on layout switch", async ({ page }) => {
@@ -580,7 +608,10 @@ test("captures polished cover labels and envelope", async ({ page }) => {
   await page.waitForTimeout(900);
   await page.screenshot({ path: "output/playwright/verified-cover-polish.png" });
 
-  await page.goto("/#letter");
+  await page.evaluate(() => {
+    window.__musicPlayCalls = [];
+  });
+  await page.locator("#jumpLetter").click();
   await expect(page.locator("body")).toHaveAttribute("data-view", "letter");
   await expect.poll(async () => (
     await page.evaluate(() => window.__musicPlayCalls.join("|"))

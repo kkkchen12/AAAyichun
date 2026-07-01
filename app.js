@@ -318,10 +318,15 @@ function routeFromHash(updateHash = true) {
     lockMainContent();
     return true;
   }
-  const viewId = window.location.hash.slice(1) || "home";
-  if (!["home", "photoWall", "letter"].includes(viewId)) return false;
+  const viewId = getHashViewId();
+  if (!viewId) return false;
   showView(viewId, { resetLetter: viewId === "letter", updateHash });
   return true;
+}
+
+function getHashViewId() {
+  const viewId = window.location.hash.slice(1) || "home";
+  return ["home", "photoWall", "letter"].includes(viewId) ? viewId : "";
 }
 
 function setupPrivacyGate() {
@@ -346,6 +351,7 @@ function setupPrivacyGate() {
     isUnlocked = true;
     $("#gateError").textContent = "";
     gate.classList.add("is-unlocking");
+    void startMusicForView(getHashViewId(), { manual: true });
     window.setTimeout(() => {
       gate.hidden = true;
       gate.setAttribute("aria-hidden", "true");
@@ -397,7 +403,9 @@ function setupActions() {
         lockMainContent();
         return;
       }
-      showView(trigger.dataset.view, { resetLetter: trigger.dataset.view === "letter" });
+      const targetView = trigger.dataset.view;
+      void startMusicForView(targetView, { manual: true });
+      showView(targetView, { resetLetter: targetView === "letter" });
     });
   });
 
@@ -408,6 +416,7 @@ function setupActions() {
       lockMainContent();
       return;
     }
+    void startMusicForView("photoWall", { manual: true });
     openPhoto(0);
   });
   $("#closeLightbox").addEventListener("click", closePhoto);
@@ -472,6 +481,7 @@ function setupActions() {
       lockMainContent();
       return;
     }
+    void startMusicForView("letter", { manual: true });
     showView("letter", { resetLetter: true });
   });
   $("#replayLetter").addEventListener("click", () => {
@@ -997,6 +1007,7 @@ function focusCurrentPhotoOnStage() {
   if ($("#photoLightbox").hidden) return;
   const focusIndex = currentPhoto;
   closePhoto();
+  void startMusicForView("photoWall", { manual: true });
   showView("photoWall", { updateHash: true });
 
   manualSpotlightIndex = focusIndex;
@@ -2099,7 +2110,7 @@ async function openLetter() {
   if (letter.classList.contains("is-letter-opening")) return;
   letter.classList.add("is-letter-opening");
   $("#envelopeWrap").classList.add("is-open");
-  if (!musicOn && musicSuppressedView !== "letter") await startMusic("letter");
+  await startMusicForView("letter", { manual: true });
   window.setTimeout(() => {
     letter.classList.add("is-letter-pulling");
   }, 520);
@@ -2234,6 +2245,12 @@ function handleViewMusic(viewId) {
 
 async function startMusicForCurrentView(options = {}) {
   const trackKey = getViewMusicKey() || "album";
+  return startMusic(trackKey, options);
+}
+
+async function startMusicForView(viewId, options = {}) {
+  const trackKey = getViewMusicKey(viewId);
+  if (!trackKey) return false;
   return startMusic(trackKey, options);
 }
 
