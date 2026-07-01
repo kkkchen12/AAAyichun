@@ -322,13 +322,21 @@ npm test
 - 音乐入口约束：输入暗号直达相册、点击相册入口或照片聚焦时请求 `assets/music/until-you-arrive.mp3`；点击信件/祝福入口或拆信时请求 `assets/music/love-you.mp3`；右上角按钮继续暂停或恢复当前页面歌曲。
 - 音乐切换现在带请求序号保护：换曲会先暂停并清空旧 `src`，再重建当前歌曲的音频对象；旧播放 Promise 即使稍后返回，也不能覆盖当前页面的歌曲状态。
 
+## 2026-07-02 当前发布状态
+
+- 最新已推送提交为 `2f14481 fix: stabilize deployed music switching`，本地 `main`、`origin/main` 和 GitHub Pages 部署来源保持一致。
+- GitHub Pages 当前公开链接为 `https://kkkchen12.github.io/AAAyichun/`，部署 workflow 已成功完成，线上 `index.html` 已刷新到 `app.js?v=20260702-music-cache` 和 `styles.css?v=20260702-music-cache`。
+- 当前正式内容状态：24 张相册照片、24 组浪漫标题和说明、51 段生日信、末尾署名 `永远爱你的陈熠`、暗号 `20030518`、相册歌《直到你降临》、信件歌《爱你》。
+- 代码验证状态：`git diff --check` 通过，`npm run check` 通过，`npm test` 15/15 通过。重点回归已经覆盖私密入口、相册查看、完整照片关闭、单张拖动、手动聚焦、信件全览、信件重读和两首音乐按模块切换。
+- 国内访问判断：Vercel 不适合作为无代理国内主链接；GitHub Pages 可以作为当前立即可用的公网备用，但国内网络稳定性不保证。EdgeOne 默认 `edgeone.cool` 预设域名需要带 3 小时 token，不能作为长期发送链接；如果走 EdgeOne 长期公开访问，需要自定义域名，国内加速通常会涉及备案。后续若要确保国内无代理流畅访问，应优先评估国内云服务器/对象存储 CDN/EdgeOne 自定义域名备案路线。
+
 ## 明天重开对话快速接续
 
 明天继续时，可以直接从下面这几件事开始：
 
 1. 运行 `npm run dev`，打开 `http://127.0.0.1:5173/#photoWall`。
 2. 同时打开参考视频 `assets/reference/reference-album-effect.mp4`，也打开 `output/reference/video-timeline-crop-contact-sheet.jpg`，重点对照相册整体铺屏感、照片队列流动、前后层次和背景质感。
-3. 当前可继续优化相册视觉，也可以开始 Vercel 预部署：照片还可以继续变得更满、更像一整团动态相册集；UI 继续沿用深酒红、暗金、玻璃、细光尘的方向，但不要再默认开启自动 spotlight 单张抽出。
+3. 当前可继续优化相册视觉，也可以继续处理国内稳定访问路线：照片还可以继续变得更满、更像一整团动态相册集；UI 继续沿用深酒红、暗金、玻璃、细光尘的方向，但不要再默认开启自动 spotlight 单张抽出。
 4. 不能破坏的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不应该让相册卡住或闪烁；左上角返回封面必须可用。
 4.1. 不能破坏的单张照片交互：介绍页按钮必须能进入纯照片；纯照片点击图片外黑色区域必须关闭；照片底部文字区/边缘也必须能起拖；单张拖动范围要接近舞台外沿，且不能触发整面相册放大；切换队形必须让拖出的照片复位。
 4.2. 手动聚焦交互不能破坏：介绍页 `放到星河中央` 必须能把当前照片抽回相册前景；再次点击前景照片或点击暗场取消；双击暗场切换队形并复位。
@@ -337,6 +345,6 @@ npm test
 4.5. 信件交互不能破坏：点击信封后仍然逐字显示；双击信纸必须立即显示全文；长信信纸必须可滚动到底部并看到右下角署名；`全览截图` 必须在一个画面里显示整封信，并且点击外侧空白能退出。
 4.6. 音乐交互不能破坏：进入相册页应尝试播放《直到你降临》，进入信件页应尝试播放《爱你》；右上角音乐按钮在相册和信件页都必须可点击，用来暂停或恢复当前页面歌曲。
 5. 不能回退的技术约束：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不要推动真实队列；不要用全局强残影覆盖 24 张照片；不要恢复全局 filter/drop-shadow、单卡浮动动画或默认自动 spotlight。
-6. GitHub private repo 已是 `https://github.com/kkkchen12/AAAyichun`；Vercel 生产链接是 `https://aaayichun.vercel.app`。
+6. GitHub private repo 已是 `https://github.com/kkkchen12/AAAyichun`；GitHub Pages 当前公开链接是 `https://kkkchen12.github.io/AAAyichun/`；Vercel 生产链接 `https://aaayichun.vercel.app` 只作为海外网络备用。
 7. 私密入口已经可用，当前暗号为 `20030518`；正式发给她前在部署 URL 上重新测一次错误暗号、正确暗号、相册音乐、信件音乐、右上角音乐开关和 `再把爱读一遍`。
 8. 继续改完后运行 `npm run check` 和 `npm test`。重点查看 `output/playwright/verified-private-entrance.png`、`verified-single-photo-drag.png`、`verified-photo-full.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png` 和 `verified-album-iphone-landscape.png`。

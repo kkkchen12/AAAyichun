@@ -175,6 +175,14 @@
 - Music startup now uses a request token and rebuilds the audio element when assigning the next track, so an older album play request or stale `currentSrc` cannot overwrite the letter track after navigation.
 - Regression coverage now verifies the real path: enter album, confirm `until-you-arrive.mp3`, return home, click `祝福`, and confirm `love-you.mp3`.
 
+## 2026-07-02 Current Project Status
+
+- Latest pushed commit is `2f14481 fix: stabilize deployed music switching`; local `main`, `origin/main`, and the GitHub Pages source are aligned.
+- Public GitHub Pages URL is `https://kkkchen12.github.io/AAAyichun/`; the Pages workflow completed successfully and the deployed index references `app.js?v=20260702-music-cache` plus `styles.css?v=20260702-music-cache`.
+- Current production content includes 24 final photos, 24 romantic photo titles/captions, the 51-paragraph long birthday letter, the closing signature `永远爱你的陈熠`, private code `20030518`, album music `until-you-arrive.mp3`, and letter music `love-you.mp3`.
+- Verification baseline for this state: `git diff --check` passed, `npm run check` passed, and `npm test` passed 15/15 after the music switching fix.
+- Deployment judgment: Vercel is not reliable enough for the user's girlfriend's no-proxy China network. GitHub Pages is the current public fallback, but China reachability is not guaranteed. EdgeOne's default preset domain is temporary token access, not a stable share link. For a dependable China-accessible link, continue with a domestic server/CDN or EdgeOne custom domain route, understanding that mainland acceleration usually involves ICP filing.
+
 ## Next Session TODO
 
 1. 明天先运行 `npm run dev`，打开 `http://127.0.0.1:5173/#photoWall`，同时打开 `assets/reference/reference-album-effect.mp4` 对照。
@@ -196,4 +204,4 @@
 11. 每次视觉调整后运行 `npm run check` 和 `npm test`，查看 `output/playwright/verified-*.png`，特别是 `verified-album-desktop.png`、`verified-single-photo-drag.png`、`verified-photo-full.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png`、`verified-album-drag-motion.png`、`verified-album-iphone-landscape.png`。
 12. 做最终浏览器检查：电脑横屏、iPhone 横屏、iPhone 竖屏。
 13. Git 本地仓库已初始化，私有 GitHub 仓库 `https://github.com/kkkchen12/AAAyichun` 已创建并推送 `main`；后续每次大改先测试再 commit/push。
-14. 用 Vercel 从私有 GitHub 仓库部署，拿到 HTTPS 链接；正式发送前用真实暗号和手机浏览器再测一次私密入口。
+14. 不再把 Vercel 当国内主线路径；当前公网备用是 GitHub Pages，后续要重点处理国内无代理稳定访问：国内云服务器、对象存储 CDN，或 EdgeOne 自定义域名/备案路线。正式发送前用真实暗号和手机浏览器再测一次私密入口、相册音乐和信件音乐。

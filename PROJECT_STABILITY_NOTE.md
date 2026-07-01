@@ -279,3 +279,10 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - Preserved the current music interaction contract: album gestures request `until-you-arrive.mp3`, letter gestures request `love-you.mp3`, and the top-right button toggles the active view's track.
 - Music switching now rebuilds the audio element for a new track and uses `musicRequestToken`, so stale play rejections, old `currentSrc`, or delayed old-source state cannot turn off or overwrite the newly requested page track.
 - Added regression coverage for the cross-module path from album back to cover and then into the letter, preventing the letter entry from accidentally continuing the album track.
+
+## Current Deployment Stability Snapshot - 2026-07-02
+
+- The stable code baseline is commit `2f14481`; GitHub Pages has deployed the cache-busted index and is the current public fallback URL.
+- The deployment/access problem is separate from the album animation stability work. Do not change RAF layout, hover behavior, drag behavior, spotlight, or scene pulse while experimenting with hosting providers.
+- EdgeOne default preset-domain token access is temporary and unsuitable as a final share link. A long-term China-accessible route should be handled at the hosting/domain/CDN layer, not by simplifying the page or removing assets.
+- Keep the two-track music regression as a release gate: entering album must request `until-you-arrive.mp3`, and entering letter after returning from album must request `love-you.mp3`.
