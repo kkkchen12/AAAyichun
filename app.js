@@ -1,149 +1,203 @@
 const story = {
   herName: "宝贝",
   fromName: "我",
-  heroKicker: "Happy Birthday",
+  heroKicker: "For My Love",
   heroTitle: "亲爱的以纯，生日快乐",
-  heroText: "我把想你放进照片里，把没能当面说的话放进这封信里。你打开的时候，就像我在认真陪你过这个生日。",
-  musicPath: "assets/song.mp3",
+  heroText: "我把想你的每一刻藏进照片里，也把没能当面说出口的温柔写进这封信里。你打开的时候，就像我把一整片星光都轻轻递到你面前。",
+  music: {
+    album: {
+      title: "直到你降临",
+      path: "assets/music/until-you-arrive.mp3"
+    },
+    letter: {
+      title: "爱你",
+      path: "assets/music/love-you.mp3"
+    }
+  },
   privateCodes: ["20030518"],
   photoCount: 24,
   stageInitials: "WXY",
   stagePoems: [
-    ["纵使东风把繁花吹散", "终会将我们吹回同一个温润原点"],
-    ["命运交错日里遇见你", "从此每一次想念都有了方向"],
-    ["所有的偶然", "都是命中注定的必然"],
-    ["直到你降临", "我才明白生日也可以这样被认真期待"]
+    ["我把每一次心动都留在光里", "等你经过时，它们会替我轻轻告白"],
+    ["命运在人海里把你带到我身边", "从此我的想念都有了名字和方向"],
+    ["这些照片不是普通回忆", "是我反复确认自己爱你的证据"],
+    ["愿新一岁的你被温柔包围", "而我永远站在最靠近你的地方"]
   ],
-  envelopeText: "这封信，等你亲手拆开。",
-  letterTitle: "写给你的生日信",
+  envelopeText: "这封信，只等你亲手拆开。",
+  letterTitle: "写给以纯的生日情书",
   letter: [
-    "亲爱的，生日快乐。",
-    "今年没能陪在你身边，我其实有一点遗憾。因为我很想亲眼看见你收到祝福时的表情，也很想在零点的时候第一个对你说生日快乐。",
-    "可我又觉得，距离也许刚好让我把这些话写得更认真一点。不是随口的一句想你，也不是匆忙的一句祝福，而是一封可以被你反复打开的信。",
-    "我喜欢你身上那些很具体的地方：你认真说话的样子，你偶尔的小脾气，你开心时藏不住的语气，还有你让我觉得生活变柔软的那些瞬间。",
-    "新的一岁，我希望你被很多很多爱包围。希望你少一点委屈，多一点确定；少一点疲惫，多一点被照顾；也希望我可以更好地出现在你的生活里。",
-    "等我们见面的时候，我会把今天没能给你的拥抱补上。生日快乐，我的女孩。"
+    "亲爱的以纯：",
+    "生日快乐呀。",
+    "见字如面。写下这几个字的时候，我心里其实有很多很多话想对你说，可真的开始写了，又突然不知道该从哪里说起。我知道自己的文笔可能没有那么好，有些话也写不出心里万分之一的感觉，所以你就将就着看看啦。",
+    "这是我们在一起之后，我陪你过的第一个生日。虽然这一次我没能真正站在你身边，没能在你许愿的时候陪你一起吹蜡烛，没能第一时间抱抱你，亲口对你说生日快乐，但我还是很认真地想把这些话写给你。因为我相信，这只是我们之间很多很多生日的开始。以后还有第二个、第三个，还有无数个属于你的生日，我都想陪你一起度过。",
+    "转眼间，我们已经快一年了。时间真的很奇妙，说快很快，快到好像我们刚刚认识还在昨天；说慢也很慢，慢到这一年里我们经历了好多事情，好像已经一起走过了很长很长的一段路。从刚入学时认识你，到后来我们慢慢熟悉、慢慢靠近，再到现在一起跌跌撞撞地迎来你的生日，那些画面好像一幕幕都还很清楚。",
+    "今天你在新疆，我在合肥。我们之间隔着三千公里，隔着很多个日升月落，隔着不能随时见面的遗憾。可我一直觉得，距离虽然很远，但它不应该成为我们相爱的阻碍。因为正是隔着这么远的距离，我们还在牵挂彼此，还在认真地选择彼此，还在努力把这段感情往前走，这本身就是一件很珍贵的事情。",
+    "今天是妻子的生日，所以最先当然要祝你快乐。不是那种随口说出来的生日快乐，而是真心希望你在新的一岁里，可以少一点压力，少一点委屈，少一点嘴硬，少一点言不由衷；可以多一点开心，多一点被爱，多一点安心，也多一点属于自己的美好。",
+    "我知道，你是一个很习惯依靠自己的人。很多时候你不是不需要人陪，也不是不渴望被爱，只是你太习惯把事情藏在心里，太习惯自己一个人消化所有情绪。你有时候会悲观，会觉得很难有人一直陪着你、一直爱着你，会觉得真心最后也可能会变。我不否认你有这样的想法，因为也许过去的经历、成长的环境，让你很难轻易相信“永远”这样的词。",
+    "但是我还是想告诉你，事情会不会变坏，很多时候取决于我们怎么经营。真心不是一定会变淡的，陪伴也不是一定会半路走散的。至少我是真的想陪你走很远很远，远到不只是今天，不只是明年，不只是我们读研的这一段日子，而是远到以后回头看时，我们会发现原来我们真的一起走过了那么多岁月。",
+    "你可能不太习惯说爱，不太习惯主动表达自己的脆弱和依赖，也不太习惯把一个人真正当成自己的依靠。我知道这不是因为你不爱我，而是因为你害怕受伤，也因为你从前太习惯一个人了。所以这也是我想好好爱你的原因。我希望我的出现，不是让你觉得多了一个麻烦，而是让你慢慢觉得，原来这个世界上真的有人愿意认真听你说话，愿意接住你的情绪，也愿意一直偏向你。",
+    "其实这一年里，我看到了你的很多变化。明明还不到一年，可我们好像已经经历了不少。没有人和关系是一成不变的，但我觉得，我们之间的变化，很多时候都是在朝着更好的方向走。你不是没有努力靠近我，也不是完全不在乎我的感受。只是有时候，我太着急了。",
+    "我太想确认自己在你心里的位置，太想从你的语气、你的消息、你的行动里找到你爱我的证明，找到你在乎我的证明。因为异地真的很特别，它看起来好像只是两个人不在同一个地方而已，可真正经历过才知道，它把很多简单的事情都变成了难题。别的情侣想见面就见面，想拥抱就拥抱，哪怕只是一起散个步、吃顿饭，都是很平常的事情。可对我们来说，这些最普通的日常，反而成了很奢侈的愿望。",
+    "所以我们很多情绪只能隔着屏幕表达。可是屏幕真的太冷了，冷到有时候一句爱意传过来，只剩下一半的温度；可一句气话传过去，却又好像会加倍地伤到对方。隔着屏幕，误会会被放大，沉默会被误解，晚一点回复都会让人忍不住胡思乱想。",
+    "可我也觉得，异地并没有那么可怕。有人说过，异地就像一阵连绵不断的风，它会吹灭那些虚假的爱意，但也会让真正的爱烧得更加热烈。吹灭虚假，助长真情。我希望我们就是后者。哪怕隔着三千公里，哪怕有争吵，有误会，有委屈，我们还是愿意相信彼此，还是愿意一次次回到对方身边。",
+    "最近我们的确吵了不少架，我也说过你好多次。很多时候，我嘴上说的是“你不在乎我”，可其实我心里真正想说的是：“我有点害怕，我害怕我在你心里没有那么重要。”你知道吗，你在我心里的位置，连我自己有时候都会羡慕。我很想你，很想被你需要，很想在你那里永远都是特殊的，很想听你主动说你爱我，也很想感受到你坚定地选择我。",
+    "可是这些话从我嘴里说出来的时候，常常就变成了抱怨，变成了质问，甚至让你觉得我在否定你、要求你、指责你。对不起哦，这一点我真的想认真跟你说一声对不起。",
+    "我知道你不是不爱我。可能只是你从小到大的习惯，让你还没有完全适应我成为你真正可以依靠、可以依赖的人。你习惯了自己一个人，习惯了自己安排生活，习惯了很多事情不说出口。我们相处的时间还不算特别长，我们还需要很长很长的时间去磨合，也需要慢慢学会怎么让对方更舒服。没关系，我们慢慢来。",
+    "我也知道，你觉得我最近有点变了，甚至可能会觉得我没有以前那么爱你了。也许以前的我更加温柔一点，更加有耐心一点。当然我还是要先说好，我一直以来对你都很温柔，也一直都很有耐心，因为对自己喜欢的人，态度本身就是答案。",
+    "只是后来，因为太在意你，太害怕失去你，也太想要更多回应和更多爱，我有时候反而变得敏感、着急，甚至有点不像原来的自己。我把我能给你的爱都给你，能做到的事情也都想努力做到。给你的礼物、写给你的信、为你准备的那些东西，我都是真心想让你感受到：你在我这里很重要，你一直都被我认真爱着。",
+    "可有时候，我也会因为太在意你的一举一动而乱想。你偶尔忽视了一点，我就会难过；你没有及时表达，我就会怀疑；你稍微冷一点，我就会想很多。然后我们之间就容易发生冲突。亲爱的，我不是不爱你了，也不是不在乎你了。如果不在乎，我又怎么会因为你的一句话、一个语气、一个小动作而牵动这么多情绪呢？",
+    "我只是因为异地，因为看不见你，抱不到你，所以更需要接收到你的爱意和在乎。对我来说，那些明确的表达不是多余的，它们像是我们往前走的动力，也像是我们相爱的证明。哪怕只是一句“我在乎你”“我没有不爱你”“我只是不会表达”，对我来说都会很重要。",
+    "有时候我也会想，敏感和细心到底是上天的恩赐，还是一种惩罚呢？可如果因为敏感，我能察觉到你的不开心，注意到你的小情绪和小细节，让你感受到被在乎、被珍惜，那我就觉得它是好的。只是同样因为敏感，我也更容易因为你的点点滴滴而乱想，更容易想要你多一点回应，多一点坚定，多一点让我安心的表达。",
+    "但是无论怎样，有一件事情我一直很确定：我爱你，毫无疑问。而我也知道，我的妻子也是爱我的。",
+    "写这封信的时候，我脑海里全是我们之间的点点滴滴。我们见面的次数并不算多，可正因为不多，所以每一次都显得格外珍贵。",
+    "我记得你第一次关心我的时候，你给我点的药。那一刻我真的觉得，药好像不只是用来治病的，也像是你把关心轻轻放到了我手里。它好像能够治愈很多东西，不只是身体上的不舒服，还有我心里那些因为想你而产生的不安。",
+    "我记得我们第一次见面的时候，我在机场紧张得不行，而你站在那里，亭亭玉立。见到你的那一瞬间，我突然觉得很多等待都有了答案。后来你给我的耳机，也让我一下子想到了偶像剧里的场景。那时候我就在想，原来有些人真的会带着光走进生活里。",
+    "我也记得我们第一次牵手的时候，你还调皮地不让我牵。现在想起来，我还是会觉得很可爱。那些第一次，第一次见面，第一次靠近，第一次牵手，第一次拥有只属于我们的回忆，都变成了我心里很宝贵的东西。",
+    "我也记得你对我的在乎。你为我们发抖音的时候，你写下喜欢我的理由的时候，我真的说不清自己那一刻有多开心。只是觉得，连平常我有点厌烦的课堂，都突然变得温柔了起来。好像世界没有变，可因为你喜欢我，因为你把我放进你的心里，我眼前的一切都变得不一样了。",
+    "我记得你和朋友一起玩的时候，后来又独自回来陪我玩，还跟我说你已经懂了，我们才是最重要的人的时候，我心里真的只有一句话：得妻如此，夫复何求。",
+    "我也记得你在乎我情绪的时候。你给朋友发生日祝福，都还会关心我的心情，说不想让我不开心。那一刻我怎么舍得让你为难呢？我只是觉得真好，真的很想时间停在那一刻，停在那个充满爱意、充满温柔的瞬间。",
+    "我记得我们的点点滴滴，也记得你的一切好。记得我们说过的话，记得我们的小约定，记得那些别人不知道、只有我们两个人懂的瞬间。",
+    "其实我之前也会担心，我给你做的这些事情，写给你的信，给你的书，给你的卷轴，还有那些我一点点准备出来的东西，你会不会还会珍藏、还会喜欢，还是慢慢习以为常了呢？还好你让我知道，你还是喜欢这一切的。而我也想让你知道，我为你做的每一点每一滴，都是真心的。",
+    "对了，刚刚老婆还问我需不需要小羊。你说你其实并不喜欢这些东西，但是因为我可能喜欢，所以你就愿意。真的，这句话太犯规了。你可能只是随口一说，可是在我心里，这就是很动人的情话。因为它让我感觉到，原来你也会因为我而改变一点点，原来你也会把我的喜欢放在心上。",
+    "可能是我一直没有太多安全感，也可能是我真的太想被你爱了，所以我对妻子的可爱视频和语音完全没有抵抗力。你可能不知道，你发给我的很多语音，我都会听很多次；你发给我的很多视频，我也会看很多次；你写给我的那封信，我已经读了很多很多遍。",
+    "我真的很喜欢这些东西。它们让我感觉自己有在被爱，让我感觉我们之间有很多可以被反复确认的温柔。好像这些东西越多，我就越能感受到你爱我。虽然我也知道，爱不应该只靠这些证明，可是它们对我来说，真的很珍贵。因为每一个字、每一句话、每一个视频、每一次表达，都像是你把爱悄悄递给我的证据。",
+    "我爱你，不是因为你完美，也不是因为我想强求你变成什么样子，而是因为我就是在越来越爱你。爱你的真实，爱你的嘴硬心软，爱你的独立，也爱你慢慢向我靠近时的样子。我们之前或许有很多争执，以后也可能还会吵架，可我相信，只要我们都愿意把对方放在心上，愿意好好说话，愿意慢慢改变，我们一定会越来越好。",
+    "你值得一切偏爱，值得很多很多温柔，也值得被坚定地选择。",
+    "新的一岁，我希望你可以有新的感受。我希望你在想到我的时候，不是压力，不是负担，而是幸福和安心。好像我已经很久没有听到你因为我而觉得幸福了呢，所以我也希望，以后的我可以重新成为让你觉得幸福的人。",
+    "你可以不用那么坚强。因为在我这里，你不是在外面，不需要时时刻刻都把自己保护得很好。你可以偶尔脆弱，偶尔任性，偶尔像小朋友一样需要人哄。我希望自己可以更懂你，也希望你可以慢慢学会依靠我。",
+    "我们已经走了快一年了。这一年里，我们经历了很多，有开心，有想念，有争吵，有委屈，也有很多很多舍不得。可只要我们还愿意牵着彼此，愿意好好说话，愿意慢慢改变，愿意在一次次误会之后仍然选择对方，那么我相信，我们一定会有很多很多以后。",
+    "宝宝，生日快乐。",
+    "我想，我们还有很多未来在等着我们。",
+    "我想以后我们能够有一个真正属于我们的家。不是隔着手机说晚安，不是隔着屏幕互相想念，而是每天都能见到彼此。可以一起吃饭，一起散步，一起买菜，一起窝在沙发上看电影。那些别人眼里很平常的日子，对经历过异地的我们来说，都会变得特别珍贵。我永远都不会觉得这样的日常无聊，因为我知道，能和你把平凡的日子过成日常，本身就是最浪漫的事情。",
+    "我想我们以后可以一起去旅游。去很多还没有去过的地方，看不同的风景，吃不同的美食，留下很多属于我们的痕迹。我们还有很多很多美食没有品尝，还有很多很多新鲜的事情没有体验，还有很多很多未来没有一起走到。剩下的那些话，就先留一点吧，等以后我亲口慢慢讲给你听。",
+    "谢谢你出现在我的生活里，也谢谢你成为我的女朋友。谢谢你的爱，谢谢你即使不擅长表达，也还是在用自己的方式靠近我。谢谢你愿意包容有时候敏感、不安、想要很多爱的我。也谢谢你，让我知道原来喜欢一个人可以这么认真，想念一个人可以这么具体，爱一个人可以这么牵动心绪。",
+    "我希望你新的一岁，被好运包围，被世界温柔以待，也被我好好爱着。希望你少一点烦恼，多一点开心；少一点难过，多一点被珍惜；少一点孤单，多一点有我在身边的安心。",
+    "也希望我们能尽快有一天，不用再隔着手机说想念，不用再隔着遥远的距离去爱。希望有一天，三千公里不再是我们之间的距离，而只是我们曾经认真相爱、认真坚持过的证明。",
+    "我会继续爱你，也会继续想你。",
+    "会继续学着怎么更好地爱你，怎么更温柔地靠近你，怎么让你在我这里感受到安心和幸福。",
+    "生日快乐，我最爱的妻子。",
+    "永远爱你的陈熠"
   ],
   photos: [
     {
       image: "assets/photos/photo-1.jpg",
-      title: "第一次报备",
-      caption: "这是我们才刚认识时，你给我发的学习分享。那时候的你，也就是这么可爱。"
+      title: "故事开始的轻轻报备",
+      caption: "那时我们才刚认识，你把学习日常分享给我。后来我才明白，原来心动会从这么普通又可爱的瞬间开始。"
     },
     {
       image: "assets/photos/photo-2.jpg",
-      title: "意境深远的风景",
-      caption: "这张照片是我在你朋友圈中找到的，一个截然不同的意境，当然也用在了我给你写的那本书上。"
+      title: "我收藏过的远方",
+      caption: "这张来自你朋友圈的风景，被我悄悄记了很久。因为它像你一样，有安静的美，也有让我想靠近的远方。"
     },
     {
       image: "assets/photos/photo-3.jpg",
-      title: "来自乌鲁木齐的微笑",
-      caption: "那是第一次收到你来自乌鲁木齐的美好。虽然那天你还在故意生我气，但现在想想，只记得那时的美好。"
+      title: "来自乌鲁木齐的想念",
+      caption: "第一次收到你从乌鲁木齐带来的画面，即使那天你还在故意生我的气，我记住的也只剩下你可爱的模样。"
     },
     {
       image: "assets/photos/photo-4.jpg",
-      title: "你喜欢的这张",
-      caption: "这张照片我看过很多次，因为你说你喜欢，所以它成为了我的手机壁纸，每天都能见到好多次。"
+      title: "每天都想看见你",
+      caption: "因为你说你喜欢这张，所以它成了我的手机壁纸。很多个平常的瞬间，我都是先看见你，再继续面对这一天。"
     },
     {
       image: "assets/photos/photo-5.jpg",
-      title: "不一样美丽的咖啡",
-      caption: "来自日常的一张分享。当然不一样的不只是咖啡，更是妻子萌萌又美丽的样子。"
+      title: "日常里的甜度",
+      caption: "这是一张很日常的分享，可在我眼里，咖啡不只是咖啡，它还带着你萌萌的表情和我一整天的好心情。"
     },
     {
       image: "assets/photos/photo-6.jpg",
-      title: "这张是飒飒的风格",
-      caption: "这张是我的百变妻子的其中一个缩影，凌厉的眼神也是很有魅力的啦。"
+      title: "你眼里的光",
+      caption: "我喜欢你温柔的样子，也喜欢你这样有锋芒的瞬间。你的每一种表情，对我来说都有独一份的魅力。"
     },
     {
       image: "assets/photos/photo-7.jpg",
-      title: "爱，鲜花和你",
-      caption: "值得铭记的一刻，妻子第一次收到我的表白花花。虽然隔着遥远的距离，但还是值得铭记的啦。"
+      title: "鲜花替我先拥抱你",
+      caption: "那束花隔着很远的距离先到了你身边。它替我说了很多话，也替我把喜欢郑重地放在了你面前。"
     },
     {
       image: "assets/photos/photo-8.jpg",
-      title: "要亲亲的宝宝",
-      caption: "同样来自分享的一张日常照片，但是要亲亲的宝宝永远都是最好的啦。"
+      title: "想被亲亲的宝贝",
+      caption: "这张日常照片可爱到让我反复看。你撒娇的样子，总能把我的心一下子变得很软很软。"
     },
     {
       image: "assets/photos/photo-9.jpg",
-      title: "第一次正式见面",
-      caption: "见面正式表白后的纪念啦，执子之手，与子偕老。"
+      title: "第一次把喜欢说给你听",
+      caption: "正式见面、正式表白、正式牵起你的手。那一刻我很确定，我想把以后很多很多日子都交给你。"
     },
     {
       image: "assets/photos/photo-10.jpg",
-      title: "与我美丽的妻子见面",
-      caption: "这张照片我纠结要不要放，但是呢，老婆她是很有感觉的啦，那就放下我们这里的第一张合照啦。"
+      title: "第一张属于我们的合照",
+      caption: "我犹豫过要不要放这张，最后还是舍不得删掉。因为这是我们一起出现的画面，也是我特别珍惜的开始。"
     },
     {
       image: "assets/photos/photo-11.jpg",
-      title: "新宿舍的妻子",
-      caption: "妻子拿着我给的大疆，在即将搬入的新宿舍拍下了这个美好的时刻。"
+      title: "新生活里的你",
+      caption: "你拿着我送的大疆，拍下即将搬进新宿舍的时刻。我很喜欢这种感觉，好像我也参与了你生活里重要的小片段。"
     },
     {
       image: "assets/photos/photo-12.jpg",
-      title: "吃虾虾的以纯",
-      caption: "这张照片毫无疑问是美好的照片。如果没猜错的话，是我们上次去过的那家吧；如果是的话，原谅我不想说出来哈哈哈。"
+      title: "和你有关的烟火气",
+      caption: "这张照片让我想到一起吃饭、一起笑、一起把普通日子过得热热闹闹。只要和你有关，连烟火气都很浪漫。"
     },
     {
       image: "assets/photos/photo-13.jpg",
-      title: "公开的合照",
-      caption: "这是一张妻子公开在所有人面前的合照，拥有值得庆祝的勇气和我们的爱。"
+      title: "把我们放进阳光里",
+      caption: "这张合照对我来说很珍贵，因为它像一次温柔又勇敢的确认：我们不只是悄悄喜欢，也可以被认真看见。"
     },
     {
       image: "assets/photos/photo-14.jpg",
-      title: "好看的照片",
-      caption: "这张其实我不知道是在哪一个场景拍的，但是就是好看好看，妻子就是好看！"
+      title: "怎么拍都心动",
+      caption: "我不一定记得这张是在什么场景拍下的，但我记得看见它时的心情：很喜欢，很心动，很想夸你。"
     },
     {
       image: "assets/photos/photo-15.jpg",
-      title: "迪士尼的可爱公主",
-      caption: "时间瞬间拉回到去迪士尼的那天，那天蒙蒙细雨，但也浇不灭妻子的热情，以及我们的爱。"
+      title: "雨天里的迪士尼公主",
+      caption: "那天有细雨，也有你藏不住的开心。雨没有让回忆变暗，反而让你像童话里走出来的公主一样发光。"
     },
     {
       image: "assets/photos/photo-16.jpg",
-      title: "第一次的生日",
-      caption: "这张照片我知道老婆不一定想放的啦。虽然我觉得这么拍也是很好看的，但这还是很有意义的一张啦。"
+      title: "陪你过的第一个生日",
+      caption: "这张照片对我有特别的意义。因为它记录的不只是生日，也是我第一次认真参与到你新一岁的开始。"
     },
     {
       image: "assets/photos/photo-17.jpg",
-      title: "手托住的世界",
-      caption: "妻子曾经说这张很有感觉，我同意，也喜欢她在我手心里的感觉，好像托住了整个世界。"
+      title: "把全世界托给你",
+      caption: "你说这张很有感觉，我也很喜欢。那一瞬间像是把我的整个世界托在手心里，而那个世界的中心正好是你。"
     },
     {
       image: "assets/photos/photo-18.jpg",
-      title: "来自大疆的记录",
-      caption: "这张同样是宝宝使用大疆记录下的美好一瞬间，我猜应该是和室友一起去的呢。"
+      title: "你镜头里的小美好",
+      caption: "这是你用大疆记录下来的瞬间。即使我不在现场，也会因为看见你的生活，被悄悄带进那天的风和光里。"
     },
     {
       image: "assets/photos/photo-19.jpg",
-      title: "阳光下的我们",
-      caption: "阳光下是我们两个的身影，好像时间定格在这一刻，美好不期而遇。"
+      title: "阳光替我们停留",
+      caption: "阳光下有我们的影子，也有被时间温柔停住的一刻。那一秒很简单，却足够让我想念很久。"
     },
     {
       image: "assets/photos/photo-20.jpg",
-      title: "微笑的天使",
-      caption: "这张来自图书馆的照片。如果世界上有天使的话，一定是满怀笑意的妻子，这一切温馨而又美丽。"
+      title: "图书馆里的温柔天使",
+      caption: "这张照片里的你笑得很温柔。安静的图书馆、明亮的你、还有我看见照片时突然变轻的心。"
     },
     {
       image: "assets/photos/photo-21.jpg",
-      title: "两个人的合照",
-      caption: "其实就是想放我们的合照。如果有要说的，难得一次我出现半边脸哈哈哈哈哈。"
+      title: "我们在同一张照片里",
+      caption: "我想把这张合照放进来，因为能和你一起出现在画面里，本身就是一件让我很满足的小事。"
     },
     {
       image: "assets/photos/photo-22.jpg",
-      title: "卖萌的妻子",
-      caption: "虽然这张是我截图下来的，但是没办法，这么可爱的妻子谁能不爱呢。"
+      title: "藏不住的可爱",
+      caption: "虽然这是我截图保存下来的，但我还是很想放进来。因为你的可爱太犯规了，我真的舍不得不收藏。"
     },
     {
       image: "assets/photos/photo-23.jpg",
-      title: "美丽的以纯",
-      caption: "没有什么特别的意思，就是单纯很纯真的美。"
+      title: "清澈又美丽的以纯",
+      caption: "这张没有复杂的故事，只是你很美。那种干净、自然、让人想一直看下去的美。"
     },
     {
       image: "assets/photos/photo-24.jpg",
-      title: "不知道在想什么的纯纯",
-      caption: "眼神不知道被什么吸引了的纯纯，还是那么可可爱爱。"
+      title: "望向远处的纯纯",
+      caption: "我不知道那一刻你在看什么，但我知道我在看你。你安静望向远处的样子，也让我觉得很心动。"
     }
   ]
 };
@@ -168,11 +222,15 @@ const PRIVACY_UNLOCK_KEY = "aaayichun-unlocked";
 let currentPhoto = 0;
 let shuffledPhotos = [...story.photos];
 let letterStarted = false;
+let letterTyping = false;
+let letterTypingToken = 0;
 let layoutIndex = 0;
 let audio;
 let audioContext;
 let synthTimer;
 let musicOn = false;
+let currentMusicKey = "";
+let musicSuppressedView = "";
 let orbitOffset = 0;
 let orbitVelocity = 0.0011;
 let queueOffset = 0;
@@ -225,10 +283,10 @@ let manualSpotlightStartedAt = 0;
 let isUnlocked = false;
 
 const layouts = [
-  { name: "Valley Arrival", label: "队形：命运交错" },
-  { name: "Orbit Bloom", label: "队形：圆环循环" },
-  { name: "Flower Cluster", label: "队形：花束聚合" },
-  { name: "Starlit Scatter", label: "队形：星夜散落" }
+  { name: "First Light", label: "这一幕：命运把我们推近" },
+  { name: "Moon Orbit", label: "这一幕：想念围着你旋转" },
+  { name: "Bloom Vow", label: "这一幕：爱意慢慢开成花" },
+  { name: "Starfall", label: "这一幕：星光落在我们身上" }
 ];
 
 function init() {
@@ -278,7 +336,7 @@ function setupPrivacyGate() {
     const value = normalizePrivateCode(input.value);
     const valid = story.privateCodes.some((code) => normalizePrivateCode(code) === value);
     if (!valid) {
-      $("#gateError").textContent = "暗号不对，再想想我们之间最熟悉的称呼。";
+      $("#gateError").textContent = "暗号不对哦，再想想只属于我们的那一天。";
       input.select();
       gate.classList.remove("is-shaking");
       requestAnimationFrame(() => gate.classList.add("is-shaking"));
@@ -373,7 +431,7 @@ function setupActions() {
   });
   $(".lightbox-image-wrap").setAttribute("tabindex", "0");
   $(".lightbox-image-wrap").setAttribute("role", "button");
-  $(".lightbox-image-wrap").setAttribute("aria-label", "打开完整照片");
+  $(".lightbox-image-wrap").setAttribute("aria-label", "看见完整的这一刻");
   $(".lightbox-image-wrap").addEventListener("click", (event) => {
     event.stopPropagation();
     if ($("#photoLightbox").classList.contains("is-full-image") && isOutsideRenderedImage(event)) {
@@ -417,9 +475,26 @@ function setupActions() {
     showView("letter", { resetLetter: true });
   });
   $("#replayLetter").addEventListener("click", () => {
+    stopLetterTyping();
     letterStarted = false;
     $("#letterBody").innerHTML = "";
     openLetter();
+  });
+  $("#openLetterOverview").addEventListener("click", () => {
+    if (!isUnlocked) {
+      lockMainContent();
+      return;
+    }
+    openLetterOverview();
+  });
+  $(".letter-paper").addEventListener("dblclick", (event) => {
+    if (!$("#letter").classList.contains("is-letter-open")) return;
+    event.preventDefault();
+    revealFullLetter();
+    window.getSelection()?.removeAllRanges();
+  });
+  $("#letterOverview").addEventListener("click", (event) => {
+    if (event.target === event.currentTarget) closeLetterOverview();
   });
 
   $("#musicToggle").addEventListener("click", async () => {
@@ -427,8 +502,8 @@ function setupActions() {
       lockMainContent();
       return;
     }
-    if (musicOn) stopMusic();
-    else await startMusic();
+    if (musicOn) stopMusic({ manual: true });
+    else await startMusicForCurrentView({ manual: true });
   });
 
   window.addEventListener("hashchange", () => {
@@ -436,6 +511,10 @@ function setupActions() {
   });
 
   document.addEventListener("keydown", (event) => {
+    if (!$("#letterOverview").hidden) {
+      if (event.key === "Escape") closeLetterOverview();
+      return;
+    }
     if ($("#photoLightbox").hidden) return;
     if (event.key === "Escape") closePhoto();
     if (event.key === "ArrowLeft") movePhoto(-1);
@@ -474,6 +553,7 @@ function showView(viewId, options = {}) {
     startAlbumIntro();
     applyLayout();
   }
+  handleViewMusic(viewId);
 }
 
 function startAlbumIntro(force = false) {
@@ -498,10 +578,12 @@ function startAlbumIntro(force = false) {
 }
 
 function resetLetterView() {
+  stopLetterTyping();
   letterStarted = false;
   $("#letter").classList.remove("is-letter-opening", "is-letter-pulling", "is-letter-open");
   $("#envelopeWrap").classList.remove("is-open");
   $("#letterBody").innerHTML = "";
+  $("#letterBody").classList.remove("is-complete");
 }
 
 function markInteraction() {
@@ -550,7 +632,7 @@ function renderPhotos() {
         <img src="${photo.image}" alt="${escapeHtml(photo.title)}" />
       </span>
       <span class="tile-caption">
-        <strong>MEMORY ${displayNumber}</strong>
+        <strong>LOVE NOTE ${displayNumber}</strong>
         <span>${escapeHtml(photo.title)}</span>
       </span>
       <span class="photo-hit-zone" aria-hidden="true"></span>
@@ -646,8 +728,8 @@ function buildPhotoList() {
     const number = index + 1;
     return {
       image: existing.image || `assets/photos/photo-${number}.jpg`,
-      title: existing.title || `照片 ${number}`,
-      caption: existing.caption || "这里可以先空着，后面换成这张照片背后的真实回忆。"
+      title: existing.title || `写给你的第 ${number} 个瞬间`,
+      caption: existing.caption || "这一张先为你留白，等我把只属于我们的温柔回忆补进来。"
     };
   });
 }
@@ -990,7 +1072,7 @@ function applyLayout(updateCopy = true) {
   if (updateCopy) {
     wall.classList.remove("layout-0", "layout-1", "layout-2", "layout-3");
     wall.classList.add(`layout-${layoutIndex}`);
-    $("#wallStatus").textContent = `${layout.label}。点击任意照片可以放大查看介绍。`;
+    $("#wallStatus").textContent = `${layout.label}。轻点一张照片，我把这一刻的心动讲给你听。`;
     $("#stageMode").textContent = `${layout.name} / ${String(Math.round(((layoutIndex + 1) / layouts.length) * 100)).padStart(2, "0")}%`;
 
     const poem = story.stagePoems[layoutIndex % story.stagePoems.length];
@@ -2020,7 +2102,7 @@ async function openLetter() {
   if (letter.classList.contains("is-letter-opening")) return;
   letter.classList.add("is-letter-opening");
   $("#envelopeWrap").classList.add("is-open");
-  await startMusic();
+  if (!musicOn && musicSuppressedView !== "letter") await startMusic("letter");
   window.setTimeout(() => {
     letter.classList.add("is-letter-pulling");
   }, 520);
@@ -2033,15 +2115,19 @@ async function openLetter() {
 async function typeLetter() {
   if (letterStarted) return;
   letterStarted = true;
+  letterTyping = true;
+  const token = ++letterTypingToken;
   const target = $("#letterBody");
   target.innerHTML = "";
+  target.classList.remove("is-complete");
 
   if (prefersReducedMotion) {
-    target.innerHTML = story.letter.map((line) => `<p>${escapeHtml(line)}</p>`).join("");
+    revealFullLetter();
     return;
   }
 
   for (const paragraph of story.letter) {
+    if (token !== letterTypingToken) return;
     const p = document.createElement("p");
     const cursor = document.createElement("span");
     cursor.className = "cursor";
@@ -2049,47 +2135,145 @@ async function typeLetter() {
     p.appendChild(cursor);
 
     for (const char of paragraph) {
+      if (token !== letterTypingToken) return;
       cursor.insertAdjacentText("beforebegin", char);
       await wait(char === "，" || char === "。" ? 120 : 36);
     }
     cursor.remove();
     await wait(220);
   }
+  letterTyping = false;
+  target.classList.add("is-complete");
 }
 
-async function startMusic() {
+function stopLetterTyping() {
+  letterTypingToken += 1;
+  letterTyping = false;
+}
+
+function revealFullLetter() {
+  const target = $("#letterBody");
+  stopLetterTyping();
+  letterStarted = true;
+  target.innerHTML = story.letter.map((line) => `<p>${escapeHtml(line)}</p>`).join("");
+  target.classList.add("is-complete");
+  requestAnimationFrame(() => window.getSelection()?.removeAllRanges());
+}
+
+function openLetterOverview() {
+  const overlay = $("#letterOverview");
+  const body = $("#letterOverviewBody");
+  body.innerHTML = story.letter.map((line) => `<p>${escapeHtml(line)}</p>`).join("");
+  overlay.hidden = false;
+  document.body.style.overflow = "hidden";
+  requestAnimationFrame(fitLetterOverview);
+}
+
+function closeLetterOverview() {
+  $("#letterOverview").hidden = true;
+  if ($("#photoLightbox").hidden) document.body.style.overflow = "";
+}
+
+function fitLetterOverview() {
+  const body = $("#letterOverviewBody");
+  if (!body || $("#letterOverview").hidden) return;
+  const viewport = window.innerWidth;
+  const columns = viewport >= 1180 ? 4 : viewport >= 780 ? 3 : 2;
+  const minSize = viewport >= 1180 ? 6.8 : viewport >= 780 ? 6.2 : 5.8;
+  let size = viewport >= 1180 ? 9.6 : viewport >= 780 ? 8.2 : 6.8;
+  body.style.setProperty("--overview-columns", columns);
+  body.style.setProperty("--overview-font", `${size}px`);
+  body.scrollTop = 0;
+
+  const fits = () => body.scrollWidth <= body.clientWidth + 2 && body.scrollHeight <= body.clientHeight + 2;
+  for (let guard = 0; guard < 18 && !fits() && size > minSize; guard += 1) {
+    size = Math.max(minSize, size - 0.25);
+    body.style.setProperty("--overview-font", `${size.toFixed(2)}px`);
+  }
+}
+
+function getViewMusicKey(viewId = document.body.dataset.view) {
+  if (viewId === "photoWall") return "album";
+  if (viewId === "letter") return "letter";
+  return "";
+}
+
+function handleViewMusic(viewId) {
+  const trackKey = getViewMusicKey(viewId);
+  if (!trackKey) {
+    stopMusic();
+    musicSuppressedView = "";
+    return;
+  }
+  if (musicSuppressedView === viewId) {
+    updateMusicButton();
+    return;
+  }
+  void startMusic(trackKey);
+}
+
+async function startMusicForCurrentView(options = {}) {
+  const trackKey = getViewMusicKey() || "album";
+  return startMusic(trackKey, options);
+}
+
+async function startMusic(trackKey = getViewMusicKey() || "album", options = {}) {
   if (!isUnlocked) return;
-  if (musicOn) return;
+  const track = story.music?.[trackKey];
+  if (!track) return;
+  if (musicOn && currentMusicKey === trackKey) return;
+  stopSynth();
+  if (options.manual) musicSuppressedView = "";
+
   musicOn = true;
-  updateMusicButton();
+  currentMusicKey = trackKey;
 
   if (!audio) {
-    audio = new Audio(story.musicPath);
+    audio = new Audio();
     audio.loop = true;
-    audio.volume = 0.35;
+    audio.volume = 0.42;
   }
+
+  if (!audio.src || !audio.src.endsWith(track.path)) {
+    audio.pause();
+    audio.src = track.path;
+    audio.load();
+  }
+  audio.loop = true;
+  audio.volume = trackKey === "letter" ? 0.38 : 0.42;
+  updateMusicButton();
 
   try {
     await audio.play();
+    return true;
   } catch {
-    startSynth();
+    musicOn = false;
+    updateMusicButton();
+    return false;
   }
 }
 
-function stopMusic() {
+function stopMusic(options = {}) {
+  if (options.manual) musicSuppressedView = document.body.dataset.view || "";
   musicOn = false;
   if (audio) audio.pause();
+  stopSynth();
+  updateMusicButton();
+}
+
+function stopSynth() {
   if (synthTimer) {
     clearInterval(synthTimer);
     synthTimer = null;
   }
-  updateMusicButton();
 }
 
 function updateMusicButton() {
+  const activeTrack = story.music?.[currentMusicKey] || story.music?.[getViewMusicKey()] || story.music?.album;
   $("#musicToggle").classList.toggle("is-on", musicOn);
   $("#musicIcon").textContent = musicOn ? "Ⅱ" : "♪";
-  $("#musicToggle").setAttribute("aria-label", musicOn ? "暂停音乐" : "播放音乐");
+  $("#musicToggle").setAttribute("aria-label", musicOn ? `暂停音乐：${activeTrack.title}` : `播放音乐：${activeTrack.title}`);
+  $("#musicToggle").title = musicOn ? `暂停 ${activeTrack.title}` : `播放 ${activeTrack.title}`;
 }
 
 function startSynth() {

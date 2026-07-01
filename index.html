@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#111729" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="生日信" />
-    <title>只给你看的生日信</title>
+    <meta name="apple-mobile-web-app-title" content="给以纯的爱" />
+    <title>只给以纯的爱</title>
     <link rel="preload" as="image" href="assets/hero-letter.png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
@@ -15,30 +15,30 @@
     <section class="privacy-gate" id="privacyGate" aria-labelledby="gateTitle">
       <div class="gate-glow" aria-hidden="true"></div>
       <form class="gate-panel" id="gateForm">
-        <p class="eyebrow">Private Entrance</p>
+        <p class="eyebrow">Only For Yichun</p>
         <h1 id="gateTitle">只给你的爱</h1>
-        <p class="gate-copy">输入我们之间的暗号，再打开这份为你准备的回忆。</p>
+        <p class="gate-copy">输入我们之间的暗号，再打开这份只为你准备的浪漫。</p>
         <label class="gate-field" for="gateCode">
           <span>暗号</span>
-          <input id="gateCode" type="password" autocomplete="off" inputmode="text" placeholder="输入我们的暗号" />
+          <input id="gateCode" type="password" autocomplete="off" inputmode="text" placeholder="输入只属于我们的暗号" />
         </label>
         <p class="gate-error" id="gateError" aria-live="polite"></p>
-        <button class="gate-submit" type="submit">打开</button>
+        <button class="gate-submit" type="submit">打开这份爱</button>
       </form>
     </section>
-    <a class="home-return" href="#home" data-view="home" aria-label="返回封面">返回封面</a>
+    <a class="home-return" href="#home" data-view="home" aria-label="回到生日封面">回到封面</a>
+    <nav class="top-nav" aria-label="页面导航">
+      <a href="#photoWall" data-view="photoWall">相册</a>
+      <a href="#letter" data-view="letter">信</a>
+      <button class="music-button" id="musicToggle" type="button" aria-label="播放音乐">
+        <span id="musicIcon">♪</span>
+      </button>
+    </nav>
 
     <main>
       <section class="hero is-active" id="home">
         <img class="hero-image" src="assets/hero-letter.png" alt="" />
         <div class="hero-shade"></div>
-        <nav class="top-nav" aria-label="页面导航">
-          <a href="#photoWall" data-view="photoWall">相册</a>
-          <a href="#letter" data-view="letter">信</a>
-          <button class="music-button" id="musicToggle" type="button" aria-label="播放音乐">
-            <span id="musicIcon">♪</span>
-          </button>
-        </nav>
         <div class="hero-copy">
           <p class="eyebrow" id="heroKicker"></p>
           <h1 id="heroTitle"></h1>
@@ -54,12 +54,12 @@
         <div class="section-shell">
           <header class="section-head">
             <p class="eyebrow">Interactive Album</p>
-            <h2>把我们放进同一片星河里</h2>
-            <p>移动鼠标或手指时，照片会跟着轻轻偏移；点开任意一张，就能单独放大看照片和对应介绍。</p>
+            <h2>把我们的心动放进同一片星河</h2>
+            <p>每一种队形，都是我重新整理过的一次想念；点开任意一张照片，就能看到我写给那一刻的温柔。</p>
           </header>
           <div class="wall-toolbar" aria-label="相册操作">
-            <button id="cycleLayout" type="button">切换队形</button>
-            <button id="openFirstPhoto" type="button">从第一张开始看</button>
+            <button id="cycleLayout" type="button">换一束星光</button>
+            <button id="openFirstPhoto" type="button">从第一眼心动开始</button>
           </div>
           <div class="wall-status" id="wallStatus" aria-live="polite"></div>
           <div class="photo-wall" id="photoGrid" aria-live="polite">
@@ -78,7 +78,7 @@
             </div>
             <div class="stage-brand">
               <strong id="stageInitials"></strong>
-              <span>Eternal Blossoms</span>
+              <span>For Yichun, Always</span>
             </div>
             <div class="stage-mode" id="stageMode"></div>
             <div class="stage-poem">
@@ -109,7 +109,8 @@
             <h2 id="letterTitle"></h2>
             <div class="letter-body" id="letterBody"></div>
             <div class="letter-actions">
-              <button class="primary-action" id="replayLetter" type="button">重新读一遍</button>
+              <button class="primary-action" id="replayLetter" type="button">再把爱读一遍</button>
+              <button class="secondary-action letter-overview-toggle" id="openLetterOverview" type="button">全览截图</button>
             </div>
           </article>
         </div>
@@ -128,12 +129,22 @@
           <h3 id="lightboxTitle"></h3>
           <p id="lightboxCaption"></p>
           <div class="lightbox-actions">
-            <button class="lightbox-full" id="viewFullPhoto" type="button">打开完整照片</button>
-            <button class="lightbox-focus" id="focusPhotoStage" type="button">在相册中聚焦</button>
+            <button class="lightbox-full" id="viewFullPhoto" type="button">看见完整的你</button>
+            <button class="lightbox-focus" id="focusPhotoStage" type="button">放到星河中央</button>
           </div>
         </figcaption>
       </figure>
       <button class="lightbox-nav next" id="nextPhoto" type="button" aria-label="下一张">›</button>
+    </div>
+
+    <div class="letter-overview" id="letterOverview" hidden>
+      <section class="letter-overview-sheet" role="dialog" aria-modal="true" aria-label="全览整篇生日信">
+        <header class="letter-overview-head">
+          <span>Letter Overview</span>
+          <strong>写给以纯的生日情书</strong>
+        </header>
+        <div class="letter-overview-body" id="letterOverviewBody"></div>
+      </section>
     </div>
 
     <script src="app.js"></script>

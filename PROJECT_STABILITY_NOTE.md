@@ -232,3 +232,34 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - Default desktop photo card size was pulled back from the previous oversized pass. The album now reads as a denser group of photos instead of one large card wall, while keeping enough coverage and strong central focus.
 - Photo paper material was strengthened with side-edge inset light and darker opposite-edge pressure, still through `.photo-tile`/`.photo-tile::after` rather than global filters or per-card animations.
 - Regression coverage now asserts the depth rail exists, is pointer-disabled, has visible bounded opacity, uses transform positioning, remains smaller than the main photos, and still keeps the existing no-global-filter/no-card-animation guards.
+
+## Romantic Copy Pass - 2026-06-30
+
+- Rewrote the photo-facing copy for a girlfriend birthday gift: all 24 photo titles and captions now read as romantic memories instead of casual placeholders or notes.
+- Updated surrounding album labels only at the content layer: `LOVE NOTE XX` card labels, romantic stage poems, layout status copy, album heading, private-gate copy, full-photo button text, and manual spotlight button text.
+- No animation, pointer, hover, drag, lightbox, RAF layout, or spotlight mechanics changed in this pass. The same stability constraints remain: no global `.photo-cards` filter/drop-shadow, no per-card animation, no default automatic spotlight, and no hover-driven queue movement.
+
+## Long Letter Import And Reveal Control - 2026-07-01
+
+- Imported the final long birthday letter from `C:\Users\kkkchen\Desktop\11111.docx` into `story.letter`, then added a separate closing signature `永远爱你的陈熠`. It is now 51 webpage paragraphs, so the letter panel must remain scrollable.
+- Preserved the slow typewriter reveal by default. Added a double-click reveal on `.letter-paper` for the user's requested shortcut to show the full letter immediately.
+- The double-click path cancels any active typing loop through `letterTypingToken`, then renders the full escaped letter text and clears browser text selection so the page does not show accidental blue selection highlights.
+- Opened-letter visuals were adjusted for readability: the envelope moves to a dim background layer, the paper moves to the foreground, and completed long-letter text gets brighter color and more comfortable line height.
+- Regression coverage now verifies the full text appears, the paragraph count is correct, the signature is present, the letter paper becomes visible, and the panel scrolls to the bottom with the signature in view.
+
+## Letter Screenshot Overview - 2026-07-01
+
+- Added a `全览截图` action beside the replay button. This is explicitly for screenshot capture, not comfortable reading.
+- The overview opens a full-screen `.letter-overview` panel with a compact dark-gold sheet, small multi-column text, and the signature in the lower-right flow.
+- `fitLetterOverview()` chooses 2/3/4 columns by viewport width and shrinks `--overview-font` until the overview body has no horizontal or vertical overflow. This keeps the whole letter in one screenshot frame where possible.
+- Clicking the dark blank area outside `.letter-overview-sheet` closes the overview. Escape also closes it through the shared keydown handler.
+- Regression coverage verifies the overview is visible, contains the signature, fits within its viewport without overflow, uses a non-tiny minimum font, screenshots `verified-letter-overview.png`, and closes when the outside blank area is clicked.
+
+## Two-Track Page Music - 2026-07-01
+
+- Added two real MP3 assets under `assets/music/`: `until-you-arrive.mp3` for the album page and `love-you.mp3` for the letter page.
+- Replaced the old single `story.musicPath` path with `story.music.album` and `story.music.letter`. `handleViewMusic()` starts the album track on `#photoWall`, starts the letter track on `#letter`, and stops music on non-music views.
+- The right-top music button now controls the current page track. Manual pause records `musicSuppressedView` so the app does not immediately restart the same page's music; manual play clears that suppression and retries the current page track.
+- Browser autoplay rejection no longer starts the synthetic fallback tone. If the browser blocks autoplay, the button remains available for a user-gesture retry with the real track.
+- The top navigation was moved outside the hero section into a global layer. Non-home views hide the text nav links but keep the music button visible and clickable above album/letter sections.
+- Regression coverage stubs `HTMLMediaElement.play()` in Playwright, verifies album entry requests `until-you-arrive.mp3`, verifies letter entry requests `love-you.mp3`, and checks the right-top button can pause and resume the letter track.

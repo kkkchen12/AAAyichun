@@ -9,7 +9,7 @@
 - 参考视频已保存到项目内：`assets/reference/reference-album-effect.mp4`。
 - 后续调相册时优先对照这个视频，而不是凭感觉改。重点看：照片是否铺得够满、队列是否整体流动、照片是否有前后层次、背景是否高级暗场、交互是否不需要额外播放按钮。
 - 参考视频抽帧和联系表仍在：`output/reference/video-contact-sheet.jpg`、`output/reference/video-frame-01.jpg` 到 `output/reference/video-frame-08.jpg`。
-- 当前主要验收截图在：`output/playwright/verified-*.png`。其中最重要的是 `verified-album-desktop.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png`、`verified-album-iphone-landscape.png`、`verified-photo-detail.png`、`verified-letter-envelope-polish.png`。
+- 当前主要验收截图在：`output/playwright/verified-*.png`。其中最重要的是 `verified-album-desktop.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png`、`verified-album-iphone-landscape.png`、`verified-photo-detail.png`、`verified-letter-envelope-polish.png`、`verified-letter-full-text.png`、`verified-letter-full-text-bottom.png`、`verified-letter-overview.png`。
 
 ## 页面结构
 
@@ -32,7 +32,8 @@
 3. **一封信**
    - 信封按钮。
    - 点击后信封展开。
-   - 信件正文逐字显示。
+   - 信件正文逐字显示；信纸打开后双击信纸区域可立即显示全文。
+   - 信纸上有 `全览截图` 按钮，用更小字号和多栏排版在一个画面里展示整封信，方便截图；点击面板外暗色空白可退出。
 
 ## 如何替换内容
 
@@ -65,7 +66,7 @@ photo-24.jpg
 story.photos
 ```
 
-当前项目已经导入 24 张相册文件：`photo-1.jpg` 到 `photo-14.jpg` 是用户提供的真实照片，`photo-15.jpg` 到 `photo-24.jpg` 暂时重复前面的照片补齐队列密度。
+当前项目已经导入 24 张正式相册文件：`photo-1.jpg` 到 `photo-24.jpg` 都在 `assets/photos/` 中作为页面使用的正式照片。根目录临时导入用的 `photos/` 文件夹不进入仓库。
 
 ### 替换信件
 
@@ -77,15 +78,26 @@ story.letter
 
 每一项是一段文字。
 
+当前 `story.letter` 已从 `C:\Users\kkkchen\Desktop\11111.docx` 导入正式长信内容，并在最后单独追加署名 `永远爱你的陈熠`。页面保留逐字显示的仪式感；长信较长，所以信纸区域可滚动阅读，双击信纸可直接显示全文，`全览截图` 可一屏展示整封信。
+
 ### 替换音乐
 
-把音乐文件放到：
+音乐文件放到：
 
 ```text
-assets/song.mp3
+assets/music/
 ```
 
-iPhone/Safari 不允许网页自动播放音乐，所以音乐需要用户点击按钮或拆信后触发。
+当前已经导入两首歌：
+
+```text
+assets/music/until-you-arrive.mp3  # 相册页，直到你降临
+assets/music/love-you.mp3          # 信件页，爱你
+```
+
+相册页会自动尝试循环播放《直到你降临》，信件页会自动尝试循环播放《爱你》。右上角音乐按钮已经移到全局层，封面显示完整导航，相册和信件页保留右上角音乐开关，用来暂停或恢复当前页面的歌曲。
+
+iPhone/Safari 仍可能因为浏览器自动播放策略拦截第一次播放；这种情况下，用户点右上角音乐按钮即可手动启动当前页面歌曲。
 
 ## 部署方案
 
@@ -101,7 +113,7 @@ iPhone/Safari 不允许网页自动播放音乐，所以音乐需要用户点击
 - Vercel 会生成 HTTPS 链接，适合发给异地的她。
 - 后续改内容后重新推送即可自动更新。
 
-建议先在本地把框架、横屏交互、私密入口和基础视觉验收完成，再部署。照片介绍、生日信正文和音乐可以后补，但部署前最好至少完成一次真实照片测试。
+建议先在本地把框架、横屏交互、私密入口和基础视觉验收完成，再部署。照片、照片介绍、生日信正文和两首背景音乐已经完成正式替换。
 
 ## 本地运行和验收
 
@@ -114,7 +126,7 @@ npm test
 - `npm run dev` 启动本地静态服务：`http://127.0.0.1:5173`
 - `npm run check` 检查 `app.js` 语法。
 - `npm test` 运行项目本地 `@playwright/test` 视觉验收，覆盖桌面横屏相册、手机横屏相册、照片介绍层和纯照片模式。
-- 当前还额外覆盖私密入口、照片点击 FLIP、hover 后点击可靠性、hover 不长期卡住队列、返回封面、入场聚合、自动场景演化、拖动响应光效、双击空白变阵，以及封面按钮文案和信封视觉截图，截图包括 `output/playwright/verified-private-entrance.png`、`output/playwright/verified-private-unlocked.png`、`output/playwright/verified-photo-flight.png`、`output/playwright/verified-hover-stability.png`、`output/playwright/verified-album-intro-gather.png`、`output/playwright/verified-album-auto-scene.png`、`output/playwright/verified-album-drag-motion.png`、`output/playwright/verified-album-doubleclick-morph.png`、`output/playwright/verified-cover-polish.png`、`output/playwright/verified-letter-envelope-polish.png`。
+- 当前还额外覆盖私密入口、照片点击 FLIP、hover 后点击可靠性、hover 不长期卡住队列、返回封面、入场聚合、自动场景演化、拖动响应光效、双击空白变阵，以及封面按钮文案和信封视觉截图，截图包括 `output/playwright/verified-private-entrance.png`、`output/playwright/verified-private-unlocked.png`、`output/playwright/verified-photo-flight.png`、`output/playwright/verified-hover-stability.png`、`output/playwright/verified-album-intro-gather.png`、`output/playwright/verified-album-auto-scene.png`、`output/playwright/verified-album-drag-motion.png`、`output/playwright/verified-album-doubleclick-morph.png`、`output/playwright/verified-cover-polish.png`、`output/playwright/verified-letter-envelope-polish.png`、`output/playwright/verified-letter-full-text.png`、`output/playwright/verified-letter-full-text-bottom.png`、`output/playwright/verified-letter-overview.png`。
 - 主相册用例现在会断言桌面照片宽度、可见照片集合覆盖宽度和覆盖高度，避免后续调整又退回“照片小、空隙大”的状态；同时继续检查 transform 定位、扫光变量和 camera 变量。
 - 验收截图会生成到 `output/playwright/verified-*.png`，用于快速判断相册是否仍然符合参考视频方向。
 
@@ -143,13 +155,13 @@ npm test
 
 2. **搭建核心页面**
    - 完成封面、互动相册、一封信三个主页面。
-   - 加入音乐入口；后面只需要放入 `assets/song.mp3`。
+   - 加入音乐入口；当前已经按页面分配两首音乐。
    - 信件区保留信封拆开和逐字显示正文的结构。
 
 3. **导入照片并扩展相册数量**
    - 已把用户提供的真实照片复制进 `assets/photos/`。
-   - 当前相册按 24 张设计；真实照片不足的部分用重复照片补齐，保证队列密度。
-   - 后面主要替换照片标题、照片说明和重复补位图片。
+   - 当前相册按 24 张设计；早期曾用重复照片补齐队列密度，现在已替换为 24 张正式照片。
+   - 照片标题和说明已经完成正式内容替换，并做过一轮更浪漫的表达润色。
 
 4. **按参考视频重做相册方向**
    - 从早期偏卡通/简单照片墙，改成暗色电影感、暗金玻璃、星尘粒子的视觉方向。
@@ -181,10 +193,10 @@ npm test
 
 ## 后续推荐路线
 
-1. **先补真实内容**
-   - 替换每张照片的标题和说明。
-   - 把 `photo-15` 到 `photo-24` 的重复补位换成更多真实照片，或者减少 `story.photoCount`。
-   - 写最终信件正文，当前正文还是可用模板。
+1. **先做内容终稿检查**
+   - 当前 24 张照片和每张照片的标题、说明都已替换为正式内容，并做了一轮更浪漫的表达润色。
+   - 后续只需要按用户口味微调个别措辞，不再把 `photo-15` 到 `photo-24` 当作重复补位。
+   - 正式长信已导入，后续只需要按用户口吻微调个别表达。
 
 2. **再继续对照视频调相册质感**
    - 继续微调默认三层照片流的密度、中心照片比例和侧翼纵深。
@@ -192,10 +204,10 @@ npm test
    - 重点加强细粒子、照片边缘微闪、照片残影，不建议再加卡通心形或大花瓣。
    - 不建议恢复 hover 推动真实队列；如果一定要做，需要先重新设计点击命中逻辑。
 
-3. **补音乐和私密入口**
-   - 放入 `assets/song.mp3`。
-   - 加一个简单私密入口，例如输入她的昵称、生日或纪念日才能进入。
-   - 私密入口完成后再准备部署。
+3. **检查音乐和私密入口**
+   - 当前相册页音乐为《直到你降临》，信件页音乐为《爱你》。
+   - 右上角音乐按钮可暂停或恢复当前页面歌曲。
+   - 私密入口已完成；正式部署后要用真实手机再测一次暗号和音乐按钮。
 
 4. **做最终设备验收**
    - 电脑横屏：重点看相册震撼感和照片点击。
@@ -213,9 +225,9 @@ npm test
 
 1. 先打开 `assets/reference/reference-album-effect.mp4` 和 `output/playwright/verified-album-desktop.png` 对照，继续判断相册是否够满、够动态、够高级。
 2. 继续微调横向照片队列的纵深、密度、光效、hover 视觉反馈和拖拽手感；照片要保持大、密、铺屏，不要退回小卡片和大空隙。
-3. 替换每张照片的真实介绍；当前部分照片标题和文案仍是占位。
-4. 整理最终信件。
-5. 放入背景音乐 `assets/song.mp3`。
+3. 检查每张照片的浪漫介绍是否符合用户口吻；当前 24 张照片已有正式标题和一句话说明。
+4. 检查最终信件的个别表达；当前长信正文已导入网页。
+5. 背景音乐已导入：相册页《直到你降临》，信件页《爱你》。
 6. 添加私密入口，例如输入昵称、生日或纪念日才能进入。
 7. 每次视觉调整后运行 `npm run check` 和 `npm test`，并看 `output/playwright/verified-*.png`。
 8. 最后做私有 GitHub 仓库 + Vercel 部署。
@@ -258,7 +270,7 @@ npm test
 - 照片视觉从透明玻璃片继续改成实体照片：提高主队列和场景照片 opacity，降低常态 blur，提高图片亮度/对比/饱和，减轻全局残影；入场 ghost 单独压低，避免聚合阶段糊成一团。
 - Playwright 增加质感/稳定性断言：主相册检查照片卡无独立动画、整组照片无全局 filter、主照片 opacity 足够高；hover 测试检查不固定跳层到 160、非 hover 残影更低。
 - 按最新要求重新完整观看参考视频并抽帧：新增 `output/reference/video-timeline-1fps-contact-sheet.jpg`、`output/reference/video-timeline-crop-contact-sheet.jpg`，以及 `output/reference/timeline/`、`output/reference/timeline-crop/` 下的逐秒帧，后续继续改相册时优先对照这些图，而不是只凭印象调效果。
-- 相册新增自动单张照片抽出机制：空闲时一张照片会从队列中被单独拿到前景，背景照片退成有景深的弧形/队列；抽出的照片更大、更清晰、显示 `MEMORY XX` 和标题，截图为 `output/playwright/verified-album-spotlight-extract.png`。
+- 相册新增自动单张照片抽出机制：空闲时一张照片会从队列中被单独拿到前景，背景照片退成有景深的弧形/队列；抽出的照片更大、更清晰、显示编号和标题，截图为 `output/playwright/verified-album-spotlight-extract.png`。当前卡片编号样式已改为 `LOVE NOTE XX`。
 - 抽出机制会在拖拽、打开照片弹层、双击空白切换队形或自动进入下一段时复位，符合“单张照片拿出来，换样式再重置过去”的方向；后续不要把它改成一直固定在前景的普通弹窗。
 - 自动 scene 循环新增第 4 种竖向矩阵/帘幕队形，用来贴近参考视频里竖排照片墙和幕布式变化；当前相册已经不只是横向 coverflow、照片墙、花束/漩涡、交叉队形。
 - 手机低高度横屏再次修正：上方诗句更小、更淡、更靠上，避免覆盖主照片；`captures phone landscape album` 现在会断言诗句透明度、底部位置和标题字号。
@@ -272,14 +284,14 @@ npm test
 - 部署前私密入口已加入：任何 hash 路由进入前都会先显示暗金玻璃质感口令门，暗号配置在 `app.js` 的 `story.privateCodes`，当前暗号为 `20030518`。正确输入后解锁状态会保存在本机 `localStorage`，并回到原本想打开的相册或信件路由。
 - 私密入口只是一层前端口令门，不是后端鉴权或照片加密。它适合正式链接发给她之前增加私密感和基础防误开，但 Vercel 链接本身仍然是公开 URL；正式发送前页面上不要显示开发提示或暗号配置说明。
 - Playwright 已新增私密入口回归：`guards the site behind a private entrance` 会验证未解锁状态、错误暗号提示、正确暗号解锁和 hash 路由恢复，并生成 `verified-private-entrance.png`、`verified-private-unlocked.png`。
-- 修复照片介绍页 `查看完整照片` 按钮无效的问题：按钮现在拦截 `pointerdown/click`，并在切到纯照片模式时清理未完成的照片飞入/reveal 状态。
+- 修复照片介绍页完整照片按钮无效的问题：按钮当前显示为 `看见完整的你`，会拦截 `pointerdown/click`，并在切到纯照片模式时清理未完成的照片飞入/reveal 状态。
 - 修复原图打开后不好返回的问题：纯照片模式点击图片外侧黑色区域关闭照片层，Escape 仍然可用。
 - 单张照片拖动重做为更稳定的 pointer 控制器：从照片整体、底部文字区或边缘起拖都能把这张照片拖出队列；拖动中由 document 级事件继续跟随，不会因为鼠标离开小区域就中断。
 - 为避免 hover 和重叠层级抢命中，照片上方不再触发会推开卡片的舞台视差；单张拖动近邻命中按距离优先，整面相册拖动则从真实空白区域开始。
-- Playwright 当前扩展到 13 项：新增/收紧 `查看完整照片` 按钮、纯照片外侧关闭、单张照片底部区域拖出、切换队形复位、真实空白区拖动整面相册等回归。最新验证：`npm run check` 通过，`npm test` 13/13 通过。
+- Playwright 当前扩展到 13 项：新增/收紧完整照片按钮、纯照片外侧关闭、单张照片底部区域拖出、切换队形复位、真实空白区拖动整面相册等回归。最新验证：`npm run check` 通过，`npm test` 13/13 通过。
 - 在不改动上述交互链路的前提下，继续按参考视频加强相册舞台：默认横向 ribbon 略微拉宽、下沉并增加纵深，照片队列更像铺开的整团相册，背景低频光场、底部暗金椭圆光、舞台流光和照片边缘材质都进一步加强。
 - 这轮质感增强仍然避开会重新导致闪烁的路径：不恢复 `.photo-cards` 全局 filter/drop-shadow，不恢复单卡 `cardFloat` 动画，不开启默认自动 spotlight；主相册测试新增 `.stage-flow` 和 `.photo-cards::after` 可见度断言，防止后续把舞台光感又改没。
-- 照片介绍页新增 `在相册中聚焦`：它不是自动动画，而是用户主动把当前照片放回相册舞台前景，背景照片形成景深队列，贴近参考视频里“单张照片抽出再复位”的效果。再次点击前景照片或点击暗场空白会取消聚焦，双击暗场会切换队形并让聚焦照片复位。
+- 照片介绍页新增手动聚焦动作：按钮当前显示为 `放到星河中央`，它不是自动动画，而是用户主动把当前照片放回相册舞台前景，背景照片形成景深队列，贴近参考视频里“单张照片抽出再复位”的效果。再次点击前景照片或点击暗场空白会取消聚焦，双击暗场会切换队形并让聚焦照片复位。
 - Playwright 新增手动聚焦回归，截图为 `output/playwright/verified-manual-spotlight.png`；后续改 spotlight 时要守住：默认自动 spotlight 关闭、手动入口可用、再次点击前景照片可取消、切换队形可复位。
 - 双击空白切换队形现在会触发短促的手动 scene pulse：在用户主动变阵时短暂混入照片墙/花束/交叉/竖幕的高级光场和深度感，约 1.55 秒后回到稳定队列。它不等同于自动 scene，默认空闲自动 scene 仍然关闭。
 - Playwright 已加强 `captures blank-area double click layout morph`：变阵瞬间必须有受控 scene blend，但强度不能超过稳定阈值；等待后必须回到 scene 0，避免再次出现整体照片闪烁或动画不受控制。
@@ -292,6 +304,13 @@ npm test
 - 默认桌面照片尺寸从上一轮偏大的状态收回到更克制的区间，让相册更像一整团密集照片队列，而不是一张巨大的中心卡片；手机横屏和竖屏规则同步收窄，避免小屏拥挤。
 - 相纸材质继续加厚但仍走低成本路径：通过 `.photo-tile`、`.photo-tile::after` 和 `.photo-media` 的内侧边缘光、侧边压暗和暗金外缘光实现，不恢复全局 filter/drop-shadow 或单卡浮动动画。
 - Playwright 主相册用例新增远景轨道断言：验证 `.depth-photo` 数量、不可命中、透明度范围、transform 定位、尺寸小于主照片，同时继续守住无 `.photo-cards` 全局 filter、无单卡动画、无 opacity 动画。
+- 按用户要求把相册相关文字整体改成更适合送给女朋友的浪漫语气：24 张照片标题和一句话介绍已重写，舞台诗句、队形状态、相册说明、完整照片按钮、手动聚焦按钮和卡片编号也统一改成更柔和的礼物表达。
+- 本轮是内容文案改动，没有改变相册 RAF 布局、hover、拖拽、手动聚焦、纯照片关闭或队形切换复位等稳定交互路径。
+- 从 `C:\Users\kkkchen\Desktop\11111.docx` 导入正式生日信正文到 `story.letter`，并在末尾另起一段署名 `永远爱你的陈熠`，当前共 51 段页面正文；继续保留逐字显示效果。
+- 为长信补充双击信纸立即显示全文的交互，并让信纸在打开后置于前景、信封退到背景；Playwright 新增全文顶部和底部截图，确认长信可滚动读到右下角署名。
+- 新增 `全览截图` 面板：它不是阅读模式，而是截图模式，会用自动缩小字号和多栏排版把整封信压进一个画面，点击面板旁边暗色空白退出。Playwright 会断言全览内容无横向/纵向溢出，并输出 `verified-letter-overview.png`。
+- 导入两首正式歌曲：`assets/music/until-you-arrive.mp3` 用于相册页自动循环播放《直到你降临》，`assets/music/love-you.mp3` 用于信件页自动循环播放《爱你》；右上角音乐按钮可手动暂停/恢复当前页面歌曲。
+- 顶部导航已移到全局层，封面显示 `相册` / `信` / 音乐，相册和信件页隐藏文字导航但保留右上角音乐按钮，避免按钮被当前页面 section 拦截。
 
 ## 明天重开对话快速接续
 
@@ -302,10 +321,12 @@ npm test
 3. 当前可继续优化相册视觉，也可以开始 Vercel 预部署：照片还可以继续变得更满、更像一整团动态相册集；UI 继续沿用深酒红、暗金、玻璃、细光尘的方向，但不要再默认开启自动 spotlight 单张抽出。
 4. 不能破坏的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不应该让相册卡住或闪烁；左上角返回封面必须可用。
 4.1. 不能破坏的单张照片交互：介绍页按钮必须能进入纯照片；纯照片点击图片外黑色区域必须关闭；照片底部文字区/边缘也必须能起拖；单张拖动范围要接近舞台外沿，且不能触发整面相册放大；切换队形必须让拖出的照片复位。
-4.2. 手动聚焦交互不能破坏：介绍页 `在相册中聚焦` 必须能把当前照片抽回相册前景；再次点击前景照片或点击暗场取消；双击暗场切换队形并复位。
+4.2. 手动聚焦交互不能破坏：介绍页 `放到星河中央` 必须能把当前照片抽回相册前景；再次点击前景照片或点击暗场取消；双击暗场切换队形并复位。
 4.3. 手动变阵脉冲不能破坏：双击空白时可以短暂出现 scene 光场/深度，但必须自动回落；不要重新打开空闲自动 scene。
 4.4. 舞台体积光和相纸材质可以继续增强，但必须保持低强度、CSS 光层和单卡伪元素路径；不要用全局 filter/drop-shadow 或独立卡片动画换质感。
+4.5. 信件交互不能破坏：点击信封后仍然逐字显示；双击信纸必须立即显示全文；长信信纸必须可滚动到底部并看到右下角署名；`全览截图` 必须在一个画面里显示整封信，并且点击外侧空白能退出。
+4.6. 音乐交互不能破坏：进入相册页应尝试播放《直到你降临》，进入信件页应尝试播放《爱你》；右上角音乐按钮在相册和信件页都必须可点击，用来暂停或恢复当前页面歌曲。
 5. 不能回退的技术约束：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不要推动真实队列；不要用全局强残影覆盖 24 张照片；不要恢复全局 filter/drop-shadow、单卡浮动动画或默认自动 spotlight。
 6. GitHub private repo 已是 `https://github.com/kkkchen12/AAAyichun`；后续用 Vercel 从该仓库导入部署。
-7. 私密入口已经可用，当前暗号为 `20030518`；正式发给她前在部署 URL 上重新测一次错误暗号和正确暗号。
+7. 私密入口已经可用，当前暗号为 `20030518`；正式发给她前在部署 URL 上重新测一次错误暗号、正确暗号、相册音乐、信件音乐和右上角音乐开关。
 8. 继续改完后运行 `npm run check` 和 `npm test`。重点查看 `output/playwright/verified-private-entrance.png`、`verified-single-photo-drag.png`、`verified-photo-full.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png` 和 `verified-album-iphone-landscape.png`。

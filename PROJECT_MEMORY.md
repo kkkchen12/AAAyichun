@@ -147,6 +147,17 @@
 - 2026-06-30 默认照片尺寸从上一轮偏大的 190px 上限回收到约 172px 上限，layout 1/2/3 和手机横屏/竖屏同步收窄。方向是“更密、更有纵深、更接近参考视频的照片群”，不是退回小卡片；远景层负责补密度，主照片负责清晰焦点。
 - 2026-06-30 相纸材质继续增强侧边厚度：`.photo-tile` 和 `.photo-tile::after` 新增左右 inset 边缘光/压暗，让真实照片更像实体相纸；仍禁止恢复 `.photo-cards` 全局 filter/drop-shadow、单卡 `cardFloat`/filter 动画或默认自动 spotlight。
 - 2026-06-30 Playwright 主相册用例新增远景轨道回归：断言 `.depth-photo` 至少 8 张、轨道不可命中、透明度受控、使用 transform、尺寸小于主照片，并继续检查无全局 filter、无单卡动画、aperture/相纸质感存在。
+- 2026-06-30 用户确认暂时不再新增照片；当前 `assets/photos/photo-1.jpg` 到 `photo-24.jpg` 是正式相册照片，根目录临时导入用 `photos/` 保持忽略，不进入仓库。
+- 2026-06-30 已把相册内容文字整体改成更适合送给女朋友的浪漫语气：24 张照片标题和一句话说明全部重写，`heroText`、`stagePoems`、layout label、wall status、完整照片按钮、手动聚焦按钮、相册说明和私密入口提示都同步润色。
+- 2026-06-30 卡片底部编号从 `MEMORY XX` 改为 `LOVE NOTE XX`，舞台品牌从 `Eternal Blossoms` 改为 `For Yichun, Always`；这是文案层变化，不改变照片 hitbox、拖拽、hover、RAF 布局或手动 spotlight 稳定路径。
+- 2026-07-01 已从 `C:\Users\kkkchen\Desktop\11111.docx` 提取并导入正式生日信正文，并在最后另起一段署名 `永远爱你的陈熠`；`story.letter` 现在是 51 段长信内容，首段为 `亲爱的以纯：`。
+- 2026-07-01 信件仍保持逐字显示的仪式感；新增双击 `.letter-paper` 直接显示全文的隐藏快捷操作。`typeLetter()` 通过 `letterTypingToken` 支持中断，避免双击后旧打字循环继续追加。
+- 2026-07-01 长信阅读视觉已调整：信件打开后信封退到背景、信纸置于前景，`.letter-body.is-complete` 提高正文亮度和行距；Playwright 覆盖全文出现、51 段数量、右下角署名、信纸可滚动到底部和底部截图。
+- 2026-07-01 新增 `全览截图` 功能：按钮在信纸操作区，打开 `.letter-overview` 全屏截图面板，使用自动缩小字号和多栏排版把整封信压进一个画面。它是截图模式，不是阅读模式；点击面板外暗色空白关闭。
+- 2026-07-01 `fitLetterOverview()` 会根据视口选择 2/3/4 栏并逐步减小 `--overview-font`，直到 `#letterOverviewBody` 没有横向或纵向溢出。Playwright 断言 overview fit、署名存在、点击空白关闭，并输出 `verified-letter-overview.png`。
+- 2026-07-01 已导入两首正式音乐：`assets/music/until-you-arrive.mp3` 是《直到你降临》，进入相册页 `#photoWall` 自动尝试循环播放；`assets/music/love-you.mp3` 是《爱你》，进入信件页 `#letter` 自动尝试循环播放。
+- 2026-07-01 音乐逻辑从单一 `story.musicPath` 改成 `story.music.album/letter`，用 `currentMusicKey`、`musicSuppressedView` 和 `handleViewMusic()` 按当前页面切换曲目。自动播放失败时不再回退合成音，右上角按钮可手动重试当前页面歌曲。
+- 2026-07-01 顶部导航从封面 section 移到全局层。封面页显示 `相册` / `信` / 音乐，相册和信件页隐藏文字导航但保留右上角音乐按钮，避免音乐按钮被 `.letter-section` 或 `.photo-section` 拦截。
 
 ## Next Session TODO
 
@@ -154,17 +165,17 @@
 2. 优先继续优化相册视觉：照片要继续保持更大、更满、更铺屏，队列要像视频里一整团动态相册集，而不是小卡片墙；但不要恢复自动 spotlight 强抽出，后续单张抽出应改成手动触发或更稳定的低频展示。
 3. 继续对照参考视频微调横向照片队列的纵深、密度、光效、hover 视觉反馈和拖拽手感；后续所有 UI 继续沿用深色电影感、暗金、细光尘、不卡通的方向。
 4. 不要破坏已稳定的交互：单击照片先开介绍层，再点击图片进入纯照片；双击空白切换队形；拖拽推动照片流；hover 不长时间暂停、不闪烁；返回封面可用。
-4.1 不要破坏本轮单张照片交互：介绍页 `查看完整照片` 按钮必须可用，纯照片模式点击图片外黑色区域必须能关闭，照片底部文字区/边缘也应能拖出单张照片，单张拖动范围要接近舞台外沿且不能触发整面相册放大，切换队形时拖出的照片必须回到队列。
+4.1 不要破坏本轮单张照片交互：介绍页完整照片按钮当前显示为 `看见完整的你`，必须继续可用；纯照片模式点击图片外黑色区域必须能关闭，照片底部文字区/边缘也应能拖出单张照片，单张拖动范围要接近舞台外沿且不能触发整面相册放大，切换队形时拖出的照片必须回到队列。
 4.2 后续视觉增强可以继续提高光场、照片材质和铺屏层次，但必须先保留现有低成本路径：不要恢复全局 filter/drop-shadow、独立照片浮动动画或默认自动 spotlight。
-4.3 新增的 `在相册中聚焦` 是手动 spotlight 入口，不要改回空闲自动强抽出；聚焦后再次点击前景照片或点击暗场应取消，双击暗场应切换队形并复位。
+4.3 当前显示为 `放到星河中央` 的按钮是手动 spotlight 入口，不要改回空闲自动强抽出；聚焦后再次点击前景照片或点击暗场应取消，双击暗场应切换队形并复位。
 4.4 手动变阵可以有短暂 scene pulse，但不要重新开启空闲自动 scene；变阵脉冲必须有上限、自动回落，并继续通过回归测试保护。
 4.5 舞台体积光和照片材质可继续增强，但必须走低强度 CSS 光层、`.stage-aperture` 伪元素、`.photo-media`/`.photo-tile::after` 伪元素路径；不要恢复全局 filter/drop-shadow 或单卡独立动画来换质感。
 5. 不要回退已修好的技术路径：照片定位继续用 `--x-px`/`--y-px` + `translate3d`，不要恢复 `left/top` 动画；hover 不推动真实队列；不要用全局强残影覆盖全部照片。
 6. 不要回退本轮稳定性修正：不要恢复 `.photo-cards` 常驻 `drop-shadow`，不要恢复照片独立 `cardFloat`/filter 动画，hover 不要固定跳到高 z-index；残影只能克制地服务拖拽、入场、变阵和当前 hover 卡片。
 6.1 不要回退本轮动画回收：不要把自动 scene blend 再拉回 0.9 左右，不要默认开启自动 spotlight，不要让扫光/ghost/camera 同时大幅叠加，否则会重新出现整体照片闪烁和动画失控。
-7. 把占位照片标题和说明替换成真实回忆；当前 `photo-15` 到 `photo-24` 是重复补位。
-8. 把信件正文替换成用户最终想写的内容。
-9. 放入背景音乐 `assets/song.mp3`。
+7. 24 张照片和对应标题/说明已经完成正式替换并做过浪漫化润色；后续只按用户口吻微调，不再把 `photo-15` 到 `photo-24` 当作重复补位。
+8. 信件正文已从 `11111.docx` 正式导入，末尾已有 `永远爱你的陈熠` 署名；后续只做个别表达微调，不要删除逐字显示、双击显示全文或 `全览截图` 的交互。
+9. 背景音乐已导入并按页面自动切换；后续不要再使用旧的 `assets/song.mp3` 单曲逻辑。正式部署后要用真实手机测试相册自动音乐、信件自动音乐和右上角手动开关。
 10. 私密入口已添加；当前暗号为 `20030518`，正式部署前用真实设备再测一次。
 11. 每次视觉调整后运行 `npm run check` 和 `npm test`，查看 `output/playwright/verified-*.png`，特别是 `verified-album-desktop.png`、`verified-single-photo-drag.png`、`verified-photo-full.png`、`verified-album-auto-scene.png`、`verified-hover-stability.png`、`verified-album-drag-motion.png`、`verified-album-iphone-landscape.png`。
 12. 做最终浏览器检查：电脑横屏、iPhone 横屏、iPhone 竖屏。

@@ -1,12 +1,25 @@
 const { test, expect } = require("@playwright/test");
 
+const mockMedia = async (page) => {
+  await page.addInitScript(() => {
+    window.__musicPlayCalls = [];
+    HTMLMediaElement.prototype.play = function play() {
+      window.__musicPlayCalls.push(this.currentSrc || this.src);
+      return Promise.resolve();
+    };
+    HTMLMediaElement.prototype.pause = function pause() {};
+  });
+};
+
 const unlock = async (page) => {
+  await mockMedia(page);
   await page.addInitScript(() => {
     localStorage.setItem("aaayichun-unlocked", "yes");
   });
 };
 
 test("guards the site behind a private entrance", async ({ page }) => {
+  await mockMedia(page);
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
   await expect(page.locator("#privacyGate")).toBeVisible();
@@ -33,6 +46,10 @@ test("captures album and two-step photo viewer", async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto("/#photoWall");
   await page.waitForTimeout(3600);
+  await expect(page.locator("#musicToggle")).toHaveClass(/is-on/);
+  await expect.poll(async () => (
+    await page.evaluate(() => window.__musicPlayCalls.join("|"))
+  )).toContain("until-you-arrive.mp3");
   await expect(page.locator(".photo-tile")).toHaveCount(24);
   await expect(page.locator(".photo-tile.is-hero-card").first()).toBeVisible();
   const desktopTileWidth = await page.locator(".photo-tile").first().evaluate((tile) => (
@@ -565,7 +582,53 @@ test("captures polished cover labels and envelope", async ({ page }) => {
 
   await page.goto("/#letter");
   await expect(page.locator("body")).toHaveAttribute("data-view", "letter");
+  await expect.poll(async () => (
+    await page.evaluate(() => window.__musicPlayCalls.join("|"))
+  )).toContain("love-you.mp3");
+  await expect(page.locator("#musicToggle")).toHaveClass(/is-on/);
+  await page.locator("#musicToggle").click();
+  await expect(page.locator("#musicToggle")).not.toHaveClass(/is-on/);
+  await page.locator("#musicToggle").click();
+  await expect(page.locator("#musicToggle")).toHaveClass(/is-on/);
   await expect(page.locator("#openLetter")).toBeVisible();
   await page.waitForTimeout(600);
   await page.screenshot({ path: "output/playwright/verified-letter-envelope-polish.png" });
+
+  await page.locator("#openLetter").click();
+  await expect(page.locator("#letter")).toHaveClass(/is-letter-open/);
+  await page.waitForTimeout(900);
+  await expect(page.locator("#letterBody p").first()).toBeVisible();
+  await page.locator(".letter-paper").dblclick();
+  await expect(page.locator("#letterBody")).toHaveClass(/is-complete/);
+  await expect(page.locator("#letterBody p")).toHaveCount(51);
+  await expect(page.locator("#letterBody")).toContainText("生日快乐，我最爱的妻子。");
+  await expect(page.locator("#letterBody")).toContainText("永远爱你的陈熠");
+  await expect.poll(async () => (
+    await page.locator(".letter-paper").evaluate((paper) => Number.parseFloat(getComputedStyle(paper).opacity))
+  )).toBeGreaterThan(0.96);
+  await page.screenshot({ path: "output/playwright/verified-letter-full-text.png" });
+
+  const isScrollable = await page.locator(".letter-paper").evaluate((paper) => paper.scrollHeight > paper.clientHeight);
+  expect(isScrollable).toBe(true);
+  await page.locator(".letter-paper").evaluate((paper) => {
+    paper.scrollTop = paper.scrollHeight;
+  });
+  await expect(page.getByText("永远爱你的陈熠")).toBeInViewport();
+  await page.screenshot({ path: "output/playwright/verified-letter-full-text-bottom.png" });
+
+  await page.locator("#openLetterOverview").click();
+  await expect(page.locator("#letterOverview")).toBeVisible();
+  await expect(page.locator("#letterOverviewBody")).toContainText("永远爱你的陈熠");
+  const overviewFit = await page.locator("#letterOverviewBody").evaluate((body) => ({
+    widthFits: body.scrollWidth <= body.clientWidth + 2,
+    heightFits: body.scrollHeight <= body.clientHeight + 2,
+    fontSize: Number.parseFloat(getComputedStyle(body).fontSize)
+  }));
+  expect(overviewFit.widthFits).toBe(true);
+  expect(overviewFit.heightFits).toBe(true);
+  expect(overviewFit.fontSize).toBeGreaterThan(5.6);
+  await page.screenshot({ path: "output/playwright/verified-letter-overview.png" });
+
+  await page.mouse.click(24, 450);
+  await expect(page.locator("#letterOverview")).toBeHidden();
 });
