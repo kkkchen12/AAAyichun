@@ -314,6 +314,14 @@ npm test
 - 修复 `再把爱读一遍`：按钮现在直接重启信件逐字显示，清空正文、移除完成态并把信纸滚动回顶部，不再复用已经打开后的信封动画流程。
 - Vercel 生产链接为 `https://aaayichun.vercel.app`，项目名 `aaayichun`，已连接私有 GitHub 仓库 `https://github.com/kkkchen12/AAAyichun`。`.vercelignore` 会排除测试输出、参考视频和开发目录，但保留正式页面、照片、音乐和主视觉资源。
 
+## 2026-07-02 EdgeOne Pages 部署与缓存说明
+
+- GitHub Pages 已从 `main` 开启并验证，公网备用链接为 `https://kkkchen12.github.io/AAAyichun/`；页面、脚本、样式、照片和两首音乐都返回公开 `200`。
+- EdgeOne Makers/Pages 生产部署已完成，项目名 `aaayichun`，项目 ID `makers-9p5a5odqcu8r`。默认 `edgeone.cool` 预设域名是 token 访问模式，必须分享完整的 `eo_token` / `eo_time` 链接；删掉查询参数会返回 `401`。
+- `index.html` 现在给 `styles.css` 和 `app.js` 加了 `?v=20260702-music-cache`，用于强制 EdgeOne/CDN/浏览器刷新旧缓存，避免线上继续加载旧音乐逻辑。
+- 音乐入口约束：输入暗号直达相册、点击相册入口或照片聚焦时请求 `assets/music/until-you-arrive.mp3`；点击信件/祝福入口或拆信时请求 `assets/music/love-you.mp3`；右上角按钮继续暂停或恢复当前页面歌曲。
+- 音乐切换现在带请求序号保护：换曲会先暂停并清空旧 `src`，再重建当前歌曲的音频对象；旧播放 Promise 即使稍后返回，也不能覆盖当前页面的歌曲状态。
+
 ## 明天重开对话快速接续
 
 明天继续时，可以直接从下面这几件事开始：

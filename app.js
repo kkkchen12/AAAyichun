@@ -231,6 +231,7 @@ let synthTimer;
 let musicOn = false;
 let currentMusicKey = "";
 let musicSuppressedView = "";
+let musicRequestToken = 0;
 let orbitOffset = 0;
 let orbitVelocity = 0.0011;
 let queueOffset = 0;
@@ -2258,23 +2259,28 @@ async function startMusic(trackKey = getViewMusicKey() || "album", options = {})
   if (!isUnlocked) return;
   const track = story.music?.[trackKey];
   if (!track) return;
-  if (musicOn && currentMusicKey === trackKey) return;
+  const trackSrc = new URL(track.path, document.baseURI).href;
+  if (musicOn && currentMusicKey === trackKey && audio?.src === trackSrc) return true;
+  const requestToken = ++musicRequestToken;
   stopSynth();
   if (options.manual) musicSuppressedView = "";
 
   musicOn = true;
   currentMusicKey = trackKey;
 
-  if (!audio) {
-    audio = new Audio();
+  if (!audio || audio.src !== trackSrc) {
+    const previousAudio = audio;
+    if (previousAudio) {
+      previousAudio.pause();
+      previousAudio.removeAttribute("src");
+      previousAudio.load();
+    }
+    audio = new Audio(trackSrc);
+    audio.preload = "auto";
     audio.loop = true;
     audio.volume = 0.42;
-  }
-
-  if (!audio.src || !audio.src.endsWith(track.path)) {
+  } else {
     audio.pause();
-    audio.src = track.path;
-    audio.load();
   }
   audio.loop = true;
   audio.volume = trackKey === "letter" ? 0.38 : 0.42;
@@ -2282,8 +2288,12 @@ async function startMusic(trackKey = getViewMusicKey() || "album", options = {})
 
   try {
     await audio.play();
+    if (requestToken !== musicRequestToken || currentMusicKey !== trackKey) return false;
+    musicOn = true;
+    updateMusicButton();
     return true;
   } catch {
+    if (requestToken !== musicRequestToken || currentMusicKey !== trackKey) return false;
     musicOn = false;
     updateMusicButton();
     return false;
@@ -2291,6 +2301,7 @@ async function startMusic(trackKey = getViewMusicKey() || "album", options = {})
 }
 
 function stopMusic(options = {}) {
+  musicRequestToken += 1;
   if (options.manual) musicSuppressedView = document.body.dataset.view || "";
   musicOn = false;
   if (audio) audio.pause();

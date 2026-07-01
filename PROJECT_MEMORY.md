@@ -166,6 +166,15 @@
 - Vercel project `aaayichun` is connected to `https://github.com/kkkchen12/AAAyichun`; production alias is `https://aaayichun.vercel.app`.
 - `.vercelignore` excludes local/test/reference files from Vercel while keeping the static app and final `assets/` resources needed by other computers.
 
+## 2026-07-02 EdgeOne And Music Cache Fix
+
+- GitHub Pages is now a verified public fallback at `https://kkkchen12.github.io/AAAyichun/`.
+- EdgeOne Makers/Pages project `aaayichun` deploys successfully through `edgeone makers deploy deploy-edgeone -n aaayichun --env production --area global --json`.
+- EdgeOne's default preset domain is protected by `eo_token`/`eo_time`; share the full URL exactly as returned by the deploy command, because the bare `edgeone.cool` URL returns `401`.
+- `index.html` now uses `styles.css?v=20260702-music-cache` and `app.js?v=20260702-music-cache` so EdgeOne and browser caches cannot keep serving older music logic.
+- Music startup now uses a request token and rebuilds the audio element when assigning the next track, so an older album play request or stale `currentSrc` cannot overwrite the letter track after navigation.
+- Regression coverage now verifies the real path: enter album, confirm `until-you-arrive.mp3`, return home, click `祝福`, and confirm `love-you.mp3`.
+
 ## Next Session TODO
 
 1. 明天先运行 `npm run dev`，打开 `http://127.0.0.1:5173/#photoWall`，同时打开 `assets/reference/reference-album-effect.mp4` 对照。

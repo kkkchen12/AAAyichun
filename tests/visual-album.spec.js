@@ -198,7 +198,8 @@ test("plays matching music from album and letter module clicks", async ({ page }
     await page.evaluate(() => window.__musicPlayCalls.join("|"))
   )).toContain("until-you-arrive.mp3");
 
-  await page.goto("/");
+  await page.locator(".home-return").click();
+  await expect(page.locator("body")).toHaveAttribute("data-view", "home");
   await page.evaluate(() => {
     window.__musicPlayCalls = [];
   });

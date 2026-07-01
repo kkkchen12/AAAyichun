@@ -15,3 +15,9 @@ Thumbs.db
 .DS_Store
 
 .vercel
+
+# Tencent Cloud EdgeOne
+.edgeone/*
+.tef_dist/*
+deploy-edgeone/
+aaayichun-edgeone.zip

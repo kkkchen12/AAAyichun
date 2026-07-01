@@ -271,3 +271,11 @@ Do not reintroduce hover-driven queue movement unless click reliability is redes
 - Regression coverage now clicks `#replayLetter` after the full letter is shown, verifies the completed state is cleared, verifies the paper scroll returns to the top, then double-clicks to reveal the full letter again.
 - Vercel production deployment is configured under the project name `aaayichun` and aliased at `https://aaayichun.vercel.app`.
 - `.vercelignore` keeps deployment output focused on the static app and final assets. It excludes local test artifacts, reference video material, development folders, and project notes, but keeps `index.html`, `app.js`, `styles.css`, `assets/photos`, `assets/music`, and `assets/hero-letter.png` available for the public site.
+
+## EdgeOne Music Cache Stabilization - 2026-07-02
+
+- EdgeOne production deploy succeeded, but verification showed the preset domain could still serve an older cached `app.js` when the resource URL had no version query.
+- Added versioned static references in `index.html` for `styles.css` and `app.js` so CDN/browser cache cannot mask newly pushed music-entry fixes.
+- Preserved the current music interaction contract: album gestures request `until-you-arrive.mp3`, letter gestures request `love-you.mp3`, and the top-right button toggles the active view's track.
+- Music switching now rebuilds the audio element for a new track and uses `musicRequestToken`, so stale play rejections, old `currentSrc`, or delayed old-source state cannot turn off or overwrite the newly requested page track.
+- Added regression coverage for the cross-module path from album back to cover and then into the letter, preventing the letter entry from accidentally continuing the album track.
